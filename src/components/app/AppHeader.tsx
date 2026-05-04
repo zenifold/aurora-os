@@ -1,7 +1,6 @@
 import { useAuth } from "@/lib/auth-context";
 import { useUIStore } from "@/stores/ui-store";
 import { useNavigate } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Moon, Sun, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Search, LogOut, Settings, User as UserIcon } from "lucide-react";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
