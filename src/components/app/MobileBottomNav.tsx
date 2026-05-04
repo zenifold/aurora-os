@@ -3,22 +3,31 @@ import { Home, Inbox, Plus, Folder, MoreHorizontal } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 import { haptic } from "@/lib/haptics";
 
-const TABS = [
-  { to: "/app", label: "Home", icon: Home, exact: true },
-  { to: "/app/my-tasks", label: "Tasks", icon: Inbox, exact: true },
-  { to: null, label: "Create", icon: Plus, exact: false }, // FAB-style center
-  { to: "/app/projects", label: "Projects", icon: Folder, exact: false },
-  { to: "/app/settings", label: "More", icon: MoreHorizontal, exact: false },
-] as const;
+type LinkTab = {
+  kind: "link";
+  to: "/app" | "/app/my-tasks" | "/app/settings";
+  label: string;
+  icon: typeof Home;
+  exact: boolean;
+};
+type ActionTab = { kind: "fab" | "drawer"; label: string; icon: typeof Plus };
+type Tab = LinkTab | ActionTab;
+
+const TABS: Tab[] = [
+  { kind: "link", to: "/app", label: "Home", icon: Home, exact: true },
+  { kind: "link", to: "/app/my-tasks", label: "Tasks", icon: Inbox, exact: true },
+  { kind: "fab", label: "Create", icon: Plus },
+  { kind: "drawer", label: "Projects", icon: Folder },
+  { kind: "link", to: "/app/settings", label: "More", icon: MoreHorizontal, exact: false },
+];
 
 export function MobileBottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const setQuickCaptureOpen = useUIStore((s) => s.setQuickCaptureOpen);
+  const setMobileDrawerOpen = useUIStore((s) => s.setMobileDrawerOpen);
 
-  const isActive = (to: string | null, exact: boolean) => {
-    if (!to) return false;
-    return exact ? path === to : path.startsWith(to);
-  };
+  const isActive = (to: string, exact: boolean) =>
+    exact ? path === to : path.startsWith(to);
 
   return (
     <nav
@@ -28,9 +37,8 @@ export function MobileBottomNav() {
       <ul className="flex h-16 items-stretch justify-around px-2">
         {TABS.map((tab, i) => {
           const Icon = tab.icon;
-          const active = isActive(tab.to, tab.exact);
 
-          if (tab.label === "Create") {
+          if (tab.kind === "fab") {
             return (
               <li key={i} className="flex items-center">
                 <button
@@ -48,8 +56,25 @@ export function MobileBottomNav() {
             );
           }
 
-          if (!tab.to) return null;
+          if (tab.kind === "drawer") {
+            return (
+              <li key={i} className="flex flex-1 items-stretch">
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic("tap");
+                    setMobileDrawerOpen(true);
+                  }}
+                  className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground"
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{tab.label}</span>
+                </button>
+              </li>
+            );
+          }
 
+          const active = isActive(tab.to, tab.exact);
           return (
             <li key={i} className="flex flex-1 items-stretch">
               <Link
