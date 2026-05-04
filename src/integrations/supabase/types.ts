@@ -292,7 +292,11 @@ export type Database = {
           content: Json
           created_at: string
           id: string
+          mentions: string[]
           parent_id: string | null
+          reactions: Json
+          resolved_at: string | null
+          resolved_by: string | null
           task_id: string
           updated_at: string
           workspace_id: string
@@ -302,7 +306,11 @@ export type Database = {
           content: Json
           created_at?: string
           id?: string
+          mentions?: string[]
           parent_id?: string | null
+          reactions?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
           task_id: string
           updated_at?: string
           workspace_id: string
@@ -312,7 +320,11 @@ export type Database = {
           content?: Json
           created_at?: string
           id?: string
+          mentions?: string[]
           parent_id?: string | null
+          reactions?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
           task_id?: string
           updated_at?: string
           workspace_id?: string
