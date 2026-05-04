@@ -74,11 +74,12 @@ export function MobileBottomNav() {
             );
           }
 
-          const active = isActive(tab.to, tab.exact);
+          const linkTab = tab as LinkTab;
+          const active = isActive(linkTab.to, linkTab.exact);
           return (
             <li key={i} className="flex flex-1 items-stretch">
               <Link
-                to={tab.to}
+                to={linkTab.to}
                 onClick={() => haptic("tap")}
                 className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-md text-[10px] transition-colors ${
                   active
@@ -90,7 +91,7 @@ export function MobileBottomNav() {
                   className={`h-5 w-5 ${active ? "text-aura-gradient" : ""}`}
                   strokeWidth={active ? 2.5 : 2}
                 />
-                <span className={active ? "font-medium" : ""}>{tab.label}</span>
+                <span className={active ? "font-medium" : ""}>{linkTab.label}</span>
               </Link>
             </li>
           );
