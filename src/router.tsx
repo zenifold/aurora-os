@@ -40,8 +40,36 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 
 export const getRouter = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        gcTime: 1000 * 60 * 60 * 24, // 24h — keep cache for offline restore
+        refetchOnWindowFocus: false,
+      },
+    },
   });
+
+  // Persist query cache to localStorage for offline support (browser only)
+  if (typeof window !== "undefined") {
+    Promise.all([
+      import("@tanstack/react-query-persist-client"),
+      import("@tanstack/query-sync-storage-persister"),
+    ])
+      .then(([{ persistQueryClient }, { createSyncStoragePersister }]) => {
+        const persister = createSyncStoragePersister({
+          storage: window.localStorage,
+          key: "aura-query-cache",
+          throttleTime: 1000,
+        });
+        persistQueryClient({
+          queryClient,
+          persister,
+          maxAge: 1000 * 60 * 60 * 24, // 24h
+        });
+      })
+      .catch(() => {});
+  }
+
   const router = createRouter({
     routeTree,
     context: { queryClient },
