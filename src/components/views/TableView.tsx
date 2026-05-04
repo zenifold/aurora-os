@@ -6,6 +6,8 @@ import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
 import { colorForTask, isColumnVisible } from "@/lib/view-config";
+import { buildTaskTree, flattenTree, rollupFraction, rollupPercent } from "@/lib/task-tree";
+import { getTaskTypeMeta } from "@/lib/task-types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
