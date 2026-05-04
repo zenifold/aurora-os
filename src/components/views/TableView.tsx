@@ -319,6 +319,7 @@ function TaskRow({
   task,
   fields,
   selected,
+  indicator,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -327,6 +328,7 @@ function TaskRow({
   task: Task;
   fields: CustomFieldDef[];
   selected: boolean;
+  indicator?: { blockedBy: number; blocking: number };
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -335,6 +337,8 @@ function TaskRow({
   const [titleEdit, setTitleEdit] = useState<string | null>(null);
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
+  const isBlocked = (indicator?.blockedBy ?? 0) > 0;
+  const isBlocking = (indicator?.blocking ?? 0) > 0;
 
   return (
     <tr className="group border-b border-border hover:bg-accent/30">
