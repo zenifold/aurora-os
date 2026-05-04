@@ -276,6 +276,10 @@ function AgentDialog({
   onClose: () => void;
 }) {
   const upsert = useUpsertAgent();
+  const generateAgentFn = useServerFn(generateAgentSpec);
+  const workspaceId = useWorkspaceStore((s) => s.current?.id);
+  const { data: keyRow } = useWorkspaceAiKey();
+  const hasKey = !!keyRow?.openrouter_api_key;
 
   const [name, setName] = useState(agent?.name ?? "");
   const [emoji, setEmoji] = useState(agent?.avatar_emoji ?? "🤖");
@@ -287,10 +291,8 @@ function AgentDialog({
   const [temperature, setTemperature] = useState(agent?.temperature ?? 0.7);
   const [maxTokens, setMaxTokens] = useState(agent?.max_tokens ?? 2000);
 
-  // Reset form when dialog opens with different agent
-  if (open && agent && agent.id !== (open ? agent.id : "")) {
-    // no-op; keep React happy
-  }
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [generating, setGenerating] = useState(false);
 
   const reset = () => {
     setName(agent?.name ?? "");
@@ -302,6 +304,29 @@ function AgentDialog({
     setModel(agent?.model ?? "openai/gpt-4o-mini");
     setTemperature(agent?.temperature ?? 0.7);
     setMaxTokens(agent?.max_tokens ?? 2000);
+    setAiPrompt("");
+  };
+
+  const handleGenerate = async () => {
+    if (!workspaceId || !aiPrompt.trim()) return;
+    setGenerating(true);
+    try {
+      const spec = await generateAgentFn({
+        data: { workspace_id: workspaceId, prompt: aiPrompt.trim() },
+      });
+      setName(spec.name);
+      setEmoji(spec.avatar_emoji);
+      setDescription(spec.description);
+      setSystemPrompt(spec.system_prompt);
+      setModel(spec.model);
+      setTemperature(spec.temperature);
+      setMaxTokens(spec.max_tokens);
+      toast.success("Agent drafted — tweak and save");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to generate agent");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -315,11 +340,53 @@ function AgentDialog({
         }
       }}
     >
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{agent ? "Edit agent" : "New AI agent"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {!agent && (
+            <div className="rounded-xl border border-primary/30 bg-aura-gradient-subtle p-3">
+              <Label className="flex items-center gap-1.5 text-xs font-medium">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> Describe your agent
+              </Label>
+              <div className="mt-1.5 flex gap-2">
+                <Input
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey && aiPrompt.trim() && hasKey) {
+                      e.preventDefault();
+                      void handleGenerate();
+                    }
+                  }}
+                  placeholder="A senior copywriter who drafts blog intros…"
+                  className="flex-1"
+                  disabled={generating}
+                />
+                <Button
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={!aiPrompt.trim() || generating || !hasKey}
+                  className="bg-aura-gradient text-primary-foreground hover:opacity-90"
+                >
+                  {generating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="mr-1 h-3.5 w-3.5" /> Generate
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                {hasKey
+                  ? "AI will draft the name, prompt, and recommended model — you can edit everything below."
+                  : "Add an OpenRouter key first to enable AI generation."}
+              </p>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <div>
               <Label>Emoji</Label>
