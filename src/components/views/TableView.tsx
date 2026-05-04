@@ -135,7 +135,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   };
 
   return (
-    <div className="min-w-max">
+    <div className="min-w-max [&_.sticky-col]:sticky [&_.sticky-col]:left-0 [&_.sticky-col]:z-[5] [&_.sticky-col]:bg-background">
       {selected.size > 0 && (
         <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-aura-gradient-subtle px-4 py-2 text-sm">
           <span className="font-medium">{selected.size} selected</span>
@@ -177,13 +177,15 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="px-3 py-2">
+            <th className="sticky-col px-3 py-2">
               <Checkbox
                 checked={tasks.length > 0 && selected.size === tasks.length}
                 onCheckedChange={(c) => toggleAll(!!c)}
               />
             </th>
-            <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
+            <th className="sticky-col left-[40px] z-[6] bg-background border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground" style={{ left: widths.select }}>
+              <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+            </th>
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
             {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
