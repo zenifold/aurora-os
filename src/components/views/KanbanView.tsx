@@ -93,6 +93,8 @@ function Column({
   overLimit,
   tasks,
   indicators,
+  cardFields,
+  colorFor,
   onAdd,
   onTaskClick,
 }: {
@@ -103,6 +105,8 @@ function Column({
   overLimit: boolean;
   tasks: Task[];
   indicators?: Map<string, { blockedBy: number; blocking: number }>;
+  cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
+  colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
 }) {
@@ -141,7 +145,14 @@ function Column({
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {tasks.map((t) => (
-          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} indicator={indicators?.get(t.id)} />
+          <Card
+            key={t.id}
+            task={t}
+            cardFields={cardFields}
+            accent={colorFor(t)}
+            onClick={() => onTaskClick(t.id)}
+            indicator={indicators?.get(t.id)}
+          />
         ))}
         {adding && (
           <Input
