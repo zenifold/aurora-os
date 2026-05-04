@@ -25,6 +25,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { RichEditor } from "./RichEditor";
+import { RecurrencePicker } from "./RecurrencePicker";
 import { CommentsThread } from "./CommentsThread";
 import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
