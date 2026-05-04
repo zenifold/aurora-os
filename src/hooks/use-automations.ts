@@ -133,17 +133,18 @@ export function useAutomationRuns(automationId: string | null) {
 
 export function useTriggerAutomations() {
   const fn = useServerFn(triggerTaskAutomations);
-  return async (input: {
+  return (input: {
     task_id: string;
     event: "task.created" | "task.updated" | "task.status_changed";
     prev?: Record<string, unknown> | null;
   }) => {
-    try {
-      return await fn({ data: input });
-    } catch (err) {
-      // Fail silently — automations should never break user actions
-      console.warn("Automation trigger failed", err);
-      return { ran: 0, skipped: 0 };
-    }
+    // Fire-and-forget: never await, never let rejections bubble.
+    // Automations are background work — they must never crash the UI.
+    Promise.resolve()
+      .then(() => fn({ data: input }))
+      .catch((err) => {
+        console.warn("Automation trigger failed:", err);
+      });
+    return { ran: 0, skipped: 0 };
   };
 }
