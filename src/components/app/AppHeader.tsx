@@ -9,7 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Search, LogOut, Settings, User as UserIcon, PanelLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
