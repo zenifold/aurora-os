@@ -1,5 +1,15 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  DragOverlay,
+  type DragEndEvent,
+} from "@dnd-kit/core";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
@@ -217,7 +227,7 @@ export function AppSidebar() {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        <ProjectTree projects={projects} parentId={null} currentPath={path} depth={0} />
+        <ProjectTreeDnd projects={projects} currentPath={path} />
         {creating && (
           <div className="px-2 py-1">
             <Input
@@ -298,123 +308,280 @@ function IconNav({ to, icon: Icon, active, label }: { to: string; icon: typeof F
   );
 }
 
-function ProjectTree({ projects, parentId, currentPath, depth }: { projects: Project[]; parentId: string | null; currentPath: string; depth: number }) {
+function ProjectTreeDnd({ projects, currentPath }: { projects: Project[]; currentPath: string }) {
   const updateProject = useUpdateProject();
+  const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const items = projects.filter((p) => (p.parent_id ?? null) === parentId);
+  const byParent = useMemo(() => {
+    const map = new Map<string | null, Project[]>();
+    for (const p of projects) {
+      const k = p.parent_id ?? null;
+      if (!map.has(k)) map.set(k, []);
+      map.get(k)!.push(p);
+    }
+    for (const list of map.values()) list.sort((a, b) => a.position - b.position);
+    return map;
+  }, [projects]);
 
-  if (items.length === 0) return null;
+  const isDescendant = (ancestorId: string, candidateId: string): boolean => {
+    let cur = projects.find((p) => p.id === candidateId);
+    while (cur?.parent_id) {
+      if (cur.parent_id === ancestorId) return true;
+      cur = projects.find((p) => p.id === cur!.parent_id);
+    }
+    return false;
+  };
 
-  return (
-    <ul className="space-y-0.5">
-      {items.map((p) => {
-        const children = projects.filter((c) => c.parent_id === p.id);
-        const hasChildren = children.length > 0;
-        const isExpanded = expanded.has(p.id);
-        const active = currentPath === `/app/p/${p.id}`;
+  const handleDragEnd = (e: DragEndEvent) => {
+    setActiveId(null);
+    const dragged = e.active.id as string;
+    const overId = e.over?.id as string | undefined;
+    if (!overId || dragged === overId) return;
 
-        return (
-          <li key={p.id}>
-            <ContextMenu>
-              <ContextMenuTrigger asChild>
-                <div
-                  className={`group flex items-center gap-1 rounded-md px-1 py-1 transition-colors ${
-                    active ? "bg-aura-gradient-subtle font-medium" : "hover:bg-sidebar-accent/50"
-                  }`}
-                  style={{ paddingLeft: `${depth * 12 + 4}px` }}
-                >
-                  <button
-                    className="flex h-4 w-4 shrink-0 items-center justify-center"
-                    onClick={() => {
-                      const next = new Set(expanded);
-                      if (isExpanded) next.delete(p.id);
-                      else next.add(p.id);
-                      setExpanded(next);
-                    }}
-                  >
-                    {hasChildren ? (
-                      <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                    ) : null}
-                  </button>
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-sm"
-                    style={{ backgroundColor: p.color }}
-                  />
-                  {renaming === p.id ? (
-                    <Input
-                      autoFocus
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      onBlur={() => {
-                        if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
-                        setRenaming(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
-                          setRenaming(null);
-                        }
-                        if (e.key === "Escape") setRenaming(null);
-                      }}
-                      className="h-6 flex-1 text-sm"
-                    />
-                  ) : (
-                    <Link
-                      to="/app/p/$projectId"
-                      params={{ projectId: p.id }}
-                      className="flex-1 truncate text-sm"
-                    >
-                      {p.name}
-                    </Link>
-                  )}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="opacity-0 transition-opacity group-hover:opacity-100">
-                        <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
-                        <Pencil className="mr-2 h-4 w-4" /> Rename
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => {
-                          if (confirm(`Delete "${p.name}"? This will delete all tasks in it.`)) {
-                            deleteProject.mutate(p.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </ContextMenuTrigger>
-              <ContextMenuContent>
-                <ContextMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
-                  <Pencil className="mr-2 h-4 w-4" /> Rename
-                </ContextMenuItem>
-                <ContextMenuItem
-                  className="text-destructive"
+    // Drop targets: "root" | `into:<id>` | `before:<id>` | `after:<id>`
+    if (overId === "root") {
+      if (isDescendant(dragged, dragged)) return;
+      const siblings = byParent.get(null) ?? [];
+      const lastPos = siblings.length ? siblings[siblings.length - 1].position : 0;
+      updateProject.mutate({ id: dragged, parent_id: null, position: lastPos + 1 });
+      return;
+    }
+    if (overId.startsWith("into:")) {
+      const targetId = overId.slice(5);
+      if (targetId === dragged || isDescendant(dragged, targetId)) return;
+      const siblings = byParent.get(targetId) ?? [];
+      const lastPos = siblings.length ? siblings[siblings.length - 1].position : 0;
+      updateProject.mutate({ id: dragged, parent_id: targetId, position: lastPos + 1 });
+      setExpanded((prev) => new Set(prev).add(targetId));
+      return;
+    }
+    if (overId.startsWith("before:") || overId.startsWith("after:")) {
+      const isBefore = overId.startsWith("before:");
+      const targetId = overId.slice(isBefore ? 7 : 6);
+      if (targetId === dragged) return;
+      const target = projects.find((p) => p.id === targetId);
+      if (!target) return;
+      if (isDescendant(dragged, targetId)) return;
+      const newParent = target.parent_id ?? null;
+      const siblings = (byParent.get(newParent) ?? []).filter((s) => s.id !== dragged);
+      const idx = siblings.findIndex((s) => s.id === targetId);
+      const insertIdx = isBefore ? idx : idx + 1;
+      const prev = siblings[insertIdx - 1]?.position;
+      const next = siblings[insertIdx]?.position;
+      let newPos: number;
+      if (prev == null && next == null) newPos = 0;
+      else if (prev == null) newPos = next! - 1;
+      else if (next == null) newPos = prev + 1;
+      else newPos = (prev + next) / 2;
+      updateProject.mutate({ id: dragged, parent_id: newParent, position: newPos });
+    }
+  };
+
+  const draggedProject = activeId ? projects.find((p) => p.id === activeId) : null;
+
+  const renderRow = (p: Project, depth: number) => {
+    const children = byParent.get(p.id) ?? [];
+    const hasChildren = children.length > 0;
+    const isExpanded = expanded.has(p.id);
+    const active = currentPath === `/app/p/${p.id}`;
+
+    return (
+      <li key={p.id}>
+        <DropZone id={`before:${p.id}`} />
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <DraggableRow id={p.id} folderId={p.id}>
+              <div
+                className={`group flex items-center gap-1 rounded-md px-1 py-1 transition-colors ${
+                  active ? "bg-aura-gradient-subtle font-medium" : "hover:bg-sidebar-accent/50"
+                }`}
+                style={{ paddingLeft: `${depth * 12 + 4}px` }}
+              >
+                <button
+                  className="flex h-4 w-4 shrink-0 items-center justify-center"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => {
-                    if (confirm(`Delete "${p.name}"?`)) deleteProject.mutate(p.id);
+                    const next = new Set(expanded);
+                    if (isExpanded) next.delete(p.id);
+                    else next.add(p.id);
+                    setExpanded(next);
                   }}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
-            {hasChildren && isExpanded && (
-              <ProjectTree projects={projects} parentId={p.id} currentPath={currentPath} depth={depth + 1} />
-            )}
-          </li>
-        );
-      })}
-    </ul>
+                  {hasChildren ? (
+                    <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                  ) : null}
+                </button>
+                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: p.color }} />
+                {renaming === p.id ? (
+                  <Input
+                    autoFocus
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onBlur={() => {
+                      if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
+                      setRenaming(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
+                        setRenaming(null);
+                      }
+                      if (e.key === "Escape") setRenaming(null);
+                    }}
+                    className="h-6 flex-1 text-sm"
+                  />
+                ) : (
+                  <Link
+                    to="/app/p/$projectId"
+                    params={{ projectId: p.id }}
+                    className="flex-1 truncate text-sm"
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    {p.name}
+                  </Link>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="opacity-0 transition-opacity group-hover:opacity-100"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
+                      <Pencil className="mr-2 h-4 w-4" /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        const name = window.prompt("Subfolder name");
+                        if (name?.trim()) {
+                          await createProject.mutateAsync({ name: name.trim(), parent_id: p.id });
+                          setExpanded((prev) => new Set(prev).add(p.id));
+                        }
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" /> New subfolder
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => {
+                        if (confirm(`Delete "${p.name}"? This will delete all tasks in it.`)) {
+                          deleteProject.mutate(p.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </DraggableRow>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
+              <Pencil className="mr-2 h-4 w-4" /> Rename
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={async () => {
+                const name = window.prompt("Subfolder name");
+                if (name?.trim()) {
+                  await createProject.mutateAsync({ name: name.trim(), parent_id: p.id });
+                  setExpanded((prev) => new Set(prev).add(p.id));
+                }
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> New subfolder
+            </ContextMenuItem>
+            <ContextMenuItem
+              className="text-destructive"
+              onClick={() => {
+                if (confirm(`Delete "${p.name}"?`)) deleteProject.mutate(p.id);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Delete
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+        {hasChildren && isExpanded && (
+          <ul className="space-y-0.5">{children.map((c) => renderRow(c, depth + 1))}</ul>
+        )}
+        {hasChildren && isExpanded && <DropZone id={`after:${p.id}`} />}
+      </li>
+    );
+  };
+
+  const roots = byParent.get(null) ?? [];
+
+  return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={(e) => setActiveId(e.active.id as string)}
+      onDragCancel={() => setActiveId(null)}
+      onDragEnd={handleDragEnd}
+    >
+      <RootDropZone />
+      <ul className="space-y-0.5">{roots.map((p) => renderRow(p, 0))}</ul>
+      {roots.length > 0 && <DropZone id={`after:${roots[roots.length - 1].id}`} />}
+      <DragOverlay>
+        {draggedProject ? (
+          <div className="flex items-center gap-1 rounded-md bg-sidebar-accent px-2 py-1 text-sm shadow-lg">
+            <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: draggedProject.color }} />
+            <span className="truncate">{draggedProject.name}</span>
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
+function DraggableRow({ id, folderId, children }: { id: string; folderId: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({ id });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: `into:${folderId}` });
+  return (
+    <div
+      ref={(el) => {
+        setDragRef(el);
+        setDropRef(el);
+      }}
+      {...attributes}
+      {...listeners}
+      className={`${isDragging ? "opacity-40" : ""} ${isOver ? "ring-1 ring-primary/60 rounded-md" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DropZone({ id }: { id: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`h-1 -my-0.5 rounded transition-colors ${isOver ? "bg-primary" : ""}`}
+    />
+  );
+}
+
+function RootDropZone() {
+  const { setNodeRef, isOver } = useDroppable({ id: "root" });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`mb-1 h-2 rounded text-[10px] text-center transition-colors ${
+        isOver ? "bg-primary/20 text-primary" : "text-transparent"
+      }`}
+    >
+      Move to root
+    </div>
   );
 }
