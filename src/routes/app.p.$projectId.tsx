@@ -178,22 +178,12 @@ function ProjectPage() {
             </Link>
           </Button>
         </div>
-        {!isMobile && (
-          <ViewTabs
-            views={views}
-            activeId={activeViewId}
-            onSelect={setActiveViewId}
-            projectId={projectId}
-          />
-        )}
-        {isMobile && views.length > 1 && (
-          <ViewTabs
-            views={views}
-            activeId={activeViewId}
-            onSelect={setActiveViewId}
-            projectId={projectId}
-          />
-        )}
+        <ViewTabs
+          views={views}
+          activeId={activeViewId}
+          onSelect={setActiveViewId}
+          projectId={projectId}
+        />
       </div>
 
       {activeView?.view_type === "table" && (
