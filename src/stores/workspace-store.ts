@@ -44,6 +44,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
       current = workspaces.find((w) => w.id === stored) ?? workspaces[0];
       if (current && typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, current.id);
+    } else if (current) {
+      // Refresh current with latest data (name, plan, etc.)
+      const fresh = workspaces.find((w) => w.id === current!.id);
+      if (fresh) current = fresh;
     }
     set({ workspaces, current, loading: false });
   },
