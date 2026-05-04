@@ -73,6 +73,8 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
               overLimit={overLimit}
               tasks={list}
               indicators={indicators}
+              cardFields={cardFields}
+              colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
               onTaskClick={onTaskClick}
             />
