@@ -7,6 +7,10 @@ import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppHeader } from "@/components/app/AppHeader";
 import { CommandPalette } from "@/components/app/CommandPalette";
 import { PreferencesSync } from "@/components/app/PreferencesSync";
+import { MobileTopBar } from "@/components/app/MobileTopBar";
+import { MobileBottomNav } from "@/components/app/MobileBottomNav";
+import { MobileDrawer } from "@/components/app/MobileDrawer";
+import { QuickCaptureSheet } from "@/components/app/QuickCaptureSheet";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
