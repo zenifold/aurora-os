@@ -429,64 +429,70 @@ function TaskRow({
           </div>
         )}
       </td>
-      <td className="px-3 py-1.5">
-        <Select value={task.status} onValueChange={(v) => onUpdate({ status: v })}>
-          <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-              <span className="text-xs">{status?.label ?? task.status}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                  {s.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </td>
-      <td className="px-3 py-1.5">
-        <Select value={task.priority} onValueChange={(v) => onUpdate({ priority: v as Task["priority"] })}>
-          <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: priority?.color }} />
-              <span className="text-xs">{priority?.label}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {PRIORITY_OPTIONS.map((p) => (
-              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </td>
-      <td className="px-3 py-1.5">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex h-7 w-full items-center rounded px-2 text-left text-xs hover:bg-accent">
-              {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={task.due_date ? parseISO(task.due_date) : undefined}
-              onSelect={(d) => onUpdate({ due_date: d ? format(d, "yyyy-MM-dd") : null })}
-            />
-            {task.due_date && (
-              <div className="border-t border-border p-2">
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => onUpdate({ due_date: null })}>
-                  Clear
-                </Button>
-              </div>
-            )}
-          </PopoverContent>
-        </Popover>
-      </td>
+      {showStatus && (
+        <td className="px-3 py-1.5">
+          <Select value={task.status} onValueChange={(v) => onUpdate({ status: v })}>
+            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
+                <span className="text-xs">{status?.label ?? task.status}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                    {s.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </td>
+      )}
+      {showPriority && (
+        <td className="px-3 py-1.5">
+          <Select value={task.priority} onValueChange={(v) => onUpdate({ priority: v as Task["priority"] })}>
+            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: priority?.color }} />
+                <span className="text-xs">{priority?.label}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {PRIORITY_OPTIONS.map((p) => (
+                <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </td>
+      )}
+      {showDue && (
+        <td className="px-3 py-1.5">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex h-7 w-full items-center rounded px-2 text-left text-xs hover:bg-accent">
+                {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={task.due_date ? parseISO(task.due_date) : undefined}
+                onSelect={(d) => onUpdate({ due_date: d ? format(d, "yyyy-MM-dd") : null })}
+              />
+              {task.due_date && (
+                <div className="border-t border-border p-2">
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => onUpdate({ due_date: null })}>
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+        </td>
+      )}
       {fields.map((f) => (
         <td key={f.id} className="px-3 py-1.5">
           <CustomFieldCell
