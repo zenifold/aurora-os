@@ -12,10 +12,11 @@ import { ViewTabs } from "@/components/views/ViewTabs";
 import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { ShareDialog } from "@/components/app/ShareDialog";
+import { MagicAddDialog } from "@/components/app/MagicAddDialog";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View } from "@/lib/types";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
@@ -34,6 +35,7 @@ function ProjectPage() {
 
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [magicOpen, setMagicOpen] = useState(false);
 
   // Pick default view
   useEffect(() => {
