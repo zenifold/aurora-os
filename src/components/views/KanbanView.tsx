@@ -61,6 +61,7 @@ export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
             title={s.label}
             color={s.color}
             tasks={grouped.get(s.value) ?? []}
+            indicators={indicators}
             onAdd={(title) => create.mutate({ title, status: s.value })}
             onTaskClick={onTaskClick}
           />
