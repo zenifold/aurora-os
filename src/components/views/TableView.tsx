@@ -151,21 +151,34 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
         </div>
       )}
 
-      <table className="w-full border-collapse text-sm">
+      <table className="border-collapse text-sm" style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}>
+        <colgroup>
+          <col style={{ width: widths.select }} />
+          <col style={{ width: widths.title }} />
+          <col style={{ width: widths.status }} />
+          <col style={{ width: widths.priority }} />
+          <col style={{ width: widths.due }} />
+          {fields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
+          <col style={{ width: widths.add }} />
+        </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="w-10 px-3 py-2">
+            <th className="px-3 py-2">
               <Checkbox
                 checked={tasks.length > 0 && selected.size === tasks.length}
                 onCheckedChange={(c) => toggleAll(!!c)}
               />
             </th>
-            <Th>Title</Th>
-            <Th className="w-36">Status</Th>
-            <Th className="w-32">Priority</Th>
-            <Th className="w-32">Due</Th>
-            {fields.map((f) => <Th key={f.id} className="w-40">{f.name}</Th>)}
-            <th className="w-10 px-2">
+            <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
+            <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>
+            <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>
+            <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>
+            {fields.map((f) => (
+              <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
+                {f.name}
+              </ResizableTh>
+            ))}
+            <th className="px-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground">
