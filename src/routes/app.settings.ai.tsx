@@ -7,6 +7,7 @@ import {
   useDeleteAgent,
   useWorkspaceAiKey,
   useSetWorkspaceAiKey,
+  useOpenRouterModels,
   type AiAgent,
 } from "@/hooks/use-ai";
 import { Button } from "@/components/ui/button";
@@ -21,20 +22,25 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Sparkles, Plus, Trash2, KeyRound, ExternalLink, Bot } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Sparkles, Plus, Trash2, KeyRound, ExternalLink, Bot, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings/ai")({
   component: AiSettingsPage,
 });
-
-const COMMON_MODELS = [
-  "openai/gpt-4o-mini",
-  "openai/gpt-4o",
-  "anthropic/claude-3.5-sonnet",
-  "anthropic/claude-3.5-haiku",
-  "google/gemini-2.0-flash-exp:free",
-  "meta-llama/llama-3.3-70b-instruct",
-];
 
 function AiSettingsPage() {
   const { data: agents = [] } = useAiAgents();
@@ -357,27 +363,16 @@ function AgentDialog({
 
           <div>
             <Label>Model</Label>
-            <Input
-              list="ai-models"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="mt-1.5 font-mono text-xs"
-              placeholder="provider/model"
-            />
-            <datalist id="ai-models">
-              {COMMON_MODELS.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
+            <ModelPicker value={model} onChange={setModel} />
             <p className="mt-1 text-xs text-muted-foreground">
-              Any{" "}
+              Live catalog from{" "}
               <a
                 href="https://openrouter.ai/models"
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary hover:underline"
               >
-                OpenRouter model id
+                openrouter.ai/models
               </a>
               .
             </p>
@@ -434,5 +429,96 @@ function AgentDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ModelPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data, isLoading, error } = useOpenRouterModels();
+  const [open, setOpen] = useState(false);
+  const models = data?.models ?? [];
+  const selected = models.find((m) => m.id === value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="mt-1.5 w-full justify-between font-mono text-xs"
+        >
+          <span className="truncate">
+            {isLoading ? (
+              <span className="inline-flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" /> Loading models…
+              </span>
+            ) : selected ? (
+              <>
+                <span className="font-sans">{selected.name}</span>
+                <span className="ml-2 text-muted-foreground">{selected.id}</span>
+              </>
+            ) : (
+              value || "Select a model…"
+            )}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command
+          filter={(itemValue, search) => {
+            const m = models.find((x) => x.id === itemValue);
+            const hay = `${itemValue} ${m?.name ?? ""}`.toLowerCase();
+            return hay.includes(search.toLowerCase()) ? 1 : 0;
+          }}
+        >
+          <CommandInput placeholder="Search models…" />
+          <CommandList>
+            {error || data?.error ? (
+              <CommandEmpty>Failed to load models. {data?.error}</CommandEmpty>
+            ) : (
+              <CommandEmpty>No models found.</CommandEmpty>
+            )}
+            <CommandGroup>
+              {models.map((m) => {
+                const promptPrice = m.pricing ? Number(m.pricing.prompt) * 1_000_000 : null;
+                return (
+                  <CommandItem
+                    key={m.id}
+                    value={m.id}
+                    onSelect={() => {
+                      onChange(m.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-start gap-2"
+                  >
+                    <Check
+                      className={cn(
+                        "mt-0.5 h-4 w-4 shrink-0",
+                        value === m.id ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm">{m.name}</span>
+                        {promptPrice !== null && (
+                          <span className="shrink-0 text-[10px] text-muted-foreground">
+                            ${promptPrice.toFixed(2)}/M
+                          </span>
+                        )}
+                      </div>
+                      <div className="truncate font-mono text-[10px] text-muted-foreground">
+                        {m.id}
+                        {m.context_length ? ` · ${(m.context_length / 1000).toFixed(0)}k ctx` : ""}
+                      </div>
+                    </div>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
