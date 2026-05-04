@@ -41,10 +41,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Aura — Where whiteboards meet workflows" },
       { name: "description", content: "Aura is the visual project OS. Tables, boards, and canvases — one source of truth." },
-      { property: "og:title", content: "Aura" },
-      { property: "og:description", content: "Where whiteboards meet workflows." },
+      { property: "og:title", content: "Aura — Where whiteboards meet workflows" },
+      { property: "og:description", content: "Aura is the visual project OS. Tables, boards, and canvases — one source of truth." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Aura — Where whiteboards meet workflows" },
+      { name: "twitter:description", content: "Aura is the visual project OS. Tables, boards, and canvases — one source of truth." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5d0bf22-76f9-40a1-8a0f-934b2b655a44/id-preview-3b9adf90--9fa87df8-7e17-44bc-8d0a-b1b8ef2d6368.lovable.app-1777936118432.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b5d0bf22-76f9-40a1-8a0f-934b2b655a44/id-preview-3b9adf90--9fa87df8-7e17-44bc-8d0a-b1b8ef2d6368.lovable.app-1777936118432.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -76,10 +80,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function ThemeBootstrap() {
-  const resolvedTheme = useUIStore((s) => s.resolvedTheme);
+  const theme = useUIStore((s) => s.theme);
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
-  }, [resolvedTheme]);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
   return null;
 }
 
