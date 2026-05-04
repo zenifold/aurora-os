@@ -77,8 +77,16 @@ export function MagicAddDialog({
     if (!ws || !prompt.trim()) return;
     setLoading(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        toast.error("Please sign in again before using Magic Add.");
+        return;
+      }
+
       const res = await generate({
         data: { workspace_id: ws.id, prompt: prompt.trim(), max_tasks: maxTasks },
+        headers: { authorization: `Bearer ${token}` },
       });
       const tasks = (res as { tasks?: unknown })?.tasks;
       if (!Array.isArray(tasks) || tasks.length === 0) {
