@@ -64,6 +64,8 @@ export function AppSidebar() {
   };
 
   const initials = (ws?.name ?? "A").slice(0, 2).toUpperCase();
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "You";
+  const userInitials = (profile?.display_name || user?.email || "?").slice(0, 2).toUpperCase();
 
   if (collapsed) {
     return (
