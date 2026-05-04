@@ -104,6 +104,9 @@ function ProjectPage() {
               <p className="truncate text-sm text-muted-foreground">{project.description}</p>
             )}
           </div>
+          <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
+            <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Share
           </Button>
@@ -163,6 +166,7 @@ function ProjectPage() {
       />
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} projectName={project.name} />
+      <MagicAddDialog open={magicOpen} onOpenChange={setMagicOpen} projectId={projectId} />
     </div>
   );
 }
