@@ -253,6 +253,11 @@ function Card({
       )}
 
       <div className="flex items-start gap-1.5">
+        <TypeIcon
+          className={`mt-0.5 shrink-0 ${isInitiative ? "h-4 w-4" : "h-3.5 w-3.5"}`}
+          style={{ color: typeMeta.color }}
+          aria-label={typeMeta.label}
+        />
         {isBlocked && (
           <ArrowLeftCircle
             className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive"
@@ -265,7 +270,18 @@ function Card({
             aria-label={`Blocking ${indicator?.blocking} task(s)`}
           />
         )}
-        <p className="line-clamp-2 text-sm font-medium">{task.title}</p>
+        <p className={`line-clamp-2 flex-1 ${isInitiative ? "text-sm font-bold" : isSubtask ? "text-xs" : "text-sm font-medium"} ${isSubtask && task.status === "done" ? "line-through text-muted-foreground" : ""}`}>
+          {task.title}
+        </p>
+        {(isInitiative || isEpic) && childCount > 0 && (
+          <span
+            className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+            style={{ background: typeMeta.tint, color: typeMeta.color }}
+            title={`${completedCount} of ${childCount} complete`}
+          >
+            {completedCount}/{childCount}
+          </span>
+        )}
       </div>
 
       {hasFooter && (
