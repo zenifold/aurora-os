@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/types";
+import { getTaskTypeMeta } from "@/lib/task-types";
 import { useUpdateView } from "@/hooks/use-views";
 import { Maximize2, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -215,13 +216,15 @@ export function CanvasView({
                     onTaskClick?.(task.id);
                   }
                 }}
-                className="absolute cursor-grab select-none rounded-xl border border-border bg-card p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md active:cursor-grabbing"
+                className="absolute cursor-grab select-none rounded-xl border bg-card p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md active:cursor-grabbing"
                 style={{
                   left: pos.x,
                   top: pos.y,
-                  width: CARD_W,
-                  minHeight: CARD_H,
-                  borderLeft: status ? `3px solid ${status.color}` : undefined,
+                  width: getTaskTypeMeta(t.task_type).canvasW,
+                  minHeight: getTaskTypeMeta(t.task_type).canvasH,
+                  borderColor: getTaskTypeMeta(t.task_type).color,
+                  borderWidth: t.task_type === "initiative" ? 3 : t.task_type === "epic" ? 2 : 1,
+                  borderRadius: t.task_type === "subtask" ? 999 : 12,
                 }}
               >
                 <p className="line-clamp-2 text-sm font-medium leading-snug">{t.title}</p>
