@@ -4,6 +4,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import type { Task } from "@/lib/types";
 import { toast } from "sonner";
+import { useTriggerAutomations } from "@/hooks/use-automations";
 
 export function useTasks(projectId: string | undefined) {
   return useQuery({
