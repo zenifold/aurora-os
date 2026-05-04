@@ -283,11 +283,15 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                   </div>
                   <div className="relative flex-1" style={{ width: totalWidth }}>
                     <div
-                      className={`group absolute top-1.5 flex h-7 cursor-grab items-center rounded-md text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""}`}
+                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""}`}
                       style={{
+                        top: (ROW_H - barH) / 2,
+                        height: barH,
                         left,
                         width: Math.max(width, 12),
                         background: `linear-gradient(135deg, ${color}, color-mix(in oklab, ${color} 80%, transparent))`,
+                        borderRadius: t.task_type === "subtask" ? 999 : 6,
+                        border: `1px solid ${typeMeta.color}`,
                       }}
                       onClick={(e) => {
                         if (drag) return;
