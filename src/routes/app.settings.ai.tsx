@@ -431,3 +431,94 @@ function AgentDialog({
     </Dialog>
   );
 }
+
+function ModelPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { data, isLoading, error } = useOpenRouterModels();
+  const [open, setOpen] = useState(false);
+  const models = data?.models ?? [];
+  const selected = models.find((m) => m.id === value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="mt-1.5 w-full justify-between font-mono text-xs"
+        >
+          <span className="truncate">
+            {isLoading ? (
+              <span className="inline-flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" /> Loading models…
+              </span>
+            ) : selected ? (
+              <>
+                <span className="font-sans">{selected.name}</span>
+                <span className="ml-2 text-muted-foreground">{selected.id}</span>
+              </>
+            ) : (
+              value || "Select a model…"
+            )}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+        <Command
+          filter={(itemValue, search) => {
+            const m = models.find((x) => x.id === itemValue);
+            const hay = `${itemValue} ${m?.name ?? ""}`.toLowerCase();
+            return hay.includes(search.toLowerCase()) ? 1 : 0;
+          }}
+        >
+          <CommandInput placeholder="Search models…" />
+          <CommandList>
+            {error || data?.error ? (
+              <CommandEmpty>Failed to load models. {data?.error}</CommandEmpty>
+            ) : (
+              <CommandEmpty>No models found.</CommandEmpty>
+            )}
+            <CommandGroup>
+              {models.map((m) => {
+                const promptPrice = m.pricing ? Number(m.pricing.prompt) * 1_000_000 : null;
+                return (
+                  <CommandItem
+                    key={m.id}
+                    value={m.id}
+                    onSelect={() => {
+                      onChange(m.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-start gap-2"
+                  >
+                    <Check
+                      className={cn(
+                        "mt-0.5 h-4 w-4 shrink-0",
+                        value === m.id ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm">{m.name}</span>
+                        {promptPrice !== null && (
+                          <span className="shrink-0 text-[10px] text-muted-foreground">
+                            ${promptPrice.toFixed(2)}/M
+                          </span>
+                        )}
+                      </div>
+                      <div className="truncate font-mono text-[10px] text-muted-foreground">
+                        {m.id}
+                        {m.context_length ? ` · ${(m.context_length / 1000).toFixed(0)}k ctx` : ""}
+                      </div>
+                    </div>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Pop over>
+  );
+}
