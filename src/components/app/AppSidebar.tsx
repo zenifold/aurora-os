@@ -86,6 +86,9 @@ export function AppSidebar() {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => navigate({ to: "/app/profile" })}>
+            <Settings className="mr-2 h-4 w-4" /> Profile & preferences
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate({ to: "/onboarding" })}>
             <Plus className="mr-2 h-4 w-4" /> New workspace
           </DropdownMenuItem>
