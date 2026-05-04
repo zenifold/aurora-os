@@ -62,7 +62,7 @@ export const getRouter = () => {
           throttleTime: 1000,
         });
         persistQueryClient({
-          queryClient,
+          queryClient: queryClient as any,
           persister,
           maxAge: 1000 * 60 * 60 * 24, // 24h
         });
