@@ -29,6 +29,7 @@ import { CommentsThread } from "./CommentsThread";
 import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
 import { TaskAiPanel } from "./TaskAiPanel";
+import { TaskRelationsSection } from "./TaskRelationsSection";
 import { Sparkles } from "lucide-react";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
