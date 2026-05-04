@@ -397,6 +397,66 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          background_color: string
+          collaborator_ids: string[]
+          content: Json
+          converted_task_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_archived: boolean
+          is_pinned: boolean
+          manual_order: number
+          note_type: string
+          pin_order: number
+          project_id: string | null
+          reminder_at: string | null
+          title: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          background_color?: string
+          collaborator_ids?: string[]
+          content?: Json
+          converted_task_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          is_archived?: boolean
+          is_pinned?: boolean
+          manual_order?: number
+          note_type?: string
+          pin_order?: number
+          project_id?: string | null
+          reminder_at?: string | null
+          title?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          background_color?: string
+          collaborator_ids?: string[]
+          content?: Json
+          converted_task_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_archived?: boolean
+          is_pinned?: boolean
+          manual_order?: number
+          note_type?: string
+          pin_order?: number
+          project_id?: string | null
+          reminder_at?: string | null
+          title?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
