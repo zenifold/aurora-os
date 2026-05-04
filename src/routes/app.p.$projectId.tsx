@@ -178,17 +178,15 @@ function ProjectPage() {
             </Link>
           </Button>
         </div>
-        {!isMobile && (
-          <ViewTabs
-            views={views}
-            activeId={activeViewId}
-            onSelect={setActiveViewId}
-            projectId={projectId}
-          />
-        )}
+        <ViewTabs
+          views={views}
+          activeId={activeViewId}
+          onSelect={setActiveViewId}
+          projectId={projectId}
+        />
       </div>
 
-      {!isMobile && activeView?.view_type === "table" && (
+      {activeView?.view_type === "table" && (
         <FilterBar
           filters={activeView.filters ?? []}
           sorts={activeView.sorts ?? []}
@@ -202,7 +200,7 @@ function ProjectPage() {
       )}
 
       <div className="min-h-0 flex-1 overflow-auto">
-        {isMobile ? (
+        {isMobile && activeView?.view_type !== "table" ? (
           <MobileTaskList
             projectId={projectId}
             tasks={filteredTasks}

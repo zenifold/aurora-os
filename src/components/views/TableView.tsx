@@ -135,7 +135,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   };
 
   return (
-    <div className="min-w-max">
+    <div className="min-w-max [&_.sticky-col]:sticky [&_.sticky-col]:left-0 [&_.sticky-col]:z-[5] [&_.sticky-col]:bg-background">
       {selected.size > 0 && (
         <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-aura-gradient-subtle px-4 py-2 text-sm">
           <span className="font-medium">{selected.size} selected</span>
@@ -177,13 +177,18 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="px-3 py-2">
+            <th className="sticky-col px-3 py-2">
               <Checkbox
                 checked={tasks.length > 0 && selected.size === tasks.length}
                 onCheckedChange={(c) => toggleAll(!!c)}
               />
             </th>
-            <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
+            <th
+              className="sticky-col border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              style={{ left: widths.select }}
+            >
+              <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+            </th>
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
             {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
@@ -235,6 +240,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showPriority={showPriority}
                   showDue={showDue}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
+                  titleStickyLeft={widths.select}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
@@ -246,8 +252,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
 
           {/* Add row */}
           <tr className="border-b border-border">
-            <td />
-            <td className="px-3 py-1.5">
+            <td className="sticky-col px-3 py-1.5" />
+            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: widths.select }}>
               {adding ? (
                 <Input
                   autoFocus
@@ -297,6 +303,24 @@ function ResizableTh({
   setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   children: React.ReactNode;
 }) {
+  return (
+    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <ResizableThInner colKey={colKey} widths={widths} setWidths={setWidths}>{children}</ResizableThInner>
+    </th>
+  );
+}
+
+function ResizableThInner({
+  colKey,
+  widths,
+  setWidths,
+  children,
+}: {
+  colKey: string;
+  widths: Record<string, number>;
+  setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  children: React.ReactNode;
+}) {
   const startRef = useRef<{ x: number; w: number } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -317,7 +341,7 @@ function ResizableTh({
   };
 
   return (
-    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <>
       <div className="truncate pr-2">{children}</div>
       <div
         role="separator"
@@ -328,7 +352,7 @@ function ResizableTh({
         onPointerCancel={onPointerUp}
         className="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize select-none touch-none hover:bg-primary/40"
       />
-    </th>
+    </>
   );
 }
 
@@ -342,6 +366,7 @@ function TaskRow({
   showPriority = true,
   showDue = true,
   rowColor = null,
+  titleStickyLeft = 40,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -356,6 +381,7 @@ function TaskRow({
   showPriority?: boolean;
   showDue?: boolean;
   rowColor?: string | null;
+  titleStickyLeft?: number;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -372,13 +398,13 @@ function TaskRow({
 
   return (
     <tr
-      className="group border-b border-border hover:bg-accent/30"
+      className="group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
       style={{ borderLeft: `2px solid ${borderColor}` }}
     >
-      <td className="px-3 py-1.5">
+      <td className="sticky-col px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
       </td>
-      <td className="px-3 py-1.5">
+      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
         {titleEdit !== null ? (
           <Input
             autoFocus
