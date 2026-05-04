@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
