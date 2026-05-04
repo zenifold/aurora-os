@@ -538,6 +538,39 @@ export type Database = {
           },
         ]
       }
+      task_relations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          lag_days: number
+          relation_type: string
+          source_task_id: string
+          target_task_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lag_days?: number
+          relation_type: string
+          source_task_id: string
+          target_task_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lag_days?: number
+          relation_type?: string
+          source_task_id?: string
+          target_task_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee_ids: string[]

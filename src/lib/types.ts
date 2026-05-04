@@ -117,3 +117,24 @@ export const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: stri
   { value: "high", label: "High", color: "oklch(0.65 0.18 30)" },
   { value: "urgent", label: "Urgent", color: "oklch(0.6 0.22 25)" },
 ];
+
+export type RelationType = "blocks" | "blocked_by" | "relates_to" | "duplicates" | "follows";
+
+export interface TaskRelation {
+  id: string;
+  workspace_id: string;
+  source_task_id: string;
+  target_task_id: string;
+  relation_type: RelationType;
+  lag_days: number;
+  created_by: string | null;
+  created_at: string;
+}
+
+export const RELATION_LABELS: Record<RelationType, { label: string; inverse: RelationType; description: string }> = {
+  blocks:       { label: "Blocks",       inverse: "blocked_by", description: "must finish before" },
+  blocked_by:   { label: "Blocked by",   inverse: "blocks",     description: "waits on" },
+  relates_to:   { label: "Relates to",   inverse: "relates_to", description: "related to" },
+  duplicates:   { label: "Duplicates",   inverse: "duplicates", description: "duplicate of" },
+  follows:      { label: "Follows",      inverse: "follows",    description: "comes after" },
+};

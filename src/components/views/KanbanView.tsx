@@ -12,7 +12,8 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/lib/types";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
-import { Plus, Calendar as CalendarIcon } from "lucide-react";
+import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 
@@ -25,6 +26,7 @@ interface Props {
 export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
   const update = useUpdateTask(projectId);
   const create = useCreateTask(projectId);
+  const { data: indicators } = useProjectRelationIndicators(projectId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const grouped = useMemo(() => {
@@ -59,6 +61,7 @@ export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
             title={s.label}
             color={s.color}
             tasks={grouped.get(s.value) ?? []}
+            indicators={indicators}
             onAdd={(title) => create.mutate({ title, status: s.value })}
             onTaskClick={onTaskClick}
           />
@@ -73,6 +76,7 @@ function Column({
   title,
   color,
   tasks,
+  indicators,
   onAdd,
   onTaskClick,
 }: {
@@ -80,6 +84,7 @@ function Column({
   title: string;
   color: string;
   tasks: Task[];
+  indicators?: Map<string, { blockedBy: number; blocking: number }>;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
 }) {
@@ -116,7 +121,7 @@ function Column({
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {tasks.map((t) => (
-          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} />
+          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} indicator={indicators?.get(t.id)} />
         ))}
         {adding && (
           <Input
@@ -148,9 +153,19 @@ function Column({
   );
 }
 
-function Card({ task, onClick }: { task: Task; onClick: () => void }) {
+function Card({
+  task,
+  onClick,
+  indicator,
+}: {
+  task: Task;
+  onClick: () => void;
+  indicator?: { blockedBy: number; blocking: number };
+}) {
   const { setNodeRef, transform, listeners, attributes, isDragging } = useDraggable({ id: task.id });
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
+  const isBlocked = (indicator?.blockedBy ?? 0) > 0;
+  const isBlocking = (indicator?.blocking ?? 0) > 0;
 
   return (
     <div
@@ -159,15 +174,45 @@ function Card({ task, onClick }: { task: Task; onClick: () => void }) {
       {...listeners}
       {...attributes}
       onClick={(e) => {
-        // Only open detail if not dragging
         if (!isDragging) {
           e.stopPropagation();
           onClick();
         }
       }}
-      className="cursor-grab rounded-md border border-border bg-card p-2.5 text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+      className="relative cursor-grab overflow-hidden rounded-md border border-border bg-card p-2.5 text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
     >
-      <p className="line-clamp-2 text-sm font-medium">{task.title}</p>
+      {/* Right-edge dependency strip */}
+      {(isBlocked || isBlocking) && (
+        <span
+          aria-hidden
+          className="absolute right-0 top-0 h-full w-[3px]"
+          style={{
+            background:
+              isBlocked && isBlocking
+                ? "repeating-linear-gradient(45deg, hsl(var(--destructive)) 0 4px, hsl(var(--primary)) 4px 8px)"
+                : isBlocked
+                  ? "hsl(var(--destructive))"
+                  : "hsl(var(--primary))",
+          }}
+        />
+      )}
+
+      <div className="flex items-start gap-1.5">
+        {isBlocked && (
+          <ArrowLeftCircle
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive"
+            aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+          />
+        )}
+        {isBlocking && !isBlocked && (
+          <ArrowRightCircle
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary"
+            aria-label={`Blocking ${indicator?.blocking} task(s)`}
+          />
+        )}
+        <p className="line-clamp-2 text-sm font-medium">{task.title}</p>
+      </div>
+
       {(task.due_date || priority) && (
         <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
           {priority && (

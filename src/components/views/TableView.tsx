@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CustomFieldDef, Task } from "@/lib/types";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
+import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { groupTasks } from "@/lib/filtering";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const remove = useDeleteTask(projectId);
   const bulk = useBulkUpdateTasks(projectId);
   const createField = useCreateCustomField();
+  const { data: indicators } = useProjectRelationIndicators(projectId);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -215,6 +217,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                   task={t}
                   fields={fields}
                   selected={selected.has(t.id)}
+                  indicator={indicators?.get(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
@@ -316,6 +319,7 @@ function TaskRow({
   task,
   fields,
   selected,
+  indicator,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -324,6 +328,7 @@ function TaskRow({
   task: Task;
   fields: CustomFieldDef[];
   selected: boolean;
+  indicator?: { blockedBy: number; blocking: number };
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -332,6 +337,8 @@ function TaskRow({
   const [titleEdit, setTitleEdit] = useState<string | null>(null);
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
+  const isBlocked = (indicator?.blockedBy ?? 0) > 0;
+  const isBlocking = (indicator?.blocking ?? 0) > 0;
 
   return (
     <tr className="group border-b border-border hover:bg-accent/30">
