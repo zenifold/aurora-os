@@ -216,7 +216,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
             <>
               {groupBy && (
                 <tr key={`g-${key}`}>
-                  <td colSpan={5 + fields.length + 1} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {groupBy === "status"
                       ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
                       : key === "__none__" ? "Empty" : key} · {list.length}
@@ -227,10 +227,14 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                 <TaskRow
                   key={t.id}
                   task={t}
-                  fields={fields}
+                  fields={visibleFields}
                   workflow={workflow}
                   selected={selected.has(t.id)}
                   indicator={indicators?.get(t.id)}
+                  showStatus={showStatus}
+                  showPriority={showPriority}
+                  showDue={showDue}
+                  rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
@@ -266,7 +270,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                 </button>
               )}
             </td>
-            <td colSpan={3 + fields.length + 1} />
+            <td colSpan={visibleColCount - 1} />
           </tr>
         </tbody>
       </table>
