@@ -59,7 +59,7 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex h-full gap-3 overflow-x-auto p-4">
+      <div className="flex h-full snap-x snap-mandatory gap-3 overflow-x-auto p-3 lg:snap-none lg:p-4">
         {workflow.map((s) => {
           const list = grouped.get(s.id) ?? [];
           const overLimit = s.wip_limit != null && list.length > s.wip_limit;
@@ -123,7 +123,7 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col rounded-lg border bg-muted/30 transition-colors ${
+      className={`flex w-[calc(100vw-2rem)] max-w-sm shrink-0 snap-center flex-col rounded-lg border bg-muted/30 transition-colors lg:w-72 ${
         overLimit ? "border-destructive/60" : isOver ? "border-primary/50 bg-muted/60" : "border-border"
       }`}
     >
