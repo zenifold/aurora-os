@@ -154,6 +154,54 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          link: string | null
+          project_id: string | null
+          read_at: string | null
+          recipient_id: string
+          task_id: string | null
+          title: string
+          type: string
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          project_id?: string | null
+          read_at?: string | null
+          recipient_id: string
+          task_id?: string | null
+          title: string
+          type: string
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          project_id?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          task_id?: string | null
+          title?: string
+          type?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
