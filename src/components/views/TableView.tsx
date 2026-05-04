@@ -169,10 +169,10 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         <colgroup>
           <col style={{ width: widths.select }} />
           <col style={{ width: widths.title }} />
-          <col style={{ width: widths.status }} />
-          <col style={{ width: widths.priority }} />
-          <col style={{ width: widths.due }} />
-          {fields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
+          {showStatus && <col style={{ width: widths.status }} />}
+          {showPriority && <col style={{ width: widths.priority }} />}
+          {showDue && <col style={{ width: widths.due }} />}
+          {visibleFields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
           <col style={{ width: widths.add }} />
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
@@ -184,10 +184,10 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
               />
             </th>
             <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
-            <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>
-            <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>
-            <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>
-            {fields.map((f) => (
+            {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
+            {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
+            {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
+            {visibleFields.map((f) => (
               <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
                 {f.name}
               </ResizableTh>
