@@ -7,6 +7,7 @@ import {
   useDeleteAgent,
   useWorkspaceAiKey,
   useSetWorkspaceAiKey,
+  useOpenRouterModels,
   type AiAgent,
 } from "@/hooks/use-ai";
 import { Button } from "@/components/ui/button";
@@ -21,20 +22,25 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Sparkles, Plus, Trash2, KeyRound, ExternalLink, Bot } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Sparkles, Plus, Trash2, KeyRound, ExternalLink, Bot, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings/ai")({
   component: AiSettingsPage,
 });
-
-const COMMON_MODELS = [
-  "openai/gpt-4o-mini",
-  "openai/gpt-4o",
-  "anthropic/claude-3.5-sonnet",
-  "anthropic/claude-3.5-haiku",
-  "google/gemini-2.0-flash-exp:free",
-  "meta-llama/llama-3.3-70b-instruct",
-];
 
 function AiSettingsPage() {
   const { data: agents = [] } = useAiAgents();
@@ -357,27 +363,16 @@ function AgentDialog({
 
           <div>
             <Label>Model</Label>
-            <Input
-              list="ai-models"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="mt-1.5 font-mono text-xs"
-              placeholder="provider/model"
-            />
-            <datalist id="ai-models">
-              {COMMON_MODELS.map((m) => (
-                <option key={m} value={m} />
-              ))}
-            </datalist>
+            <ModelPicker value={model} onChange={setModel} />
             <p className="mt-1 text-xs text-muted-foreground">
-              Any{" "}
+              Live catalog from{" "}
               <a
                 href="https://openrouter.ai/models"
                 target="_blank"
                 rel="noreferrer"
                 className="text-primary hover:underline"
               >
-                OpenRouter model id
+                openrouter.ai/models
               </a>
               .
             </p>

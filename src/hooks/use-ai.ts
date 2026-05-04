@@ -2,6 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { listOpenRouterModels } from "@/server/openrouter.functions";
+
+export function useOpenRouterModels() {
+  return useQuery({
+    queryKey: ["openrouter-models"],
+    staleTime: 1000 * 60 * 60, // 1h
+    queryFn: () => listOpenRouterModels(),
+  });
+}
 
 export interface AiAgent {
   id: string;
