@@ -80,9 +80,17 @@ export function MagicAddDialog({
       const res = await generate({
         data: { workspace_id: ws.id, prompt: prompt.trim(), max_tasks: maxTasks },
       });
-      setGenerated(res.tasks as Generated[]);
-      setSelected(new Set(res.tasks.map((_, i) => i)));
-      setMeta({ tokens: res.tokens_used ?? null, model: res.model_used ?? null });
+      const tasks = (res as { tasks?: unknown })?.tasks;
+      if (!Array.isArray(tasks) || tasks.length === 0) {
+        toast.error("AI didn't return any tasks. Try rephrasing your prompt.");
+        return;
+      }
+      setGenerated(tasks as Generated[]);
+      setSelected(new Set(tasks.map((_, i) => i)));
+      setMeta({
+        tokens: (res as { tokens_used?: number | null })?.tokens_used ?? null,
+        model: (res as { model_used?: string | null })?.model_used ?? null,
+      });
     } catch (err) {
       let msg = "Generation failed";
       if (err instanceof Response) {
