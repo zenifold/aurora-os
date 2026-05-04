@@ -10,9 +10,10 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/lib/types";
-import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
+import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
+import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
 import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
@@ -27,45 +28,52 @@ export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
   const update = useUpdateTask(projectId);
   const create = useCreateTask(projectId);
   const { data: indicators } = useProjectRelationIndicators(projectId);
+  const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
-    for (const s of STATUS_OPTIONS) map.set(s.value, []);
+    for (const s of workflow) map.set(s.id, []);
     for (const t of tasks) {
-      const k = (t.status as string) ?? "todo";
+      const k = (t.status as string) ?? workflow[0]?.id ?? "todo";
       if (!map.has(k)) map.set(k, []);
       map.get(k)!.push(t);
     }
     return map;
-  }, [tasks]);
+  }, [tasks, workflow]);
 
   const handleDragEnd = (e: DragEndEvent) => {
     const taskId = e.active.id as string;
     const overId = e.over?.id as string | undefined;
     if (!overId) return;
-    const target = STATUS_OPTIONS.find((s) => `col-${s.value}` === overId);
+    const target = workflow.find((s) => `col-${s.id}` === overId);
     if (!target) return;
     const task = tasks.find((t) => t.id === taskId);
-    if (!task || task.status === target.value) return;
-    update.mutate({ id: taskId, status: target.value });
+    if (!task || task.status === target.id) return;
+    update.mutate({ id: taskId, status: target.id });
   };
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex h-full gap-3 overflow-x-auto p-4">
-        {STATUS_OPTIONS.map((s) => (
-          <Column
-            key={s.value}
-            id={`col-${s.value}`}
-            title={s.label}
-            color={s.color}
-            tasks={grouped.get(s.value) ?? []}
-            indicators={indicators}
-            onAdd={(title) => create.mutate({ title, status: s.value })}
-            onTaskClick={onTaskClick}
-          />
-        ))}
+        {workflow.map((s) => {
+          const list = grouped.get(s.id) ?? [];
+          const overLimit = s.wip_limit != null && list.length > s.wip_limit;
+          return (
+            <Column
+              key={s.id}
+              id={`col-${s.id}`}
+              title={s.name}
+              color={s.color}
+              wipLimit={s.wip_limit}
+              overLimit={overLimit}
+              tasks={list}
+              indicators={indicators}
+              onAdd={(title) => create.mutate({ title, status: s.id })}
+              onTaskClick={onTaskClick}
+            />
+          );
+        })}
       </div>
     </DndContext>
   );
@@ -75,6 +83,8 @@ function Column({
   id,
   title,
   color,
+  wipLimit,
+  overLimit,
   tasks,
   indicators,
   onAdd,
@@ -83,6 +93,8 @@ function Column({
   id: string;
   title: string;
   color: string;
+  wipLimit: number | null;
+  overLimit: boolean;
   tasks: Task[];
   indicators?: Map<string, { blockedBy: number; blocking: number }>;
   onAdd: (title: string) => void;
@@ -101,15 +113,17 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col rounded-lg border border-border bg-muted/30 transition-colors ${
-        isOver ? "border-primary/50 bg-muted/60" : ""
+      className={`flex w-72 shrink-0 flex-col rounded-lg border bg-muted/30 transition-colors ${
+        overLimit ? "border-destructive/60" : isOver ? "border-primary/50 bg-muted/60" : "border-border"
       }`}
     >
       <div className="flex items-center justify-between border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: color }} />
           <span className="text-sm font-medium">{title}</span>
-          <span className="text-xs text-muted-foreground">{tasks.length}</span>
+          <span className={`text-xs ${overLimit ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+            {tasks.length}{wipLimit != null ? `/${wipLimit}` : ""}
+          </span>
         </div>
         <button
           onClick={() => setAdding(true)}
