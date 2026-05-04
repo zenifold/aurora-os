@@ -62,8 +62,6 @@ export function AppSidebar() {
 
   const initials = (ws?.name ?? "A").slice(0, 2).toUpperCase();
 
-  return (
-    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
   if (collapsed) {
     return (
       <TooltipProvider delayDuration={100}>
