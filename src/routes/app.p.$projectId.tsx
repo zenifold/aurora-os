@@ -13,6 +13,9 @@ import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { ShareDialog } from "@/components/app/ShareDialog";
 import { MagicAddDialog } from "@/components/app/MagicAddDialog";
+import { PresenceStack } from "@/components/app/PresenceStack";
+import { usePresence } from "@/hooks/use-presence";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View } from "@/lib/types";
@@ -32,6 +35,10 @@ function ProjectPage() {
   const createView = useCreateView(projectId);
   const setSelectedTaskId = useUIStore((s) => s.setSelectedTaskId);
   const selectedTaskId = useUIStore((s) => s.selectedTaskId);
+  const { user } = useAuth();
+  const { users: presenceUsers } = usePresence(`presence:project:${projectId}`, {
+    display_name: user?.email?.split("@")[0],
+  });
 
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -104,6 +111,7 @@ function ProjectPage() {
               <p className="truncate text-sm text-muted-foreground">{project.description}</p>
             )}
           </div>
+          <PresenceStack users={presenceUsers} />
           <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
             <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
           </Button>
