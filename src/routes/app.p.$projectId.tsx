@@ -25,6 +25,8 @@ import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
 import { Loader2, Settings, UserPlus, Wand2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
+import { useIsWorkspaceOwner } from "@/hooks/use-workspace-role";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
