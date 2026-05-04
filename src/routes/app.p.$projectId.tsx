@@ -7,6 +7,7 @@ import { useCustomFields } from "@/hooks/use-custom-fields";
 import { useUIStore } from "@/stores/ui-store";
 import { TableView } from "@/components/views/TableView";
 import { KanbanView } from "@/components/views/KanbanView";
+import { CanvasView } from "@/components/views/CanvasView";
 import { CalendarView } from "@/components/views/CalendarView";
 import { TimelineView } from "@/components/views/TimelineView";
 import { MobileTaskList } from "@/components/views/MobileTaskList";
@@ -221,6 +222,15 @@ function ProjectPage() {
             {activeView?.view_type === "kanban" && (
               <KanbanView
                 projectId={projectId}
+                tasks={filteredTasks}
+                viewConfig={activeView.config ?? {}}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
+            {activeView?.view_type === "canvas" && (
+              <CanvasView
+                projectId={projectId}
+                viewId={activeView.id}
                 tasks={filteredTasks}
                 viewConfig={activeView.config ?? {}}
                 onTaskClick={(id) => setSelectedTaskId(id)}
