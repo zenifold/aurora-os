@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import type { CustomFieldDef, Task } from "@/lib/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CustomFieldDef, Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
+import { colorForTask, isColumnVisible } from "@/lib/view-config";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,10 +38,11 @@ interface Props {
   tasks: Task[];
   fields: CustomFieldDef[];
   groupBy: string | null;
+  viewConfig?: ViewConfig;
   onTaskClick: (id: string) => void;
 }
 
-export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Props) {
+export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, onTaskClick }: Props) {
   const create = useCreateTask(projectId);
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
@@ -49,6 +51,13 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
+  const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
+
+  const showStatus = isColumnVisible(viewConfig, "status");
+  const showPriority = isColumnVisible(viewConfig, "priority");
+  const showDue = isColumnVisible(viewConfig, "due");
+  const visibleFields = fields.filter((f) => isColumnVisible(viewConfig, `f:${f.id}`));
+  const visibleColCount = 1 /*title*/ + (showStatus ? 1 : 0) + (showPriority ? 1 : 0) + (showDue ? 1 : 0) + visibleFields.length + 1 /*add*/;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
