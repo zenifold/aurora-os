@@ -240,6 +240,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showPriority={showPriority}
                   showDue={showDue}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
+                  titleStickyLeft={widths.select}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
@@ -251,8 +252,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
 
           {/* Add row */}
           <tr className="border-b border-border">
-            <td />
-            <td className="px-3 py-1.5">
+            <td className="sticky-col px-3 py-1.5" />
+            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: widths.select }}>
               {adding ? (
                 <Input
                   autoFocus
