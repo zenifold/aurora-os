@@ -372,6 +372,18 @@ function TaskRow({
           />
         ) : (
           <div className="flex items-center gap-2">
+            {isBlocked && (
+              <ArrowLeftCircle
+                className="h-3.5 w-3.5 shrink-0 text-destructive"
+                aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+              />
+            )}
+            {isBlocking && (
+              <ArrowRightCircle
+                className="h-3.5 w-3.5 shrink-0 text-primary"
+                aria-label={`Blocking ${indicator?.blocking} task(s)`}
+              />
+            )}
             <button onClick={onClickRow} className="flex-1 truncate text-left hover:text-aura-gradient">
               {task.title}
             </button>
