@@ -19,14 +19,18 @@ import {
   CalendarDays,
   CheckCircle2,
   FileText,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-type Step = "choose" | "team" | "template";
+type Step = "choose" | "name" | "theme" | "template";
 type TemplateKey = "blank" | "sprint" | "content" | "bugs" | "personal";
+type ThemeKey = "light" | "dark" | "system";
 
 function slugify(s: string) {
   return (
