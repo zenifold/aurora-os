@@ -519,6 +519,6 @@ function ModelPicker({ value, onChange }: { value: string; onChange: (v: string)
           </CommandList>
         </Command>
       </PopoverContent>
-    </Pop over>
+    </Popover>
   );
 }
