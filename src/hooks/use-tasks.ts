@@ -53,6 +53,7 @@ export function useCreateTask(projectId: string) {
   const ws = useWorkspaceStore((s) => s.current);
   const { user } = useAuth();
   const qc = useQueryClient();
+  const triggerAutomations = useTriggerAutomations();
   return useMutation({
     mutationFn: async (input: { title: string; status?: string }) => {
       if (!ws || !user) throw new Error("No workspace");
@@ -84,6 +85,7 @@ export function useCreateTask(projectId: string) {
         action: "created",
         changes: { title: { to: input.title } },
       });
+      void triggerAutomations({ task_id: (data as Task).id, event: "task.created" });
       return data as Task;
     },
     onSuccess: () => {
