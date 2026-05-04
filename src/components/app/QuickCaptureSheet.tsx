@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useProjects } from "@/hooks/use-projects";
+import { useTasks } from "@/hooks/use-tasks";
 import {
   Drawer,
   DrawerContent,
@@ -15,6 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CalendarPlus,
   Tag,
@@ -26,6 +34,7 @@ import {
 } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { haptic } from "@/lib/haptics";
+import { TASK_TYPES, TASK_TYPE_META, PARENT_OF, type TaskType } from "@/lib/task-types";
 
 type ParsedTask = {
   title: string;
