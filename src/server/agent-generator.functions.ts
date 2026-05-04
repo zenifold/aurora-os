@@ -40,7 +40,8 @@ export const generateAgentSpec = createServerFn({ method: "POST" })
     const systemPrompt = `You design AI agent personas for a project management app. Given a short user description, output a complete agent spec as JSON only.
 
 Recommend a model id from this short list (pick the cheapest one that fits the job):
-- "openai/gpt-4o-mini" — fast, cheap, general purpose (default)
+- "xiaomi/mimo-v2-flash" — fast, cheap, general purpose (default)
+- "openai/gpt-4o-mini" — fast, cheap general purpose
 - "openai/gpt-4o" — strong reasoning, more expensive
 - "anthropic/claude-3.5-sonnet" — best for writing, analysis
 - "anthropic/claude-3.5-haiku" — fast, cheap, good writing
@@ -66,7 +67,7 @@ Respond with ONLY valid JSON, no markdown, matching:
         "X-Title": "Aura Agent Builder",
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
+        model: "xiaomi/mimo-v2-flash",
         temperature: 0.7,
         max_tokens: 800,
         response_format: { type: "json_object" },
@@ -105,7 +106,7 @@ Respond with ONLY valid JSON, no markdown, matching:
       avatar_emoji: z.string().min(1).max(8).default("🤖"),
       description: z.string().max(300).default(""),
       system_prompt: z.string().min(10).max(4000),
-      model: z.string().min(3).default("openai/gpt-4o-mini"),
+      model: z.string().min(3).default("xiaomi/mimo-v2-flash"),
       temperature: z.number().min(0).max(2).default(0.7),
       max_tokens: z.number().int().min(100).max(8000).default(2000),
     });
