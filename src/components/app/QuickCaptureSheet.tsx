@@ -144,7 +144,23 @@ export function QuickCaptureSheet() {
         ? projects.find((p) => p.id === selectedProjectId) ?? null
         : null;
 
-  const canCreate = parsed.title.length > 0 && !!effectiveProject && !!ws && !!user;
+  // Tasks in selected project, used for the parent picker
+  const { data: projectTasks = [] } = useTasks(effectiveProject?.id);
+  const requiredParentType = PARENT_OF[taskType];
+  const validParents = useMemo(
+    () => (requiredParentType
+      ? projectTasks.filter((t) => (t.task_type ?? "task") === requiredParentType)
+      : []),
+    [projectTasks, requiredParentType]
+  );
+
+  const needsParent = requiredParentType !== null;
+  const canCreate =
+    parsed.title.length > 0 &&
+    !!effectiveProject &&
+    !!ws &&
+    !!user &&
+    (!needsParent || !!parentTaskId);
 
   const handleCreate = async (keepOpen = false) => {
     if (!canCreate || !effectiveProject) return;
@@ -168,10 +184,12 @@ export function QuickCaptureSheet() {
         created_by: user!.id,
         tags: parsed.tags,
         due_date: effectiveDate,
+        task_type: taskType,
+        parent_task_id: parentTaskId,
       } as never);
       if (error) throw error;
       haptic("success");
-      toast.success("Task added");
+      toast.success(`${TASK_TYPE_META[taskType].label} added`);
       qc.invalidateQueries({ queryKey: ["tasks", effectiveProject.id] });
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setText("");
