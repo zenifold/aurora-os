@@ -30,10 +30,17 @@ import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
 import { TaskAiPanel } from "./TaskAiPanel";
 import { Sparkles } from "lucide-react";
+import { PresenceStack } from "@/components/app/PresenceStack";
+import { usePresence } from "@/hooks/use-presence";
+import { useAuth } from "@/lib/auth-context";
 
 export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projectId: string; taskId: string | null; onClose: () => void; fields: CustomFieldDef[] }) {
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
+  const { user } = useAuth();
+  const { users: viewers } = usePresence(taskId ? `presence:task:${taskId}` : null, {
+    display_name: user?.email?.split("@")[0],
+  });
 
   const { data: task } = useQuery({
     queryKey: ["task", taskId],
@@ -67,9 +74,19 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
     <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
       <SheetContent className="flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl">
         <SheetHeader className="space-y-3 border-b border-border px-6 py-4">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">{status?.label}</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">{status?.label}</span>
+            </div>
+            {viewers.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground">
+                  {viewers.length === 1 ? "1 viewer" : `${viewers.length} viewers`}
+                </span>
+                <PresenceStack users={viewers} max={3} />
+              </div>
+            )}
           </div>
           <SheetTitle className="sr-only">Task details</SheetTitle>
           <Input
