@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { useWorkspaceStore } from "@/stores/workspace-store";
+import { generateAgentSpec } from "@/server/agent-generator.functions";
 import {
   useAiAgents,
   useUpsertAgent,
