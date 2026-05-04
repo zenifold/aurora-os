@@ -217,6 +217,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                   task={t}
                   fields={fields}
                   selected={selected.has(t.id)}
+                  indicator={indicators?.get(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
