@@ -20,13 +20,14 @@ export const generateTasksFromPrompt = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
 
     // Verify caller is a workspace member
     const { data: membership } = await supabase
       .from("user_roles")
       .select("workspace_id")
       .eq("workspace_id", data.workspace_id)
+      .eq("user_id", userId)
       .maybeSingle();
     if (!membership) throw new Error("Not a workspace member");
 
