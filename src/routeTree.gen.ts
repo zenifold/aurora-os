@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
@@ -55,6 +56,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/profile': typeof AppProfileRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/app/my-tasks'
     | '/app/profile'
     | '/app/settings'
+    | '/invite/$token'
     | '/app/'
     | '/app/p/$projectId'
     | '/app/settings/danger'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/app/my-tasks'
     | '/app/profile'
+    | '/invite/$token'
     | '/app'
     | '/app/p/$projectId'
     | '/app/settings/danger'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/app/my-tasks'
     | '/app/profile'
     | '/app/settings'
+    | '/invite/$token'
     | '/app/'
     | '/app/p/$projectId'
     | '/app/settings/danger'
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   SignupRoute: typeof SignupRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
       id: '/app/settings'
@@ -386,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   SignupRoute: SignupRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
