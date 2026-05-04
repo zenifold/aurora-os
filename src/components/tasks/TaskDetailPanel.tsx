@@ -34,11 +34,13 @@ import { Sparkles } from "lucide-react";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
 import { useAuth } from "@/lib/auth-context";
+import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
 
 export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projectId: string; taskId: string | null; onClose: () => void; fields: CustomFieldDef[] }) {
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const { users: viewers } = usePresence(taskId ? `presence:task:${taskId}` : null, {
     display_name: user?.email?.split("@")[0],
   });
@@ -62,7 +64,10 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   if (!task) {
     return (
       <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <SheetContent className="w-full sm:max-w-2xl">
+        <SheetContent
+          side={isMobile ? "bottom" : "right"}
+          className={isMobile ? "h-[92vh] w-full max-w-full p-0 pt-safe" : "w-full sm:max-w-2xl"}
+        >
           <SheetHeader><SheetTitle>Loading…</SheetTitle></SheetHeader>
         </SheetContent>
       </Sheet>
@@ -73,7 +78,14 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
 
   return (
     <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <SheetContent className="flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl">
+      <SheetContent
+        side={isMobile ? "bottom" : "right"}
+        className={
+          isMobile
+            ? "flex h-[92vh] w-full max-w-full flex-col overflow-hidden p-0 pt-safe"
+            : "flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl"
+        }
+      >
         <SheetHeader className="space-y-3 border-b border-border px-6 py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">

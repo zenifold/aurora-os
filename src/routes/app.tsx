@@ -7,6 +7,10 @@ import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppHeader } from "@/components/app/AppHeader";
 import { CommandPalette } from "@/components/app/CommandPalette";
 import { PreferencesSync } from "@/components/app/PreferencesSync";
+import { MobileTopBar } from "@/components/app/MobileTopBar";
+import { MobileBottomNav } from "@/components/app/MobileBottomNav";
+import { MobileDrawer } from "@/components/app/MobileDrawer";
+import { QuickCaptureSheet } from "@/components/app/QuickCaptureSheet";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
@@ -61,14 +65,26 @@ function AppLayout() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       <PreferencesSync />
-      <AppSidebar />
+      {/* Desktop sidebar — hidden under lg */}
+      <div className="hidden lg:flex">
+        <AppSidebar />
+      </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader />
-        <main className="min-h-0 flex-1 overflow-auto">
+        {/* Desktop header */}
+        <div className="hidden lg:block">
+          <AppHeader />
+        </div>
+        {/* Mobile top bar (sticky, auto-hide) */}
+        <MobileTopBar />
+        <main className="min-h-0 flex-1 overflow-auto pb-20 lg:pb-0">
           <Outlet />
         </main>
+        {/* Mobile bottom nav */}
+        <MobileBottomNav />
       </div>
       <CommandPalette />
+      <MobileDrawer />
+      <QuickCaptureSheet />
     </div>
   );
 }

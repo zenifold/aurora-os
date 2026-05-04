@@ -14,6 +14,8 @@ interface UIState {
   sidebarCollapsed: boolean;
   selectedTaskId: string | null;
   commandOpen: boolean;
+  mobileDrawerOpen: boolean;
+  quickCaptureOpen: boolean;
   toggleTheme: () => void;
   setTheme: (t: Theme) => void;
   setDensity: (d: Density) => void;
@@ -23,6 +25,8 @@ interface UIState {
   setSidebarCollapsed: (b: boolean) => void;
   setSelectedTaskId: (id: string | null) => void;
   setCommandOpen: (b: boolean) => void;
+  setMobileDrawerOpen: (b: boolean) => void;
+  setQuickCaptureOpen: (b: boolean) => void;
 }
 
 const THEME_KEY = "aura-theme";
@@ -96,6 +100,8 @@ export const useUIStore = create<UIState>((set, get) => ({
   sidebarCollapsed: false,
   selectedTaskId: null,
   commandOpen: false,
+  mobileDrawerOpen: false,
+  quickCaptureOpen: false,
   toggleTheme: () => {
     const next: Theme = get().resolvedTheme === "dark" ? "light" : "dark";
     get().setTheme(next);
@@ -129,6 +135,8 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
   setSelectedTaskId: (selectedTaskId) => set({ selectedTaskId }),
   setCommandOpen: (commandOpen) => set({ commandOpen }),
+  setMobileDrawerOpen: (mobileDrawerOpen) => set({ mobileDrawerOpen }),
+  setQuickCaptureOpen: (quickCaptureOpen) => set({ quickCaptureOpen }),
 }));
 
 if (typeof window !== "undefined" && window.matchMedia) {
