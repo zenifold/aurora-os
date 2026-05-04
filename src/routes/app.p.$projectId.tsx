@@ -6,6 +6,8 @@ import { useViews, useUpdateView, useCreateView } from "@/hooks/use-views";
 import { useCustomFields } from "@/hooks/use-custom-fields";
 import { useUIStore } from "@/stores/ui-store";
 import { TableView } from "@/components/views/TableView";
+import { KanbanView } from "@/components/views/KanbanView";
+import { CalendarView } from "@/components/views/CalendarView";
 import { ViewTabs } from "@/components/views/ViewTabs";
 import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
@@ -106,7 +108,7 @@ function ProjectPage() {
         />
       </div>
 
-      {activeView && (
+      {activeView?.view_type === "table" && (
         <FilterBar
           filters={activeView.filters ?? []}
           sorts={activeView.sorts ?? []}
@@ -120,13 +122,28 @@ function ProjectPage() {
       )}
 
       <div className="min-h-0 flex-1 overflow-auto">
-        <TableView
-          projectId={projectId}
-          tasks={filteredTasks}
-          fields={fields}
-          groupBy={activeView?.group_by ?? null}
-          onTaskClick={(id) => setSelectedTaskId(id)}
-        />
+        {(!activeView || activeView.view_type === "table") && (
+          <TableView
+            projectId={projectId}
+            tasks={filteredTasks}
+            fields={fields}
+            groupBy={activeView?.group_by ?? null}
+            onTaskClick={(id) => setSelectedTaskId(id)}
+          />
+        )}
+        {activeView?.view_type === "kanban" && (
+          <KanbanView
+            projectId={projectId}
+            tasks={filteredTasks}
+            onTaskClick={(id) => setSelectedTaskId(id)}
+          />
+        )}
+        {activeView?.view_type === "calendar" && (
+          <CalendarView
+            tasks={filteredTasks}
+            onTaskClick={(id) => setSelectedTaskId(id)}
+          />
+        )}
       </div>
 
       <TaskDetailPanel
