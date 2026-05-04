@@ -76,6 +76,7 @@ function Column({
   title,
   color,
   tasks,
+  indicators,
   onAdd,
   onTaskClick,
 }: {
@@ -83,6 +84,7 @@ function Column({
   title: string;
   color: string;
   tasks: Task[];
+  indicators?: Map<string, { blockedBy: number; blocking: number }>;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
 }) {
