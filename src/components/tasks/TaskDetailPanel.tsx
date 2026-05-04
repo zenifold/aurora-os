@@ -181,6 +181,8 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
                   </div>
                 </div>
               )}
+
+              <TaskRelationsSection task={task} />
             </TabsContent>
 
             <TabsContent value="subtasks" className="mt-0">
