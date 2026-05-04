@@ -266,6 +266,52 @@ function Th({ children, className = "" }: { children: React.ReactNode; className
   );
 }
 
+function ResizableTh({
+  colKey,
+  widths,
+  setWidths,
+  children,
+}: {
+  colKey: string;
+  widths: Record<string, number>;
+  setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  children: React.ReactNode;
+}) {
+  const startRef = useRef<{ x: number; w: number } | null>(null);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    startRef.current = { x: e.clientX, w: widths[colKey] ?? 160 };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    const delta = e.clientX - startRef.current.x;
+    const next = Math.max(60, startRef.current.w + delta);
+    setWidths((w) => ({ ...w, [colKey]: next }));
+  };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    startRef.current = null;
+    try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+  };
+
+  return (
+    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="truncate pr-2">{children}</div>
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize select-none touch-none hover:bg-primary/40"
+      />
+    </th>
+  );
+}
+
 function TaskRow({
   task,
   fields,
