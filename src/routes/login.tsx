@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
@@ -70,7 +71,8 @@ function Login() {
         <div />
       </div>
 
-      <div className="flex items-center justify-center bg-background p-6">
+      <div className="relative flex items-center justify-center bg-background p-6">
+        <div className="absolute right-4 top-4"><ThemeToggle /></div>
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient">

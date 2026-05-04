@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
@@ -78,7 +79,8 @@ function Signup() {
         <div />
       </div>
 
-      <div className="flex items-center justify-center bg-background p-6">
+      <div className="relative flex items-center justify-center bg-background p-6">
+        <div className="absolute right-4 top-4"><ThemeToggle /></div>
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-semibold">Create your account</h1>
           <p className="mt-1 text-sm text-muted-foreground">Get started with Aura — free, no card required.</p>

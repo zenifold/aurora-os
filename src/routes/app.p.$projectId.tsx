@@ -12,10 +12,11 @@ import { ViewTabs } from "@/components/views/ViewTabs";
 import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { ShareDialog } from "@/components/app/ShareDialog";
+import { MagicAddDialog } from "@/components/app/MagicAddDialog";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View } from "@/lib/types";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
@@ -34,6 +35,7 @@ function ProjectPage() {
 
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [magicOpen, setMagicOpen] = useState(false);
 
   // Pick default view
   useEffect(() => {
@@ -102,6 +104,9 @@ function ProjectPage() {
               <p className="truncate text-sm text-muted-foreground">{project.description}</p>
             )}
           </div>
+          <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
+            <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Share
           </Button>
@@ -161,6 +166,7 @@ function ProjectPage() {
       />
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} projectName={project.name} />
+      <MagicAddDialog open={magicOpen} onOpenChange={setMagicOpen} projectId={projectId} />
     </div>
   );
 }

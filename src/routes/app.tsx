@@ -21,6 +21,8 @@ function AppLayout() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const [bootstrapped, setBootstrapped] = useState(false);
 
+  const setTheme = useUIStore((s) => s.setTheme);
+
   useEffect(() => {
     if (loading) return;
     if (!user) {
@@ -28,7 +30,19 @@ function AppLayout() {
       return;
     }
     fetchWs().finally(() => setBootstrapped(true));
-  }, [user, loading, fetchWs, navigate]);
+    // Sync theme preference from profile
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      supabase
+        .from("profiles")
+        .select("theme_preference")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          const pref = (data as { theme_preference?: "light" | "dark" | "system" } | null)?.theme_preference;
+          if (pref) setTheme(pref);
+        });
+    });
+  }, [user, loading, fetchWs, navigate, setTheme]);
 
   // Redirect to onboarding if no workspaces
   useEffect(() => {

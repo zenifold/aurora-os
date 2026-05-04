@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   Sparkles,
   Layers,
@@ -76,6 +77,7 @@ function Navbar({ signedIn }: { signedIn: boolean }) {
           <a href="#pricing" className="text-sm text-muted-foreground transition hover:text-foreground">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {signedIn ? (
             <Button asChild className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90">
               <Link to="/app">Go to app <ArrowRight className="ml-1.5 h-4 w-4" /></Link>

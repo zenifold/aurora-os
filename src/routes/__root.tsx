@@ -76,10 +76,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function ThemeBootstrap() {
-  const theme = useUIStore((s) => s.theme);
+  const resolvedTheme = useUIStore((s) => s.resolvedTheme);
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+  }, [resolvedTheme]);
   return null;
 }
 
