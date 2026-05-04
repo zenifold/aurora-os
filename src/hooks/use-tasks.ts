@@ -99,6 +99,7 @@ export function useUpdateTask(projectId: string) {
   const ws = useWorkspaceStore((s) => s.current);
   const { user } = useAuth();
   const qc = useQueryClient();
+  const triggerAutomations = useTriggerAutomations();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Task> & { id: string }) => {
       const prev = qc.getQueryData<Task[]>(["tasks", projectId])?.find((t) => t.id === id);
@@ -111,7 +112,6 @@ export function useUpdateTask(projectId: string) {
           if (!TRACKED_FIELDS.has(k)) continue;
           const from = prev ? (prev as unknown as Record<string, unknown>)[k] : undefined;
           if (JSON.stringify(from) === JSON.stringify(v)) continue;
-          // Don't log full description JSON noise
           changes[k] = { from: k === "description" ? "…" : from, to: k === "description" ? "…" : v };
         }
         if (Object.keys(changes).length > 0) {
@@ -124,6 +124,12 @@ export function useUpdateTask(projectId: string) {
           });
         }
       }
+
+      // Trigger automations
+      const statusChanged = "status" in patch && prev && prev.status !== patch.status;
+      const event = statusChanged ? "task.status_changed" : "task.updated";
+      const prevSnapshot = prev ? (prev as unknown as Record<string, unknown>) : null;
+      void triggerAutomations({ task_id: id, event, prev: prevSnapshot });
     },
     onMutate: async ({ id, ...patch }) => {
       await qc.cancelQueries({ queryKey: ["tasks", projectId] });
