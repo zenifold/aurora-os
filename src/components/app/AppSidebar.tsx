@@ -255,6 +255,24 @@ function NavItem({ to, icon: Icon, active, children }: { to: string; icon: typeo
   );
 }
 
+function IconNav({ to, icon: Icon, active, label }: { to: string; icon: typeof Folder; active: boolean; label: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link
+          to={to}
+          className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+            active ? "bg-aura-gradient-subtle text-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent side="right">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function ProjectTree({ projects, parentId, currentPath, depth }: { projects: Project[]; parentId: string | null; currentPath: string; depth: number }) {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
