@@ -84,7 +84,13 @@ export function MagicAddDialog({
       setSelected(new Set(res.tasks.map((_, i) => i)));
       setMeta({ tokens: res.tokens_used ?? null, model: res.model_used ?? null });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Generation failed");
+      let msg = "Generation failed";
+      if (err instanceof Response) {
+        try { msg = (await err.text()) || `HTTP ${err.status}`; } catch { msg = `HTTP ${err.status}`; }
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
