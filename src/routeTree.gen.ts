@@ -16,11 +16,14 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
 import { Route as AppSettingsFieldsRouteImport } from './routes/app.settings.fields'
+import { Route as AppSettingsDataRouteImport } from './routes/app.settings.data'
+import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.danger'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -58,6 +61,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyTasksRoute = AppMyTasksRouteImport.update({
   id: '/my-tasks',
   path: '/my-tasks',
@@ -83,6 +91,16 @@ const AppSettingsFieldsRoute = AppSettingsFieldsRouteImport.update({
   path: '/fields',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsDataRoute = AppSettingsDataRouteImport.update({
+  id: '/data',
+  path: '/data',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsDangerRoute = AppSettingsDangerRouteImport.update({
+  id: '/danger',
+  path: '/danger',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
   id: '/p/$projectId',
   path: '/p/$projectId',
@@ -96,9 +114,12 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/danger': typeof AppSettingsDangerRoute
+  '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
@@ -110,8 +131,11 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/profile': typeof AppProfileRoute
   '/app': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/danger': typeof AppSettingsDangerRoute
+  '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
@@ -125,9 +149,12 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/danger': typeof AppSettingsDangerRoute
+  '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
@@ -142,9 +169,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/profile'
     | '/app/settings'
     | '/app/'
     | '/app/p/$projectId'
+    | '/app/settings/danger'
+    | '/app/settings/data'
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
@@ -156,8 +186,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/profile'
     | '/app'
     | '/app/p/$projectId'
+    | '/app/settings/danger'
+    | '/app/settings/data'
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
@@ -170,9 +203,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/profile'
     | '/app/settings'
     | '/app/'
     | '/app/p/$projectId'
+    | '/app/settings/danger'
+    | '/app/settings/data'
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
@@ -238,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/my-tasks': {
       id: '/app/my-tasks'
       path: '/my-tasks'
@@ -273,6 +316,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsFieldsRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/data': {
+      id: '/app/settings/data'
+      path: '/data'
+      fullPath: '/app/settings/data'
+      preLoaderRoute: typeof AppSettingsDataRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/danger': {
+      id: '/app/settings/danger'
+      path: '/danger'
+      fullPath: '/app/settings/danger'
+      preLoaderRoute: typeof AppSettingsDangerRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/p/$projectId': {
       id: '/app/p/$projectId'
       path: '/p/$projectId'
@@ -284,6 +341,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppSettingsRouteChildren {
+  AppSettingsDangerRoute: typeof AppSettingsDangerRoute
+  AppSettingsDataRoute: typeof AppSettingsDataRoute
   AppSettingsFieldsRoute: typeof AppSettingsFieldsRoute
   AppSettingsMembersRoute: typeof AppSettingsMembersRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
@@ -291,6 +350,8 @@ interface AppSettingsRouteChildren {
 }
 
 const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsDangerRoute: AppSettingsDangerRoute,
+  AppSettingsDataRoute: AppSettingsDataRoute,
   AppSettingsFieldsRoute: AppSettingsFieldsRoute,
   AppSettingsMembersRoute: AppSettingsMembersRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
@@ -303,6 +364,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppMyTasksRoute: typeof AppMyTasksRoute
+  AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppPProjectIdRoute: typeof AppPProjectIdRoute
@@ -310,6 +372,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppMyTasksRoute: AppMyTasksRoute,
+  AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppPProjectIdRoute: AppPProjectIdRoute,
