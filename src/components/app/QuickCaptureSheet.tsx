@@ -223,16 +223,76 @@ export function QuickCaptureSheet() {
         </DrawerHeader>
 
         <div className="space-y-3 px-4">
+          {/* Type segmented selector */}
+          <div className="flex items-center gap-1 rounded-md border border-border bg-muted/30 p-0.5">
+            {TASK_TYPES.map((t) => {
+              const meta = TASK_TYPE_META[t];
+              const Icon = meta.icon;
+              const active = taskType === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTaskType(t)}
+                  className={`flex flex-1 items-center justify-center gap-1 rounded px-2 py-1.5 text-xs font-medium transition ${
+                    active ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  style={active ? { color: meta.color } : undefined}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{meta.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
           <Input
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Buy milk tomorrow @personal #errands"
+            placeholder={
+              taskType === "initiative" ? "Launch Q3 product line" :
+              taskType === "epic" ? "Build checkout v2" :
+              taskType === "subtask" ? "Set up webhook endpoints" :
+              "Buy milk tomorrow @personal #errands"
+            }
             className="h-12 text-base"
             onKeyDown={(e) => {
               if (e.key === "Enter") handleCreate(false);
             }}
           />
+
+          {/* Parent picker (required for epic/task/subtask) */}
+          {needsParent && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Parent {TASK_TYPE_META[requiredParentType!].label.toLowerCase()}
+                {!parentTaskId && <span className="text-destructive"> *</span>}
+              </p>
+              <Select
+                value={parentTaskId ?? ""}
+                onValueChange={(v) => setParentTaskId(v || null)}
+                disabled={validParents.length === 0}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue
+                    placeholder={
+                      validParents.length === 0
+                        ? `No ${TASK_TYPE_META[requiredParentType!].label.toLowerCase()} in this project yet`
+                        : `Pick a ${TASK_TYPE_META[requiredParentType!].label.toLowerCase()}`
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {validParents.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Parsed chips */}
           {(effectiveDate || parsed.tags.length > 0 || parsed.projectName) && (
