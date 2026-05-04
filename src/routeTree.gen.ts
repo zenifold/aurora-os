@@ -15,6 +15,13 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
+import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
+import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
+import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
+import { Route as AppSettingsFieldsRouteImport } from './routes/app.settings.fields'
+import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -46,6 +53,41 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyTasksRoute = AppMyTasksRouteImport.update({
+  id: '/my-tasks',
+  path: '/my-tasks',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsMembersRoute = AppSettingsMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsFieldsRoute = AppSettingsFieldsRouteImport.update({
+  id: '/fields',
+  path: '/fields',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
+  id: '/p/$projectId',
+  path: '/p/$projectId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,14 +95,27 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/settings': typeof AppSettingsRouteWithChildren
   '/app/': typeof AppIndexRoute
+  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/my-tasks': typeof AppMyTasksRoute
   '/app': typeof AppIndexRoute
+  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,14 +124,59 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/settings': typeof AppSettingsRouteWithChildren
   '/app/': typeof AppIndexRoute
+  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/login' | '/onboarding' | '/signup' | '/app/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/onboarding'
+    | '/signup'
+    | '/app/my-tasks'
+    | '/app/settings'
+    | '/app/'
+    | '/app/p/$projectId'
+    | '/app/settings/fields'
+    | '/app/settings/members'
+    | '/app/settings/profile'
+    | '/app/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/onboarding' | '/signup' | '/app'
-  id: '__root__' | '/' | '/app' | '/login' | '/onboarding' | '/signup' | '/app/'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/signup'
+    | '/app/my-tasks'
+    | '/app'
+    | '/app/p/$projectId'
+    | '/app/settings/fields'
+    | '/app/settings/members'
+    | '/app/settings/profile'
+    | '/app/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/onboarding'
+    | '/signup'
+    | '/app/my-tasks'
+    | '/app/settings'
+    | '/app/'
+    | '/app/p/$projectId'
+    | '/app/settings/fields'
+    | '/app/settings/members'
+    | '/app/settings/profile'
+    | '/app/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,15 +231,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/my-tasks': {
+      id: '/app/my-tasks'
+      path: '/my-tasks'
+      fullPath: '/app/my-tasks'
+      preLoaderRoute: typeof AppMyTasksRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/': {
+      id: '/app/settings/'
+      path: '/'
+      fullPath: '/app/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/profile': {
+      id: '/app/settings/profile'
+      path: '/profile'
+      fullPath: '/app/settings/profile'
+      preLoaderRoute: typeof AppSettingsProfileRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/members': {
+      id: '/app/settings/members'
+      path: '/members'
+      fullPath: '/app/settings/members'
+      preLoaderRoute: typeof AppSettingsMembersRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/fields': {
+      id: '/app/settings/fields'
+      path: '/fields'
+      fullPath: '/app/settings/fields'
+      preLoaderRoute: typeof AppSettingsFieldsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/p/$projectId': {
+      id: '/app/p/$projectId'
+      path: '/p/$projectId'
+      fullPath: '/app/p/$projectId'
+      preLoaderRoute: typeof AppPProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppSettingsRouteChildren {
+  AppSettingsFieldsRoute: typeof AppSettingsFieldsRoute
+  AppSettingsMembersRoute: typeof AppSettingsMembersRoute
+  AppSettingsProfileRoute: typeof AppSettingsProfileRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+}
+
+const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsFieldsRoute: AppSettingsFieldsRoute,
+  AppSettingsMembersRoute: AppSettingsMembersRoute,
+  AppSettingsProfileRoute: AppSettingsProfileRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
+}
+
+const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
+  AppSettingsRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppMyTasksRoute: typeof AppMyTasksRoute
+  AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppPProjectIdRoute: typeof AppPProjectIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppMyTasksRoute: AppMyTasksRoute,
+  AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppPProjectIdRoute: AppPProjectIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
