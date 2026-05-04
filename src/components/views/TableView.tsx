@@ -366,6 +366,7 @@ function TaskRow({
   showPriority = true,
   showDue = true,
   rowColor = null,
+  titleStickyLeft = 40,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -380,6 +381,7 @@ function TaskRow({
   showPriority?: boolean;
   showDue?: boolean;
   rowColor?: string | null;
+  titleStickyLeft?: number;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -396,13 +398,13 @@ function TaskRow({
 
   return (
     <tr
-      className="group border-b border-border hover:bg-accent/30"
+      className="group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
       style={{ borderLeft: `2px solid ${borderColor}` }}
     >
-      <td className="px-3 py-1.5">
+      <td className="sticky-col px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
       </td>
-      <td className="px-3 py-1.5">
+      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
         {titleEdit !== null ? (
           <Input
             autoFocus
