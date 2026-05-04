@@ -121,7 +121,7 @@ function Column({
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {tasks.map((t) => (
-          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} />
+          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} indicator={indicators?.get(t.id)} />
         ))}
         {adding && (
           <Input
