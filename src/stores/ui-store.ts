@@ -14,6 +14,8 @@ interface UIState {
   sidebarCollapsed: boolean;
   selectedTaskId: string | null;
   commandOpen: boolean;
+  mobileDrawerOpen: boolean;
+  quickCaptureOpen: boolean;
   toggleTheme: () => void;
   setTheme: (t: Theme) => void;
   setDensity: (d: Density) => void;
@@ -23,6 +25,8 @@ interface UIState {
   setSidebarCollapsed: (b: boolean) => void;
   setSelectedTaskId: (id: string | null) => void;
   setCommandOpen: (b: boolean) => void;
+  setMobileDrawerOpen: (b: boolean) => void;
+  setQuickCaptureOpen: (b: boolean) => void;
 }
 
 const THEME_KEY = "aura-theme";
