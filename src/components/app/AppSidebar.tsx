@@ -162,7 +162,7 @@ export function AppSidebar() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{ws?.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+              <p className="truncate text-xs text-muted-foreground">{displayName}</p>
             </div>
             <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
           </button>
