@@ -128,8 +128,8 @@ function Onboarding() {
   const setCurrent = useWorkspaceStore((s) => s.setCurrent);
   const fetchWs = useWorkspaceStore((s) => s.fetch);
   const [step, setStep] = useState<Step>("choose");
-  const [teamName, setTeamName] = useState("");
-  const [pendingWsName, setPendingWsName] = useState<string | null>(null);
+  const [wsName, setWsName] = useState("");
+  const [theme, setTheme] = useState<ThemeKey>("system");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>("blank");
   const [busy, setBusy] = useState(false);
 
