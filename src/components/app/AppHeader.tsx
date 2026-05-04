@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Moon, Sun, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { NotificationsBell } from "@/components/app/NotificationsBell";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
@@ -36,6 +37,8 @@ export function AppHeader() {
       </button>
 
       <div className="flex-1" />
+
+      <NotificationsBell />
 
       <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
