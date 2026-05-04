@@ -27,6 +27,7 @@ import {
   KanbanSquare,
   Calendar as CalendarIcon,
   GanttChart,
+  Frame,
   Lock,
   Unlock,
   Copy,
@@ -35,6 +36,7 @@ import {
 const VIEW_TYPES: { value: View["view_type"]; label: string; icon: typeof TableIcon }[] = [
   { value: "table", label: "Table", icon: TableIcon },
   { value: "kanban", label: "Kanban", icon: KanbanSquare },
+  { value: "canvas", label: "Canvas", icon: Frame },
   { value: "calendar", label: "Calendar", icon: CalendarIcon },
   { value: "timeline", label: "Timeline", icon: GanttChart },
 ];
