@@ -39,6 +39,7 @@ export function AppSidebar() {
   const ws = useWorkspaceStore((s) => s.current);
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const setCurrent = useWorkspaceStore((s) => s.setCurrent);
+  const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const { user } = useAuth();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
