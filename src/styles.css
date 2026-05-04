@@ -241,4 +241,15 @@ html[data-high-contrast="true"] * {
       radial-gradient(at 20% 90%, color-mix(in oklab, var(--aura-orange) 25%, transparent), transparent 50%),
       var(--background);
   }
+
+  /* ---------- Safe-area insets for mobile (notches / home indicator) ---------- */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .pl-safe { padding-left: env(safe-area-inset-left); }
+  .pr-safe { padding-right: env(safe-area-inset-right); }
+  .h-safe-bottom { height: env(safe-area-inset-bottom); }
+
+  /* Hide scrollbars on snap rails */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
 }
