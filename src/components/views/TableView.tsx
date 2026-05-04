@@ -49,6 +49,46 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const [newTitle, setNewTitle] = useState("");
   const [adding, setAdding] = useState(false);
 
+  // Resizable column widths (px). Persist per-project in localStorage.
+  const storageKey = `aura-table-widths-${projectId}`;
+  const defaultWidths: Record<string, number> = {
+    select: 40,
+    title: 360,
+    status: 144,
+    priority: 128,
+    due: 128,
+    add: 40,
+  };
+  fields.forEach((f) => { defaultWidths[`f:${f.id}`] = 160; });
+
+  const [widths, setWidths] = useState<Record<string, number>>(() => {
+    if (typeof window === "undefined") return defaultWidths;
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+      return { ...defaultWidths, ...stored };
+    } catch {
+      return defaultWidths;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKey, JSON.stringify(widths));
+    }
+  }, [widths, storageKey]);
+
+  // Ensure new custom field columns get default widths
+  useEffect(() => {
+    setWidths((w) => {
+      const next = { ...w };
+      let changed = false;
+      fields.forEach((f) => {
+        if (next[`f:${f.id}`] === undefined) { next[`f:${f.id}`] = 160; changed = true; }
+      });
+      return changed ? next : w;
+    });
+  }, [fields]);
+
   const groups = groupTasks(tasks, groupBy);
 
   const handleAdd = async (status?: string) => {
