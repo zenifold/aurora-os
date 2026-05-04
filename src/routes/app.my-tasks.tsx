@@ -32,18 +32,18 @@ function MyTasks() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-8 py-10">
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 lg:px-8 lg:py-10">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aura-gradient-subtle">
           <Inbox className="h-5 w-5 text-aura-gradient" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold">My tasks</h1>
-          <p className="text-sm text-muted-foreground">Everything assigned to you across {ws?.name}.</p>
+          <h1 className="text-xl font-semibold lg:text-2xl">My tasks</h1>
+          <p className="text-xs text-muted-foreground lg:text-sm">Everything assigned to you across {ws?.name}.</p>
         </div>
       </div>
 
-      <div className="mt-8 rounded-xl border border-border bg-card">
+      <div className="mt-6 rounded-xl border border-border bg-card lg:mt-8">
         {isLoading ? (
           <div className="p-12 text-center text-sm text-muted-foreground">Loading…</div>
         ) : tasks.length === 0 ? (
