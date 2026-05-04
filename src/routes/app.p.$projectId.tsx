@@ -160,6 +160,7 @@ function ProjectPage() {
             tasks={filteredTasks}
             fields={fields}
             groupBy={activeView?.group_by ?? null}
+            viewConfig={activeView?.config ?? {}}
             onTaskClick={(id) => setSelectedTaskId(id)}
           />
         )}
@@ -167,6 +168,7 @@ function ProjectPage() {
           <KanbanView
             projectId={projectId}
             tasks={filteredTasks}
+            viewConfig={activeView.config ?? {}}
             onTaskClick={(id) => setSelectedTaskId(id)}
           />
         )}
