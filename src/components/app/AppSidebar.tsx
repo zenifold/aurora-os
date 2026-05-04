@@ -143,9 +143,21 @@ export function AppSidebar() {
             )}
           </div>
 
-          <div className="mt-auto flex h-8 w-8 items-center justify-center rounded-md bg-aura-gradient">
-            <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => navigate({ to: "/app/profile" })}
+                className="mt-auto flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent/50"
+                aria-label="Profile"
+              >
+                <Avatar className="h-7 w-7">
+                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+                  <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
+                </Avatar>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{displayName}</TooltipContent>
+          </Tooltip>
         </aside>
       </TooltipProvider>
     );
