@@ -28,6 +28,15 @@ export interface CustomFieldDef {
   order_index: number;
 }
 
+export type RecurrenceFreq = "daily" | "weekly" | "monthly" | "yearly";
+
+export interface RecurrenceRule {
+  freq: RecurrenceFreq;
+  interval: number;
+  until?: string | null; // ISO date
+  next_status?: string;
+}
+
 export interface Task {
   id: string;
   project_id: string;
@@ -47,6 +56,8 @@ export interface Task {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  recurrence?: RecurrenceRule | null;
+  recurrence_parent_id?: string | null;
 }
 
 export interface Project {
