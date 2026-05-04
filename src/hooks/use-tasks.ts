@@ -21,6 +21,33 @@ export function useTasks(projectId: string | undefined) {
   });
 }
 
+const TRACKED_FIELDS = new Set([
+  "title",
+  "status",
+  "priority",
+  "due_date",
+  "start_date",
+  "description",
+  "assignee_ids",
+]);
+
+async function logActivity(input: {
+  workspace_id: string;
+  actor_id: string | null;
+  entity_id: string;
+  action: "created" | "updated" | "deleted";
+  changes?: Record<string, unknown> | null;
+}) {
+  await supabase.from("activity_log").insert({
+    workspace_id: input.workspace_id,
+    actor_id: input.actor_id,
+    entity_type: "task",
+    entity_id: input.entity_id,
+    action: input.action,
+    changes: (input.changes ?? null) as never,
+  });
+}
+
 export function useCreateTask(projectId: string) {
   const ws = useWorkspaceStore((s) => s.current);
   const { user } = useAuth();
@@ -28,7 +55,6 @@ export function useCreateTask(projectId: string) {
   return useMutation({
     mutationFn: async (input: { title: string; status?: string }) => {
       if (!ws || !user) throw new Error("No workspace");
-      // Get max position
       const { data: existing } = await supabase
         .from("tasks")
         .select("position")
@@ -50,6 +76,13 @@ export function useCreateTask(projectId: string) {
         .select()
         .single();
       if (error) throw error;
+      await logActivity({
+        workspace_id: ws.id,
+        actor_id: user.id,
+        entity_id: (data as Task).id,
+        action: "created",
+        changes: { title: { to: input.title } },
+      });
       return data as Task;
     },
     onSuccess: () => {
@@ -60,11 +93,34 @@ export function useCreateTask(projectId: string) {
 }
 
 export function useUpdateTask(projectId: string) {
+  const ws = useWorkspaceStore((s) => s.current);
+  const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Task> & { id: string }) => {
+      const prev = qc.getQueryData<Task[]>(["tasks", projectId])?.find((t) => t.id === id);
       const { error } = await supabase.from("tasks").update(patch as never).eq("id", id);
       if (error) throw error;
+
+      if (ws && user) {
+        const changes: Record<string, { from: unknown; to: unknown }> = {};
+        for (const [k, v] of Object.entries(patch)) {
+          if (!TRACKED_FIELDS.has(k)) continue;
+          const from = prev ? (prev as unknown as Record<string, unknown>)[k] : undefined;
+          if (JSON.stringify(from) === JSON.stringify(v)) continue;
+          // Don't log full description JSON noise
+          changes[k] = { from: k === "description" ? "…" : from, to: k === "description" ? "…" : v };
+        }
+        if (Object.keys(changes).length > 0) {
+          await logActivity({
+            workspace_id: ws.id,
+            actor_id: user.id,
+            entity_id: id,
+            action: "updated",
+            changes,
+          });
+        }
+      }
     },
     onMutate: async ({ id, ...patch }) => {
       await qc.cancelQueries({ queryKey: ["tasks", projectId] });
@@ -78,16 +134,23 @@ export function useUpdateTask(projectId: string) {
       if (ctx?.prev) qc.setQueryData(["tasks", projectId], ctx.prev);
       toast.error(e.message);
     },
-    onSettled: () => {
+    onSettled: (_d, _e, vars) => {
       qc.invalidateQueries({ queryKey: ["tasks", projectId] });
+      qc.invalidateQueries({ queryKey: ["task", vars.id] });
+      qc.invalidateQueries({ queryKey: ["activity", "task", vars.id] });
     },
   });
 }
 
 export function useDeleteTask(projectId: string) {
+  const ws = useWorkspaceStore((s) => s.current);
+  const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      if (ws && user) {
+        await logActivity({ workspace_id: ws.id, actor_id: user.id, entity_id: id, action: "deleted" });
+      }
       const { error } = await supabase.from("tasks").delete().eq("id", id);
       if (error) throw error;
     },
