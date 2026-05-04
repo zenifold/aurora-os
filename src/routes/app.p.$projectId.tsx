@@ -8,6 +8,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { TableView } from "@/components/views/TableView";
 import { KanbanView } from "@/components/views/KanbanView";
 import { CalendarView } from "@/components/views/CalendarView";
+import { TimelineView } from "@/components/views/TimelineView";
 import { MobileTaskList } from "@/components/views/MobileTaskList";
 import { ViewTabs } from "@/components/views/ViewTabs";
 import { ViewOptions } from "@/components/views/ViewOptions";
@@ -201,6 +202,13 @@ function ProjectPage() {
             )}
             {activeView?.view_type === "calendar" && (
               <CalendarView
+                projectId={projectId}
+                tasks={filteredTasks}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
+            {activeView?.view_type === "timeline" && (
+              <TimelineView
                 projectId={projectId}
                 tasks={filteredTasks}
                 onTaskClick={(id) => setSelectedTaskId(id)}
