@@ -19,7 +19,8 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View } from "@/lib/types";
-import { Loader2, UserPlus, Wand2 } from "lucide-react";
+import { Loader2, Settings, UserPlus, Wand2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
@@ -117,6 +118,11 @@ function ProjectPage() {
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Share
+          </Button>
+          <Button variant="ghost" size="icon" asChild aria-label="Project settings">
+            <Link to="/app/p/$projectId/settings" params={{ projectId }}>
+              <Settings className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
         <ViewTabs

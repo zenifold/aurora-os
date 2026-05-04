@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -6,6 +6,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppHeader } from "@/components/app/AppHeader";
 import { CommandPalette } from "@/components/app/CommandPalette";
+import { PreferencesSync } from "@/components/app/PreferencesSync";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
@@ -21,8 +22,6 @@ function AppLayout() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const [bootstrapped, setBootstrapped] = useState(false);
 
-  const setTheme = useUIStore((s) => s.setTheme);
-
   useEffect(() => {
     if (loading) return;
     if (!user) {
@@ -30,19 +29,7 @@ function AppLayout() {
       return;
     }
     fetchWs().finally(() => setBootstrapped(true));
-    // Sync theme preference from profile
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      supabase
-        .from("profiles")
-        .select("theme_preference")
-        .eq("id", user.id)
-        .single()
-        .then(({ data }) => {
-          const pref = (data as { theme_preference?: "light" | "dark" | "system" } | null)?.theme_preference;
-          if (pref) setTheme(pref);
-        });
-    });
-  }, [user, loading, fetchWs, navigate, setTheme]);
+  }, [user, loading, fetchWs, navigate]);
 
   // Redirect to onboarding if no workspaces
   useEffect(() => {
@@ -73,6 +60,7 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      <PreferencesSync />
       <AppSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader />

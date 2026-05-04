@@ -656,6 +656,54 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          accent_preference: string
+          confirm_deletes: string
+          created_at: string
+          default_landing: string
+          default_view_type: string
+          density: string
+          font_size: string
+          high_contrast: boolean
+          id: string
+          reduced_motion: boolean
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_preference?: string
+          confirm_deletes?: string
+          created_at?: string
+          default_landing?: string
+          default_view_type?: string
+          density?: string
+          font_size?: string
+          high_contrast?: boolean
+          id?: string
+          reduced_motion?: boolean
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_preference?: string
+          confirm_deletes?: string
+          created_at?: string
+          default_landing?: string
+          default_view_type?: string
+          density?: string
+          font_size?: string
+          high_contrast?: boolean
+          id?: string
+          reduced_motion?: boolean
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

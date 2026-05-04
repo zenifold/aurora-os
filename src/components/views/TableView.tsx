@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { CustomFieldDef, Task } from "@/lib/types";
-import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
+import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
+import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,8 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const bulk = useBulkUpdateTasks(projectId);
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
+  const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
+  const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -216,6 +219,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                   key={t.id}
                   task={t}
                   fields={fields}
+                  workflow={workflow}
                   selected={selected.has(t.id)}
                   indicator={indicators?.get(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
@@ -318,6 +322,7 @@ function ResizableTh({
 function TaskRow({
   task,
   fields,
+  workflow,
   selected,
   indicator,
   onToggleSelect,
@@ -327,6 +332,7 @@ function TaskRow({
 }: {
   task: Task;
   fields: CustomFieldDef[];
+  workflow: WorkflowStatus[];
   selected: boolean;
   indicator?: { blockedBy: number; blocking: number };
   onToggleSelect: (c: boolean) => void;
@@ -335,6 +341,7 @@ function TaskRow({
   onDelete: () => void;
 }) {
   const [titleEdit, setTitleEdit] = useState<string | null>(null);
+  const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;

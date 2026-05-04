@@ -30,6 +30,7 @@ import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.dan
 import { Route as AppSettingsAutomationsRouteImport } from './routes/app.settings.automations'
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
+import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -136,6 +137,11 @@ const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
   path: '/p/$projectId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -150,7 +156,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
-  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -171,7 +178,7 @@ export interface FileRoutesByTo {
   '/app/search': typeof AppSearchRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
-  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -195,7 +203,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
-  '/app/p/$projectId': typeof AppPProjectIdRoute
+  '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings/'
+    | '/app/p/$projectId/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings'
+    | '/app/p/$projectId/settings'
   id:
     | '__root__'
     | '/'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings/'
+    | '/app/p/$projectId/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/p/$projectId/settings': {
+      id: '/app/p/$projectId/settings'
+      path: '/settings'
+      fullPath: '/app/p/$projectId/settings'
+      preLoaderRoute: typeof AppPProjectIdSettingsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
   }
 }
 
@@ -462,6 +481,18 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
   AppSettingsRouteChildren,
 )
 
+interface AppPProjectIdRouteChildren {
+  AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
+}
+
+const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
+  AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
+}
+
+const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
+  AppPProjectIdRouteChildren,
+)
+
 interface AppRouteChildren {
   AppMyTasksRoute: typeof AppMyTasksRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -469,7 +500,7 @@ interface AppRouteChildren {
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
-  AppPProjectIdRoute: typeof AppPProjectIdRoute
+  AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -479,7 +510,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
-  AppPProjectIdRoute: AppPProjectIdRoute,
+  AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
