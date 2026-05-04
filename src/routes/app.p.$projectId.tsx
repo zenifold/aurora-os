@@ -11,9 +11,11 @@ import { CalendarView } from "@/components/views/CalendarView";
 import { ViewTabs } from "@/components/views/ViewTabs";
 import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
+import { ShareDialog } from "@/components/app/ShareDialog";
+import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
@@ -31,6 +33,7 @@ function ProjectPage() {
   const selectedTaskId = useUIStore((s) => s.selectedTaskId);
 
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Pick default view
   useEffect(() => {
@@ -93,12 +96,15 @@ function ProjectPage() {
           >
             <span className="text-lg font-semibold">{project.name.charAt(0).toUpperCase()}</span>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold leading-tight">{project.name}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-xl font-semibold leading-tight">{project.name}</h1>
             {project.description && (
-              <p className="text-sm text-muted-foreground">{project.description}</p>
+              <p className="truncate text-sm text-muted-foreground">{project.description}</p>
             )}
           </div>
+          <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" /> Share
+          </Button>
         </div>
         <ViewTabs
           views={views}
@@ -153,6 +159,8 @@ function ProjectPage() {
         onClose={() => setSelectedTaskId(null)}
         fields={fields}
       />
+
+      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} projectName={project.name} />
     </div>
   );
 }
