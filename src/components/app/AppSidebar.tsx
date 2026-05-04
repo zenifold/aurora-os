@@ -64,6 +64,92 @@ export function AppSidebar() {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+  if (collapsed) {
+    return (
+      <TooltipProvider delayDuration={100}>
+        <aside className="flex h-full w-14 shrink-0 flex-col items-center border-r border-sidebar-border bg-sidebar py-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground hover:opacity-90" title={ws?.name}>
+                {initials}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60">
+              {workspaces.map((w) => (
+                <DropdownMenuItem key={w.id} onClick={() => setCurrent(w)}>
+                  <span className="ml-1 flex-1 truncate">{w.name}</span>
+                  {w.id === ws?.id && <Check className="h-4 w-4" />}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate({ to: "/app/profile" })}>
+                <Settings className="mr-2 h-4 w-4" /> Profile & preferences
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/onboarding" })}>
+                <Plus className="mr-2 h-4 w-4" /> New workspace
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <nav className="flex flex-col items-center gap-1">
+            <IconNav to="/app" icon={Folder} active={path === "/app"} label="Dashboard" />
+            <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
+            <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
+          </nav>
+
+          <div className="mt-2 h-px w-8 bg-sidebar-border" />
+
+          <div className="mt-2 flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto">
+            {projects.filter((p) => !p.parent_id).map((p) => (
+              <Tooltip key={p.id}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/app/p/$projectId"
+                    params={{ projectId: p.id }}
+                    className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+                      path === `/app/p/${p.id}` ? "bg-aura-gradient-subtle" : "hover:bg-sidebar-accent/50"
+                    }`}
+                  >
+                    <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: p.color }} />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{p.name}</TooltipContent>
+              </Tooltip>
+            ))}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setCreating(true)}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">New project</TooltipContent>
+            </Tooltip>
+            {creating && (
+              <Input
+                autoFocus
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onBlur={submitNew}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitNew();
+                  if (e.key === "Escape") { setCreating(false); setNewName(""); }
+                }}
+                placeholder="Name"
+                className="h-7 w-12 px-1 text-xs"
+              />
+            )}
+          </div>
+
+          <div className="mt-auto flex h-8 w-8 items-center justify-center rounded-md bg-aura-gradient">
+            <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+          </div>
+        </aside>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Workspace switcher */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
