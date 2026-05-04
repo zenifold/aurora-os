@@ -9,27 +9,31 @@ import {
   useDraggable,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import type { Task } from "@/lib/types";
+import type { Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
-import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import { colorForTask } from "@/lib/view-config";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 
 interface Props {
   projectId: string;
   tasks: Task[];
+  viewConfig?: ViewConfig;
   onTaskClick: (id: string) => void;
 }
 
-export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
+export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: Props) {
   const update = useUpdateTask(projectId);
   const create = useCreateTask(projectId);
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const cardFields = viewConfig.cardFields ?? ["priority", "due_date"];
+  const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
