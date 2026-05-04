@@ -27,6 +27,7 @@ import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.me
 import { Route as AppSettingsFieldsRouteImport } from './routes/app.settings.fields'
 import { Route as AppSettingsDataRouteImport } from './routes/app.settings.data'
 import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.danger'
+import { Route as AppSettingsAutomationsRouteImport } from './routes/app.settings.automations'
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 
@@ -120,6 +121,11 @@ const AppSettingsDangerRoute = AppSettingsDangerRouteImport.update({
   path: '/danger',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsAutomationsRoute = AppSettingsAutomationsRouteImport.update({
+  id: '/automations',
+  path: '/automations',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsAiRoute = AppSettingsAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/p/$projectId': typeof AppPProjectIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/p/$projectId'
     | '/app/settings/ai'
+    | '/app/settings/automations'
     | '/app/settings/danger'
     | '/app/settings/data'
     | '/app/settings/fields'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/p/$projectId'
     | '/app/settings/ai'
+    | '/app/settings/automations'
     | '/app/settings/danger'
     | '/app/settings/data'
     | '/app/settings/fields'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/p/$projectId'
     | '/app/settings/ai'
+    | '/app/settings/automations'
     | '/app/settings/danger'
     | '/app/settings/data'
     | '/app/settings/fields'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsDangerRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/automations': {
+      id: '/app/settings/automations'
+      path: '/automations'
+      fullPath: '/app/settings/automations'
+      preLoaderRoute: typeof AppSettingsAutomationsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/ai': {
       id: '/app/settings/ai'
       path: '/ai'
@@ -419,6 +438,7 @@ declare module '@tanstack/react-router' {
 
 interface AppSettingsRouteChildren {
   AppSettingsAiRoute: typeof AppSettingsAiRoute
+  AppSettingsAutomationsRoute: typeof AppSettingsAutomationsRoute
   AppSettingsDangerRoute: typeof AppSettingsDangerRoute
   AppSettingsDataRoute: typeof AppSettingsDataRoute
   AppSettingsFieldsRoute: typeof AppSettingsFieldsRoute
@@ -429,6 +449,7 @@ interface AppSettingsRouteChildren {
 
 const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsAiRoute: AppSettingsAiRoute,
+  AppSettingsAutomationsRoute: AppSettingsAutomationsRoute,
   AppSettingsDangerRoute: AppSettingsDangerRoute,
   AppSettingsDataRoute: AppSettingsDataRoute,
   AppSettingsFieldsRoute: AppSettingsFieldsRoute,
