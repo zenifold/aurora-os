@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { Settings, Users, Sliders, User, Database, AlertTriangle, Sparkles } from "lucide-react";
+import { Settings, Users, Sliders, User, Database, AlertTriangle, Sparkles, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsLayout,
@@ -10,6 +10,7 @@ const items = [
   { to: "/app/settings/members", label: "Members", icon: Users, exact: false },
   { to: "/app/settings/fields", label: "Custom fields", icon: Sliders, exact: false },
   { to: "/app/settings/ai", label: "AI agents", icon: Sparkles, exact: false },
+  { to: "/app/settings/automations", label: "Automations", icon: Zap, exact: false },
   { to: "/app/settings/data", label: "Data & privacy", icon: Database, exact: false },
   { to: "/app/settings/profile", label: "Account", icon: User, exact: false },
   { to: "/app/settings/danger", label: "Danger zone", icon: AlertTriangle, exact: false },
