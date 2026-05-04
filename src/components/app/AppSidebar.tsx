@@ -1,9 +1,11 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { useUIStore } from "@/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
