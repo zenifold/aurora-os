@@ -498,34 +498,74 @@ function TaskRow({
             className="h-7 text-sm"
           />
         ) : (
-          <div className="flex items-center gap-2">
-            {isBlocked && (
-              <ArrowLeftCircle
-                className="h-3.5 w-3.5 shrink-0 text-destructive"
-                aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+          <div className="flex flex-col gap-0.5" style={{ paddingLeft: indent }}>
+            <div className="flex items-center gap-1.5">
+              {/* Expand/collapse chevron */}
+              {hasChildren ? (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleCollapse?.(); }}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label={isCollapsed ? "Expand" : "Collapse"}
+                >
+                  <ChevronRightIcon
+                    className="h-3.5 w-3.5 transition-transform"
+                    style={{ transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)" }}
+                  />
+                </button>
+              ) : (
+                <span className="inline-block h-4 w-4 shrink-0" />
+              )}
+              {/* Type icon */}
+              <TypeIcon
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: typeMeta.color }}
+                aria-label={typeMeta.label}
               />
+              {isBlocked && (
+                <ArrowLeftCircle
+                  className="h-3.5 w-3.5 shrink-0 text-destructive"
+                  aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+                />
+              )}
+              {isBlocking && (
+                <ArrowRightCircle
+                  className="h-3.5 w-3.5 shrink-0 text-primary"
+                  aria-label={`Blocking ${indicator?.blocking} task(s)`}
+                />
+              )}
+              <button
+                onClick={onClickRow}
+                className={`flex-1 truncate text-left hover:text-aura-gradient ${isSubtask && task.status === "done" ? "line-through text-muted-foreground" : ""}`}
+              >
+                {task.title}
+              </button>
+              {hasChildren && rollup && rollup.total > 0 && (
+                <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+                  {rollup.done}/{rollup.total}
+                </span>
+              )}
+              <button
+                onClick={() => setTitleEdit(task.title)}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <span className="text-xs text-muted-foreground">edit</span>
+              </button>
+              <button
+                onClick={onDelete}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+              </button>
+            </div>
+            {/* Roll-up progress bar (parents only) */}
+            {hasChildren && rollupPct !== null && (
+              <div className="ml-[22px] mr-2 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${rollupPct}%`, background: typeMeta.color }}
+                />
+              </div>
             )}
-            {isBlocking && (
-              <ArrowRightCircle
-                className="h-3.5 w-3.5 shrink-0 text-primary"
-                aria-label={`Blocking ${indicator?.blocking} task(s)`}
-              />
-            )}
-            <button onClick={onClickRow} className="flex-1 truncate text-left hover:text-aura-gradient">
-              {task.title}
-            </button>
-            <button
-              onClick={() => setTitleEdit(task.title)}
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <span className="text-xs text-muted-foreground">edit</span>
-            </button>
-            <button
-              onClick={onDelete}
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-            </button>
           </div>
         )}
       </td>
