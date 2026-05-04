@@ -1,0 +1,118 @@
+export type TaskStatus = "todo" | "in_progress" | "review" | "done" | "cancelled";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
+export type FieldType =
+  | "text"
+  | "number"
+  | "date"
+  | "select"
+  | "multi_select"
+  | "user"
+  | "checkbox"
+  | "url"
+  | "email";
+
+export interface SelectOption {
+  id: string;
+  label: string;
+  color: string;
+}
+
+export interface CustomFieldDef {
+  id: string;
+  workspace_id: string;
+  name: string;
+  field_type: FieldType;
+  options: SelectOption[] | null;
+  default_value: unknown;
+  is_required: boolean;
+  order_index: number;
+}
+
+export interface Task {
+  id: string;
+  project_id: string;
+  workspace_id: string;
+  title: string;
+  description: unknown;
+  status: TaskStatus | string;
+  priority: TaskPriority;
+  assignee_ids: string[];
+  due_date: string | null;
+  start_date: string | null;
+  parent_task_id: string | null;
+  custom_values: Record<string, unknown>;
+  tags: string[];
+  position: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
+
+export interface Project {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string | null;
+  color: string;
+  icon: string;
+  parent_id: string | null;
+  is_archived: boolean;
+  position: number;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface View {
+  id: string;
+  project_id: string;
+  workspace_id: string;
+  name: string;
+  view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline";
+  config: {
+    columns?: Array<{ key: string; width?: number; visible?: boolean }>;
+  };
+  filters: Filter[];
+  sorts: Sort[];
+  group_by: string | null;
+  is_default: boolean;
+}
+
+export interface Filter {
+  id: string;
+  field: string;
+  operator: "is" | "is_not" | "contains" | "before" | "after" | "is_empty" | "is_not_empty";
+  value: unknown;
+}
+
+export interface Sort {
+  field: string;
+  direction: "asc" | "desc";
+}
+
+export interface WorkspaceMember {
+  id: string;
+  workspace_id: string;
+  user_id: string;
+  joined_at: string;
+  profile?: {
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+  role?: "owner" | "member";
+}
+
+export const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
+  { value: "todo", label: "Todo", color: "var(--status-todo)" },
+  { value: "in_progress", label: "In Progress", color: "var(--status-progress)" },
+  { value: "review", label: "Review", color: "var(--status-review)" },
+  { value: "done", label: "Done", color: "var(--status-done)" },
+  { value: "cancelled", label: "Cancelled", color: "var(--status-cancelled)" },
+];
+
+export const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] = [
+  { value: "low", label: "Low", color: "oklch(0.7 0.05 240)" },
+  { value: "medium", label: "Medium", color: "oklch(0.7 0.12 80)" },
+  { value: "high", label: "High", color: "oklch(0.65 0.18 30)" },
+  { value: "urgent", label: "Urgent", color: "oklch(0.6 0.22 25)" },
+];
