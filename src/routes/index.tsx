@@ -77,6 +77,7 @@ function Navbar({ signedIn }: { signedIn: boolean }) {
           <a href="#pricing" className="text-sm text-muted-foreground transition hover:text-foreground">Pricing</a>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {signedIn ? (
             <Button asChild className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90">
               <Link to="/app">Go to app <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
