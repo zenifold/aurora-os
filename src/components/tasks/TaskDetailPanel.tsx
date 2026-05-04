@@ -4,14 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CustomFieldDef, Task } from "@/lib/types";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
 import { useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +24,10 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { RichEditor } from "./RichEditor";
+import { CommentsThread } from "./CommentsThread";
+import { SubtasksList } from "./SubtasksList";
+import { ActivityFeed } from "./ActivityFeed";
 
 export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projectId: string; taskId: string | null; onClose: () => void; fields: CustomFieldDef[] }) {
   const update = useUpdateTask(projectId);
@@ -45,20 +44,15 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   });
 
   const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
 
   useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      const d = task.description as { text?: string } | null;
-      setDesc(typeof d === "object" && d?.text ? d.text : "");
-    }
+    if (task) setTitle(task.title);
   }, [task]);
 
   if (!task) {
     return (
       <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <SheetContent className="w-full sm:max-w-xl">
+        <SheetContent className="w-full sm:max-w-2xl">
           <SheetHeader><SheetTitle>Loading…</SheetTitle></SheetHeader>
         </SheetContent>
       </Sheet>
@@ -69,8 +63,8 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
 
   return (
     <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader className="space-y-3">
+      <SheetContent className="flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl">
+        <SheetHeader className="space-y-3 border-b border-border px-6 py-4">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
             <span className="text-xs uppercase tracking-wider text-muted-foreground">{status?.label}</span>
@@ -84,101 +78,119 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
           />
         </SheetHeader>
 
-        <div className="mt-6 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <FieldRow label="Status">
-              <Select value={task.status} onValueChange={(v) => update.mutate({ id: task.id, status: v })}>
-                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </FieldRow>
-            <FieldRow label="Priority">
-              <Select value={task.priority} onValueChange={(v) => update.mutate({ id: task.id, priority: v as Task["priority"] })}>
-                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </FieldRow>
-            <FieldRow label="Due date">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
-                    <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                    {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : "Set date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={task.due_date ? parseISO(task.due_date) : undefined}
-                    onSelect={(d) => update.mutate({ id: task.id, due_date: d ? format(d, "yyyy-MM-dd") : null })}
-                  />
-                </PopoverContent>
-              </Popover>
-            </FieldRow>
-            <FieldRow label="Start date">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
-                    <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                    {task.start_date ? format(parseISO(task.start_date), "MMM d, yyyy") : "Set date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={task.start_date ? parseISO(task.start_date) : undefined}
-                    onSelect={(d) => update.mutate({ id: task.id, start_date: d ? format(d, "yyyy-MM-dd") : null })}
-                  />
-                </PopoverContent>
-              </Popover>
-            </FieldRow>
-          </div>
+        <div className="grid grid-cols-2 gap-4 border-b border-border px-6 py-4">
+          <FieldRow label="Status">
+            <Select value={task.status} onValueChange={(v) => update.mutate({ id: task.id, status: v })}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </FieldRow>
+          <FieldRow label="Priority">
+            <Select value={task.priority} onValueChange={(v) => update.mutate({ id: task.id, priority: v as Task["priority"] })}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </FieldRow>
+          <FieldRow label="Due date">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : "Set date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={task.due_date ? parseISO(task.due_date) : undefined}
+                  onSelect={(d) => update.mutate({ id: task.id, due_date: d ? format(d, "yyyy-MM-dd") : null })}
+                />
+              </PopoverContent>
+            </Popover>
+          </FieldRow>
+          <FieldRow label="Start date">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {task.start_date ? format(parseISO(task.start_date), "MMM d, yyyy") : "Set date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={task.start_date ? parseISO(task.start_date) : undefined}
+                  onSelect={(d) => update.mutate({ id: task.id, start_date: d ? format(d, "yyyy-MM-dd") : null })}
+                />
+              </PopoverContent>
+            </Popover>
+          </FieldRow>
+        </div>
 
-          <div>
-            <Label>Description</Label>
-            <Textarea
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              onBlur={() => update.mutate({ id: task.id, description: { text: desc } as never })}
-              placeholder="Add more details…"
-              className="mt-1.5 min-h-32"
-            />
-          </div>
+        <Tabs defaultValue="description" className="flex flex-1 flex-col overflow-hidden">
+          <TabsList className="mx-6 mt-3 w-fit">
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="subtasks">Subtasks</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+          </TabsList>
 
-          {fields.length > 0 && (
-            <div>
-              <Label>Custom fields</Label>
-              <div className="mt-2 space-y-2">
-                {fields.map((f) => (
-                  <div key={f.id} className="flex items-center gap-3">
-                    <span className="w-32 text-xs text-muted-foreground">{f.name}</span>
-                    <span className="text-sm">{String(task.custom_values?.[f.id] ?? "—")}</span>
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <TabsContent value="description" className="mt-0 space-y-5">
+              <RichEditor
+                content={task.description}
+                placeholder="Add more details…"
+                onBlur={(json) => update.mutate({ id: task.id, description: json as never })}
+              />
+
+              {fields.length > 0 && (
+                <div>
+                  <Label>Custom fields</Label>
+                  <div className="mt-2 space-y-2">
+                    {fields.map((f) => (
+                      <div key={f.id} className="flex items-center gap-3">
+                        <span className="w-32 text-xs text-muted-foreground">{f.name}</span>
+                        <span className="text-sm">{String(task.custom_values?.[f.id] ?? "—")}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
+            </TabsContent>
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
-            <span className="font-mono text-xs text-muted-foreground">{task.id.slice(0, 8)}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive"
-              onClick={() => {
-                if (confirm("Delete this task?")) {
-                  remove.mutate(task.id);
-                  onClose();
-                }
-              }}
-            >
-              <Trash2 className="mr-1.5 h-4 w-4" /> Delete task
-            </Button>
+            <TabsContent value="subtasks" className="mt-0">
+              <SubtasksList parent={task} />
+            </TabsContent>
+
+            <TabsContent value="comments" className="mt-0">
+              <CommentsThread taskId={task.id} />
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-0">
+              <ActivityFeed taskId={task.id} />
+            </TabsContent>
           </div>
+        </Tabs>
+
+        <div className="flex items-center justify-between border-t border-border px-6 py-3">
+          <span className="font-mono text-xs text-muted-foreground">{task.id.slice(0, 8)}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive"
+            onClick={() => {
+              if (confirm("Delete this task?")) {
+                remove.mutate(task.id);
+                onClose();
+              }
+            }}
+          >
+            <Trash2 className="mr-1.5 h-4 w-4" /> Delete task
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
