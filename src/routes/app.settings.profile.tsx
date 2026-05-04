@@ -25,6 +25,7 @@ type ThemePref = "light" | "dark" | "system";
 
 function ProfilePage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const setUITheme = useUIStore((s) => s.setTheme);
   const currentTheme = useUIStore((s) => s.theme);
   const [name, setName] = useState("");
