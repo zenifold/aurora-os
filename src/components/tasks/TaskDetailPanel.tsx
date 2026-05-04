@@ -28,6 +28,8 @@ import { RichEditor } from "./RichEditor";
 import { CommentsThread } from "./CommentsThread";
 import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
+import { TaskAiPanel } from "./TaskAiPanel";
+import { Sparkles } from "lucide-react";
 
 export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projectId: string; taskId: string | null; onClose: () => void; fields: CustomFieldDef[] }) {
   const update = useUpdateTask(projectId);
@@ -136,6 +138,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="subtasks">Subtasks</TabsTrigger>
             <TabsTrigger value="comments">Comments</TabsTrigger>
+            <TabsTrigger value="ai"><Sparkles className="mr-1 h-3 w-3" />AI</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -168,6 +171,10 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
 
             <TabsContent value="comments" className="mt-0">
               <CommentsThread taskId={task.id} />
+            </TabsContent>
+
+            <TabsContent value="ai" className="mt-0">
+              <TaskAiPanel task={task} />
             </TabsContent>
 
             <TabsContent value="activity" className="mt-0">

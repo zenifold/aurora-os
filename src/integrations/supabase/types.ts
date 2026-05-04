@@ -55,6 +55,141 @@ export type Database = {
           },
         ]
       }
+      ai_agents: {
+        Row: {
+          avatar_emoji: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          max_tokens: number
+          model: string
+          name: string
+          system_prompt: string
+          temperature: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          avatar_emoji?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number
+          model?: string
+          name: string
+          system_prompt?: string
+          temperature?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          avatar_emoji?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_tokens?: number
+          model?: string
+          name?: string
+          system_prompt?: string
+          temperature?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_task_assignments: {
+        Row: {
+          agent_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          id: string
+          instructions: string | null
+          iterations: number
+          model_used: string | null
+          output: string | null
+          started_at: string | null
+          status: string
+          task_id: string
+          tokens_used: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          agent_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          instructions?: string | null
+          iterations?: number
+          model_used?: string | null
+          output?: string | null
+          started_at?: string | null
+          status?: string
+          task_id: string
+          tokens_used?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          agent_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          instructions?: string | null
+          iterations?: number
+          model_used?: string | null
+          output?: string | null
+          started_at?: string | null
+          status?: string
+          task_id?: string
+          tokens_used?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_task_assignments_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_task_assignments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_task_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_id: string
@@ -464,6 +599,35 @@ export type Database = {
             foreignKeyName: "views_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_ai_secrets: {
+        Row: {
+          openrouter_api_key: string | null
+          updated_at: string
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          openrouter_api_key?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          openrouter_api_key?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_ai_secrets_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
