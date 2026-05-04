@@ -235,13 +235,21 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Brand footer */}
-      <div className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-aura-gradient">
-          <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+      {/* User chip footer */}
+      <button
+        onClick={() => navigate({ to: "/app/profile" })}
+        className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/50"
+      >
+        <Avatar className="h-7 w-7">
+          {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+          <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-medium">{displayName}</p>
+          <p className="truncate text-[10px] text-muted-foreground">{user?.email}</p>
         </div>
-        <span className="text-xs font-medium text-muted-foreground">Aura</span>
-      </div>
+        <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
     </aside>
   );
 }
