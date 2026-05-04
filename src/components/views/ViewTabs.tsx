@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { View } from "@/lib/types";
-import { useDeleteView } from "@/hooks/use-views";
+import { useDeleteView, useUpdateView, useCreateView } from "@/hooks/use-views";
+import { useIsWorkspaceOwner } from "@/hooks/use-workspace-role";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +19,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Plus, Table as TableIcon, KanbanSquare, Calendar as CalendarIcon, GanttChart } from "lucide-react";
-import { useCreateView } from "@/hooks/use-views";
+import {
+  MoreHorizontal,
+  Trash2,
+  Plus,
+  Table as TableIcon,
+  KanbanSquare,
+  Calendar as CalendarIcon,
+  GanttChart,
+  Lock,
+  Unlock,
+  Copy,
+} from "lucide-react";
 
 const VIEW_TYPES: { value: View["view_type"]; label: string; icon: typeof TableIcon }[] = [
   { value: "table", label: "Table", icon: TableIcon },
@@ -42,7 +53,9 @@ export function ViewTabs({
   const [dialogType, setDialogType] = useState<View["view_type"] | null>(null);
   const [name, setName] = useState("");
   const create = useCreateView(projectId);
+  const update = useUpdateView(projectId);
   const remove = useDeleteView(projectId);
+  const isOwner = useIsWorkspaceOwner();
 
   const submit = async () => {
     if (!name.trim() || !dialogType) return;
@@ -52,11 +65,30 @@ export function ViewTabs({
     setDialogType(null);
   };
 
+  const duplicate = async (v: View) => {
+    const dup = await create.mutateAsync({
+      name: `${v.name} (copy)`,
+      view_type: v.view_type,
+      filters: v.filters,
+      sorts: v.sorts,
+      group_by: v.group_by,
+    });
+    onSelect(dup.id);
+  };
+
+  const toggleLock = (v: View) => {
+    update.mutate({
+      id: v.id,
+      config: { ...(v.config ?? {}), locked: !v.config?.locked },
+    });
+  };
+
   return (
     <div className="mt-3 flex items-center gap-1">
       {views.map((v) => {
         const meta = VIEW_TYPES.find((t) => t.value === v.view_type) ?? VIEW_TYPES[0];
         const Icon = meta.icon;
+        const locked = !!v.config?.locked;
         return (
           <div
             key={v.id}
@@ -69,21 +101,44 @@ export function ViewTabs({
             <button onClick={() => onSelect(v.id)} className="flex items-center gap-1.5">
               <Icon className="h-3.5 w-3.5" />
               {v.name}
+              {locked && <Lock className="h-3 w-3 text-muted-foreground" aria-label="Locked view" />}
             </button>
-            {!v.is_default && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="opacity-0 group-hover:opacity-100">
-                    <MoreHorizontal className="h-3 w-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem className="text-destructive" onClick={() => remove.mutate(v.id)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete view
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="opacity-0 group-hover:opacity-100" aria-label="View actions">
+                  <MoreHorizontal className="h-3 w-3" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => duplicate(v)}>
+                  <Copy className="mr-2 h-4 w-4" /> Duplicate to customize
+                </DropdownMenuItem>
+                {isOwner && (
+                  <DropdownMenuItem onClick={() => toggleLock(v)}>
+                    {locked ? (
+                      <>
+                        <Unlock className="mr-2 h-4 w-4" /> Unlock view
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="mr-2 h-4 w-4" /> Lock view
+                      </>
+                    )}
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                )}
+                {!v.is_default && (isOwner || !locked) && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      onClick={() => remove.mutate(v.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete view
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       })}

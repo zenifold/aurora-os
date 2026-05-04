@@ -100,6 +100,8 @@ export interface ViewConfig {
   /** Color row/card by this field */
   colorBy?: "none" | "priority" | "status" | "due_date";
   colorRules?: ColorRule[];
+  /** When true, only workspace owners can edit filters/sorts/config; others must duplicate. */
+  locked?: boolean;
 }
 
 export interface Filter {
