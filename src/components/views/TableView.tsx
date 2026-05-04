@@ -232,18 +232,11 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </thead>
 
         <tbody>
-          {Array.from(groups.entries()).map(([key, list]) => (
-            <>
-              {groupBy && (
-                <tr key={`g-${key}`}>
-                  <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {groupBy === "status"
-                      ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
-                      : key === "__none__" ? "Empty" : key} · {list.length}
-                  </td>
-                </tr>
-              )}
-              {list.map((t) => (
+          {useTree ? (
+            flat.map((node) => {
+              const t = node.task;
+              const hasChildren = node.children.length > 0;
+              return (
                 <TaskRow
                   key={t.id}
                   task={t}
@@ -256,14 +249,53 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showDue={showDue}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   titleStickyLeft={widths.select}
+                  depth={node.depth}
+                  hasChildren={hasChildren}
+                  isCollapsed={collapsed.has(t.id)}
+                  rollup={hasChildren ? rollupFraction(node) : null}
+                  rollupPercent={hasChildren ? rollupPercent(node) : null}
+                  onToggleCollapse={() => toggleCollapse(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
                   onDelete={() => remove.mutate(t.id)}
                 />
-              ))}
-            </>
-          ))}
+              );
+            })
+          ) : (
+            Array.from(groups.entries()).map(([key, list]) => (
+              <>
+                {groupBy && (
+                  <tr key={`g-${key}`}>
+                    <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {groupBy === "status"
+                        ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
+                        : key === "__none__" ? "Empty" : key} · {list.length}
+                    </td>
+                  </tr>
+                )}
+                {list.map((t) => (
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    fields={visibleFields}
+                    workflow={workflow}
+                    selected={selected.has(t.id)}
+                    indicator={indicators?.get(t.id)}
+                    showStatus={showStatus}
+                    showPriority={showPriority}
+                    showDue={showDue}
+                    rowColor={colorForTask(t, viewConfig, statusColorMap)}
+                    titleStickyLeft={widths.select}
+                    onToggleSelect={(c) => toggleOne(t.id, c)}
+                    onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
+                    onClickRow={() => onTaskClick(t.id)}
+                    onDelete={() => remove.mutate(t.id)}
+                  />
+                ))}
+              </>
+            ))
+          )}
 
           {/* Add row */}
           <tr className="border-b border-border">
