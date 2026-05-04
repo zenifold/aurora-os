@@ -340,8 +340,14 @@ function TaskRow({
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
+  const borderClass = isBlocked
+    ? "border-l-2 border-l-destructive"
+    : isBlocking
+    ? "border-l-2 border-l-primary"
+    : "border-l-2 border-l-transparent";
+
   return (
-    <tr className="group border-b border-border hover:bg-accent/30">
+    <tr className={`group border-b border-border hover:bg-accent/30 ${borderClass}`}>
       <td className="px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
       </td>
