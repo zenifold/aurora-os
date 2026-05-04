@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CustomFieldDef, Task } from "@/lib/types";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
@@ -48,6 +48,46 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
   const [adding, setAdding] = useState(false);
+
+  // Resizable column widths (px). Persist per-project in localStorage.
+  const storageKey = `aura-table-widths-${projectId}`;
+  const defaultWidths: Record<string, number> = {
+    select: 40,
+    title: 360,
+    status: 144,
+    priority: 128,
+    due: 128,
+    add: 40,
+  };
+  fields.forEach((f) => { defaultWidths[`f:${f.id}`] = 160; });
+
+  const [widths, setWidths] = useState<Record<string, number>>(() => {
+    if (typeof window === "undefined") return defaultWidths;
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+      return { ...defaultWidths, ...stored };
+    } catch {
+      return defaultWidths;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKey, JSON.stringify(widths));
+    }
+  }, [widths, storageKey]);
+
+  // Ensure new custom field columns get default widths
+  useEffect(() => {
+    setWidths((w) => {
+      const next = { ...w };
+      let changed = false;
+      fields.forEach((f) => {
+        if (next[`f:${f.id}`] === undefined) { next[`f:${f.id}`] = 160; changed = true; }
+      });
+      return changed ? next : w;
+    });
+  }, [fields]);
 
   const groups = groupTasks(tasks, groupBy);
 
@@ -111,21 +151,34 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
         </div>
       )}
 
-      <table className="w-full border-collapse text-sm">
+      <table className="border-collapse text-sm" style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}>
+        <colgroup>
+          <col style={{ width: widths.select }} />
+          <col style={{ width: widths.title }} />
+          <col style={{ width: widths.status }} />
+          <col style={{ width: widths.priority }} />
+          <col style={{ width: widths.due }} />
+          {fields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
+          <col style={{ width: widths.add }} />
+        </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="w-10 px-3 py-2">
+            <th className="px-3 py-2">
               <Checkbox
                 checked={tasks.length > 0 && selected.size === tasks.length}
                 onCheckedChange={(c) => toggleAll(!!c)}
               />
             </th>
-            <Th>Title</Th>
-            <Th className="w-36">Status</Th>
-            <Th className="w-32">Priority</Th>
-            <Th className="w-32">Due</Th>
-            {fields.map((f) => <Th key={f.id} className="w-40">{f.name}</Th>)}
-            <th className="w-10 px-2">
+            <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
+            <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>
+            <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>
+            <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>
+            {fields.map((f) => (
+              <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
+                {f.name}
+              </ResizableTh>
+            ))}
+            <th className="px-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground">
@@ -209,6 +262,52 @@ function Th({ children, className = "" }: { children: React.ReactNode; className
   return (
     <th className={`px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground ${className}`}>
       {children}
+    </th>
+  );
+}
+
+function ResizableTh({
+  colKey,
+  widths,
+  setWidths,
+  children,
+}: {
+  colKey: string;
+  widths: Record<string, number>;
+  setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  children: React.ReactNode;
+}) {
+  const startRef = useRef<{ x: number; w: number } | null>(null);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    startRef.current = { x: e.clientX, w: widths[colKey] ?? 160 };
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!startRef.current) return;
+    const delta = e.clientX - startRef.current.x;
+    const next = Math.max(60, startRef.current.w + delta);
+    setWidths((w) => ({ ...w, [colKey]: next }));
+  };
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    startRef.current = null;
+    try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+  };
+
+  return (
+    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="truncate pr-2">{children}</div>
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        className="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize select-none touch-none hover:bg-primary/40"
+      />
     </th>
   );
 }

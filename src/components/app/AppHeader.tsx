@@ -9,13 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Search, LogOut, Settings, User as UserIcon, PanelLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { NotificationsBell } from "@/components/app/NotificationsBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
+  const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
+  const setSidebarCollapsed = useUIStore((s) => s.setSidebarCollapsed);
   const navigate = useNavigate();
 
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
@@ -23,6 +26,16 @@ export function AppHeader() {
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        <PanelLeft className="h-4 w-4" />
+      </Button>
       <button
         onClick={() => setCommandOpen(true)}
         className="flex h-8 flex-1 max-w-md items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70"
