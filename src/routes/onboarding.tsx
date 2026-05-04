@@ -212,6 +212,19 @@ function Onboarding() {
         );
       }
 
+      // Persist theme preference + apply immediately
+      await supabase
+        .from("user_preferences")
+        .upsert({ user_id: user.id, theme: themeChoice }, { onConflict: "user_id" });
+      const root = document.documentElement;
+      root.classList.remove("light", "dark");
+      if (themeChoice === "system") {
+        const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.classList.add(sysDark ? "dark" : "light");
+      } else {
+        root.classList.add(themeChoice);
+      }
+
       setCurrent(ws);
       await fetchWs();
       toast.success("Workspace ready");
