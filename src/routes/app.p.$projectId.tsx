@@ -8,6 +8,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { TableView } from "@/components/views/TableView";
 import { KanbanView } from "@/components/views/KanbanView";
 import { CalendarView } from "@/components/views/CalendarView";
+import { MobileTaskList } from "@/components/views/MobileTaskList";
 import { ViewTabs } from "@/components/views/ViewTabs";
 import { ViewOptions } from "@/components/views/ViewOptions";
 import { FilterBar } from "@/components/views/FilterBar";
@@ -22,6 +23,7 @@ import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
 import { Loader2, Settings, UserPlus, Wand2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
 
 export const Route = createFileRoute("/app/p/$projectId")({
   component: ProjectPage,
