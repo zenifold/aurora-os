@@ -414,6 +414,12 @@ function TaskRow({
   showDue = true,
   rowColor = null,
   titleStickyLeft = 40,
+  depth = 0,
+  hasChildren = false,
+  isCollapsed = false,
+  rollup = null,
+  rollupPercent: rollupPct = null,
+  onToggleCollapse,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -429,6 +435,12 @@ function TaskRow({
   showDue?: boolean;
   rowColor?: string | null;
   titleStickyLeft?: number;
+  depth?: number;
+  hasChildren?: boolean;
+  isCollapsed?: boolean;
+  rollup?: { done: number; total: number } | null;
+  rollupPercent?: number | null;
+  onToggleCollapse?: () => void;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -441,12 +453,27 @@ function TaskRow({
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
-  const borderColor = rowColor ?? (isBlocked ? "hsl(var(--destructive))" : isBlocking ? "hsl(var(--primary))" : "transparent");
+  const typeMeta = getTaskTypeMeta(task.task_type);
+  const TypeIcon = typeMeta.icon;
+  const indent = typeMeta.indent;
+  // Type color takes precedence over rule-based row color so hierarchy is always visible.
+  const borderColor = typeMeta.color;
+  const borderWidth =
+    typeMeta.type === "initiative" ? 4 :
+    typeMeta.type === "epic" ? 3 :
+    typeMeta.type === "subtask" ? 1 : 2;
+  const rowMinH = typeMeta.rowHeight;
+  const isInitiative = typeMeta.type === "initiative";
+  const isSubtask = typeMeta.type === "subtask";
 
   return (
     <tr
-      className="group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
-      style={{ borderLeft: `2px solid ${borderColor}` }}
+      className={`group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30 ${isInitiative ? "font-semibold" : ""}`}
+      style={{
+        borderLeft: `${borderWidth}px solid ${borderColor}`,
+        height: rowMinH,
+        background: rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+      }}
     >
       <td className="sticky-col px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
