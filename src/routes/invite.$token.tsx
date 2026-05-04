@@ -60,7 +60,7 @@ function AcceptInvite() {
       // Add to workspace_members + user_roles
       const [{ error: memErr }, { error: roleErr }] = await Promise.all([
         supabase.from("workspace_members").insert({ workspace_id: invite.workspace_id, user_id: user.id }),
-        supabase.from("user_roles").insert({ workspace_id: invite.workspace_id, user_id: user.id, role: invite.role }),
+        supabase.from("user_roles").insert({ workspace_id: invite.workspace_id, user_id: user.id, role: (invite.role === "owner" ? "owner" : "member") }),
       ]);
       // Ignore duplicate key errors (already a member)
       if (memErr && !memErr.message.includes("duplicate")) throw memErr;
