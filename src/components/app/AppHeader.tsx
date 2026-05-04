@@ -17,6 +17,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export function AppHeader() {
   const { user, signOut } = useAuth();
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
+  const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
+  const setSidebarCollapsed = useUIStore((s) => s.setSidebarCollapsed);
   const navigate = useNavigate();
 
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
