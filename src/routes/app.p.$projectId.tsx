@@ -227,6 +227,15 @@ function ProjectPage() {
                 onTaskClick={(id) => setSelectedTaskId(id)}
               />
             )}
+            {activeView?.view_type === "canvas" && (
+              <CanvasView
+                projectId={projectId}
+                viewId={activeView.id}
+                tasks={filteredTasks}
+                viewConfig={activeView.config ?? {}}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
             {activeView?.view_type === "calendar" && (
               <CalendarView
                 projectId={projectId}
