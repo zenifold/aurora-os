@@ -18,13 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Plus, Table as TableIcon, KanbanSquare, Calendar as CalendarIcon } from "lucide-react";
+import { MoreHorizontal, Trash2, Plus, Table as TableIcon, KanbanSquare, Calendar as CalendarIcon, GanttChart } from "lucide-react";
 import { useCreateView } from "@/hooks/use-views";
 
 const VIEW_TYPES: { value: View["view_type"]; label: string; icon: typeof TableIcon }[] = [
   { value: "table", label: "Table", icon: TableIcon },
   { value: "kanban", label: "Kanban", icon: KanbanSquare },
   { value: "calendar", label: "Calendar", icon: CalendarIcon },
+  { value: "timeline", label: "Timeline", icon: GanttChart },
 ];
 
 export function ViewTabs({
