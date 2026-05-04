@@ -72,7 +72,7 @@ export function useUpsertAgent() {
         avatar_emoji: agent.avatar_emoji ?? "🤖",
         description: agent.description ?? null,
         system_prompt: agent.system_prompt ?? "You are a helpful AI assistant working on tasks.",
-        model: agent.model ?? "openai/gpt-4o-mini",
+        model: agent.model ?? "xiaomi/mimo-v2-flash",
         temperature: agent.temperature ?? 0.7,
         max_tokens: agent.max_tokens ?? 2000,
         is_active: agent.is_active ?? true,

@@ -290,7 +290,7 @@ function AgentDialog({
   const [systemPrompt, setSystemPrompt] = useState(
     agent?.system_prompt ?? "You are a helpful AI assistant working on tasks.",
   );
-  const [model, setModel] = useState(agent?.model ?? "openai/gpt-4o-mini");
+  const [model, setModel] = useState(agent?.model ?? "xiaomi/mimo-v2-flash");
   const [temperature, setTemperature] = useState(agent?.temperature ?? 0.7);
   const [maxTokens, setMaxTokens] = useState(agent?.max_tokens ?? 2000);
 
@@ -304,7 +304,7 @@ function AgentDialog({
     setSystemPrompt(
       agent?.system_prompt ?? "You are a helpful AI assistant working on tasks.",
     );
-    setModel(agent?.model ?? "openai/gpt-4o-mini");
+    setModel(agent?.model ?? "xiaomi/mimo-v2-flash");
     setTemperature(agent?.temperature ?? 0.7);
     setMaxTokens(agent?.max_tokens ?? 2000);
     setAiPrompt("");

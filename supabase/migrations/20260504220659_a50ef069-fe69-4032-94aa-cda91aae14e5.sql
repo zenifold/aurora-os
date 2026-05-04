@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_agents ALTER COLUMN model SET DEFAULT 'xiaomi/mimo-v2-flash'::text;

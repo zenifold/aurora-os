@@ -39,7 +39,7 @@ export const generateTasksFromPrompt = createServerFn({ method: "POST" })
     if (!apiKey) throw new Error("No OpenRouter API key configured. Add one in Settings → AI agents.");
 
     // Use specified agent OR fall back to defaults
-    let model = "openai/gpt-4o-mini";
+    let model = "xiaomi/mimo-v2-flash";
     let temperature = 0.5;
     let max_tokens = 2000;
     let systemPrompt =

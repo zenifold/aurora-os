@@ -19,14 +19,18 @@ import {
   CalendarDays,
   CheckCircle2,
   FileText,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-type Step = "choose" | "team" | "template";
+type Step = "choose" | "name" | "theme" | "template";
 type TemplateKey = "blank" | "sprint" | "content" | "bugs" | "personal";
+type ThemeKey = "light" | "dark" | "system";
 
 function slugify(s: string) {
   return (
@@ -124,8 +128,8 @@ function Onboarding() {
   const setCurrent = useWorkspaceStore((s) => s.setCurrent);
   const fetchWs = useWorkspaceStore((s) => s.fetch);
   const [step, setStep] = useState<Step>("choose");
-  const [teamName, setTeamName] = useState("");
-  const [pendingWsName, setPendingWsName] = useState<string | null>(null);
+  const [wsName, setWsName] = useState("");
+  const [theme, setTheme] = useState<ThemeKey>("system");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>("blank");
   const [busy, setBusy] = useState(false);
 
@@ -147,7 +151,7 @@ function Onboarding() {
     })();
   }, [user, navigate, setCurrent]);
 
-  const finalize = async (wsName: string, tmplKey: TemplateKey) => {
+  const finalize = async (wsName: string, tmplKey: TemplateKey, themeChoice: ThemeKey) => {
     if (!user) return;
     const tmpl = TEMPLATES.find((t) => t.key === tmplKey)!;
     setBusy(true);
@@ -208,6 +212,19 @@ function Onboarding() {
         );
       }
 
+      // Persist theme preference + apply immediately
+      await supabase
+        .from("user_preferences")
+        .upsert({ user_id: user.id, theme: themeChoice }, { onConflict: "user_id" });
+      const root = document.documentElement;
+      root.classList.remove("light", "dark");
+      if (themeChoice === "system") {
+        const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.classList.add(sysDark ? "dark" : "light");
+      } else {
+        root.classList.add(themeChoice);
+      }
+
       setCurrent(ws);
       await fetchWs();
       toast.success("Workspace ready");
@@ -228,7 +245,14 @@ function Onboarding() {
     );
   }
 
-  const progress = step === "choose" ? 33 : step === "team" ? 66 : 100;
+  const progress =
+    step === "choose" ? 25 : step === "name" ? 50 : step === "theme" ? 75 : 100;
+
+  const THEMES: { key: ThemeKey; label: string; description: string; icon: typeof Sun }[] = [
+    { key: "light", label: "Light", description: "Bright and clean.", icon: Sun },
+    { key: "dark", label: "Dark", description: "Easy on the eyes.", icon: Moon },
+    { key: "system", label: "System", description: "Match your device.", icon: Monitor },
+  ];
 
   return (
     <div className="min-h-screen aura-mesh">
@@ -257,9 +281,8 @@ function Onboarding() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <button
                 onClick={() => {
-                  const name = `${user.email?.split("@")[0] ?? "My"}'s workspace`;
-                  setPendingWsName(name);
-                  setStep("template");
+                  setWsName(`${user.email?.split("@")[0] ?? "My"}'s workspace`);
+                  setStep("name");
                 }}
                 disabled={busy}
                 className="group rounded-xl border border-border bg-background p-5 text-left transition-all hover:border-primary hover:shadow-pop disabled:opacity-60"
@@ -274,7 +297,10 @@ function Onboarding() {
               </button>
 
               <button
-                onClick={() => setStep("team")}
+                onClick={() => {
+                  setWsName("");
+                  setStep("name");
+                }}
                 disabled={busy}
                 className="group rounded-xl border border-border bg-background p-5 text-left transition-all hover:border-primary hover:shadow-pop disabled:opacity-60"
               >
@@ -290,7 +316,7 @@ function Onboarding() {
           </div>
         )}
 
-        {step === "team" && (
+        {step === "name" && (
           <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
             <button
               onClick={() => setStep("choose")}
@@ -299,16 +325,15 @@ function Onboarding() {
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
             <h1 className="text-2xl font-semibold">Name your workspace</h1>
-            <p className="mt-1 text-sm text-muted-foreground">This is your team's home in Aura.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              You can rename it anytime from settings.
+            </p>
 
             <form
               className="mt-6 space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (teamName.trim()) {
-                  setPendingWsName(teamName.trim());
-                  setStep("template");
-                }
+                if (wsName.trim()) setStep("theme");
               }}
             >
               <div>
@@ -316,15 +341,15 @@ function Onboarding() {
                 <Input
                   id="ws"
                   autoFocus
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
+                  value={wsName}
+                  onChange={(e) => setWsName(e.target.value)}
                   placeholder="Acme Inc."
                   className="mt-1.5"
                 />
               </div>
               <Button
                 type="submit"
-                disabled={!teamName.trim()}
+                disabled={!wsName.trim()}
                 className="w-full bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
               >
                 Continue <ArrowRight className="ml-2 h-4 w-4" />
@@ -333,10 +358,58 @@ function Onboarding() {
           </div>
         )}
 
+        {step === "theme" && (
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
+            <button
+              onClick={() => setStep("name")}
+              className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <h1 className="text-2xl font-semibold">Choose your theme</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sets the look across Aura. You can change it later in profile settings.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {THEMES.map((t) => {
+                const Icon = t.icon;
+                const active = theme === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setTheme(t.key)}
+                    className={`group rounded-xl border bg-background p-5 text-left transition-all hover:shadow-pop ${
+                      active
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-aura-gradient-subtle">
+                      <Icon className="h-5 w-5 text-aura-gradient" />
+                    </div>
+                    <h3 className="mt-3 text-sm font-semibold">{t.label}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{t.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={() => setStep("template")}
+                className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
+              >
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {step === "template" && (
           <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
             <button
-              onClick={() => setStep(pendingWsName?.includes("workspace") ? "choose" : "team")}
+              onClick={() => setStep("theme")}
               className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
               disabled={busy}
             >
@@ -385,8 +458,8 @@ function Onboarding() {
                 Cancel
               </Button>
               <Button
-                onClick={() => pendingWsName && finalize(pendingWsName, selectedTemplate)}
-                disabled={busy || !pendingWsName}
+                onClick={() => wsName.trim() && finalize(wsName.trim(), selectedTemplate, theme)}
+                disabled={busy || !wsName.trim()}
                 className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
               >
                 {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
