@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
-import type { Filter, Sort, View } from "@/lib/types";
+import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
 import { toast } from "sonner";
 
 export function useViews(projectId: string | undefined) {
@@ -57,16 +57,30 @@ export function useCreateView(projectId: string) {
 export function useUpdateView(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...patch }: { id: string; name?: string; filters?: Filter[]; sorts?: Sort[]; group_by?: string | null }) => {
+    mutationFn: async ({ id, ...patch }: { id: string; name?: string; filters?: Filter[]; sorts?: Sort[]; group_by?: string | null; config?: ViewConfig }) => {
       const dbPatch: Record<string, unknown> = {};
       if (patch.name !== undefined) dbPatch.name = patch.name;
       if (patch.filters !== undefined) dbPatch.filters = patch.filters;
       if (patch.sorts !== undefined) dbPatch.sorts = patch.sorts;
       if (patch.group_by !== undefined) dbPatch.group_by = patch.group_by;
+      if (patch.config !== undefined) dbPatch.config = patch.config;
       const { error } = await supabase.from("views").update(dbPatch as never).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async ({ id, ...patch }) => {
+      await qc.cancelQueries({ queryKey: ["views", projectId] });
+      const prev = qc.getQueryData<View[]>(["views", projectId]);
+      if (prev) {
+        qc.setQueryData<View[]>(["views", projectId], prev.map((v) =>
+          v.id === id ? { ...v, ...patch } as View : v
+        ));
+      }
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["views", projectId], ctx.prev);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["views", projectId] });
     },
   });
