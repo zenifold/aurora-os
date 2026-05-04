@@ -63,7 +63,7 @@ export function useUpdateProjectWorkflow(projectId: string) {
         .eq("id", projectId)
         .single();
       if (readErr) throw readErr;
-      const settings = ((data?.settings ?? {}) as ProjectSettings) ?? {};
+      const settings = (data?.settings ?? {}) as ProjectSettings;
       const next = { ...settings, status_workflow: workflow };
       const { error } = await supabase
         .from("projects")
