@@ -47,6 +47,8 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const bulk = useBulkUpdateTasks(projectId);
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
+  const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
+  const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
