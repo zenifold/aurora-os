@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { CustomFieldDef, Task } from "@/lib/types";
-import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
+import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
+import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
