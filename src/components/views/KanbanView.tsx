@@ -9,27 +9,31 @@ import {
   useDraggable,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import type { Task } from "@/lib/types";
+import type { Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
-import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import { colorForTask } from "@/lib/view-config";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 
 interface Props {
   projectId: string;
   tasks: Task[];
+  viewConfig?: ViewConfig;
   onTaskClick: (id: string) => void;
 }
 
-export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
+export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: Props) {
   const update = useUpdateTask(projectId);
   const create = useCreateTask(projectId);
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const cardFields = viewConfig.cardFields ?? ["priority", "due_date"];
+  const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
@@ -69,6 +73,8 @@ export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
               overLimit={overLimit}
               tasks={list}
               indicators={indicators}
+              cardFields={cardFields}
+              colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
               onTaskClick={onTaskClick}
             />
@@ -87,6 +93,8 @@ function Column({
   overLimit,
   tasks,
   indicators,
+  cardFields,
+  colorFor,
   onAdd,
   onTaskClick,
 }: {
@@ -97,6 +105,8 @@ function Column({
   overLimit: boolean;
   tasks: Task[];
   indicators?: Map<string, { blockedBy: number; blocking: number }>;
+  cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
+  colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
 }) {
@@ -135,7 +145,14 @@ function Column({
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {tasks.map((t) => (
-          <Card key={t.id} task={t} onClick={() => onTaskClick(t.id)} indicator={indicators?.get(t.id)} />
+          <Card
+            key={t.id}
+            task={t}
+            cardFields={cardFields}
+            accent={colorFor(t)}
+            onClick={() => onTaskClick(t.id)}
+            indicator={indicators?.get(t.id)}
+          />
         ))}
         {adding && (
           <Input
@@ -169,10 +186,14 @@ function Column({
 
 function Card({
   task,
+  cardFields,
+  accent,
   onClick,
   indicator,
 }: {
   task: Task;
+  cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
+  accent: string | null;
   onClick: () => void;
   indicator?: { blockedBy: number; blocking: number };
 }) {
@@ -180,11 +201,20 @@ function Card({
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
+  const showPriority = cardFields.includes("priority") && priority;
+  const showDue = cardFields.includes("due_date") && task.due_date;
+  const showAssignees = cardFields.includes("assignees") && task.assignee_ids.length > 0;
+  const showTags = cardFields.includes("tags") && task.tags.length > 0;
+  const hasFooter = showPriority || showDue || showAssignees || showTags;
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 }}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.4 : 1,
+        borderLeft: accent ? `3px solid ${accent}` : undefined,
+      }}
       {...listeners}
       {...attributes}
       onClick={(e) => {
@@ -227,9 +257,9 @@ function Card({
         <p className="line-clamp-2 text-sm font-medium">{task.title}</p>
       </div>
 
-      {(task.due_date || priority) && (
-        <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-          {priority && (
+      {hasFooter && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {showPriority && priority && (
             <span
               className="inline-flex items-center gap-1 rounded px-1.5 py-0.5"
               style={{ background: `${priority.color}22`, color: priority.color }}
@@ -237,10 +267,22 @@ function Card({
               {priority.label}
             </span>
           )}
-          {task.due_date && (
+          {showDue && task.due_date && (
             <span className="inline-flex items-center gap-1">
               <CalendarIcon className="h-3 w-3" />
               {format(parseISO(task.due_date), "MMM d")}
+            </span>
+          )}
+          {showAssignees && (
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {task.assignee_ids.length}
+            </span>
+          )}
+          {showTags && (
+            <span className="inline-flex items-center gap-1">
+              <Tag className="h-3 w-3" />
+              {task.tags.slice(0, 2).join(", ")}{task.tags.length > 2 ? "…" : ""}
             </span>
           )}
         </div>

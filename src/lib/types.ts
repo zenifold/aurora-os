@@ -70,13 +70,36 @@ export interface View {
   workspace_id: string;
   name: string;
   view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline";
-  config: {
-    columns?: Array<{ key: string; width?: number; visible?: boolean }>;
-  };
+  config: ViewConfig;
   filters: Filter[];
   sorts: Sort[];
   group_by: string | null;
   is_default: boolean;
+}
+
+export interface ViewColumnConfig {
+  key: string;
+  width?: number;
+  visible?: boolean;
+  order?: number;
+}
+
+export interface ColorRule {
+  id: string;
+  field: "priority" | "status" | "due_date";
+  match: string; // value or "overdue" / "today" / "this_week"
+  color: string; // hex / oklch / css color
+}
+
+export interface ViewConfig {
+  columns?: ViewColumnConfig[];
+  /** Kanban: which compact fields to render on each card */
+  cardFields?: Array<"priority" | "due_date" | "assignees" | "tags">;
+  /** Kanban: collapsed column ids */
+  collapsedColumns?: string[];
+  /** Color row/card by this field */
+  colorBy?: "none" | "priority" | "status" | "due_date";
+  colorRules?: ColorRule[];
 }
 
 export interface Filter {

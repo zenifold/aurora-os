@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import type { CustomFieldDef, Task } from "@/lib/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CustomFieldDef, Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
+import { colorForTask, isColumnVisible } from "@/lib/view-config";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,10 +38,11 @@ interface Props {
   tasks: Task[];
   fields: CustomFieldDef[];
   groupBy: string | null;
+  viewConfig?: ViewConfig;
   onTaskClick: (id: string) => void;
 }
 
-export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Props) {
+export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, onTaskClick }: Props) {
   const create = useCreateTask(projectId);
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
@@ -49,6 +51,13 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
+  const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
+
+  const showStatus = isColumnVisible(viewConfig, "status");
+  const showPriority = isColumnVisible(viewConfig, "priority");
+  const showDue = isColumnVisible(viewConfig, "due");
+  const visibleFields = fields.filter((f) => isColumnVisible(viewConfig, `f:${f.id}`));
+  const visibleColCount = 1 /*title*/ + (showStatus ? 1 : 0) + (showPriority ? 1 : 0) + (showDue ? 1 : 0) + visibleFields.length + 1 /*add*/;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -160,10 +169,10 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
         <colgroup>
           <col style={{ width: widths.select }} />
           <col style={{ width: widths.title }} />
-          <col style={{ width: widths.status }} />
-          <col style={{ width: widths.priority }} />
-          <col style={{ width: widths.due }} />
-          {fields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
+          {showStatus && <col style={{ width: widths.status }} />}
+          {showPriority && <col style={{ width: widths.priority }} />}
+          {showDue && <col style={{ width: widths.due }} />}
+          {visibleFields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
           <col style={{ width: widths.add }} />
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
@@ -175,10 +184,10 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
               />
             </th>
             <ResizableTh colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableTh>
-            <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>
-            <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>
-            <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>
-            {fields.map((f) => (
+            {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
+            {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
+            {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
+            {visibleFields.map((f) => (
               <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
                 {f.name}
               </ResizableTh>
@@ -207,7 +216,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
             <>
               {groupBy && (
                 <tr key={`g-${key}`}>
-                  <td colSpan={5 + fields.length + 1} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {groupBy === "status"
                       ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
                       : key === "__none__" ? "Empty" : key} · {list.length}
@@ -218,10 +227,14 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                 <TaskRow
                   key={t.id}
                   task={t}
-                  fields={fields}
+                  fields={visibleFields}
                   workflow={workflow}
                   selected={selected.has(t.id)}
                   indicator={indicators?.get(t.id)}
+                  showStatus={showStatus}
+                  showPriority={showPriority}
+                  showDue={showDue}
+                  rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
@@ -257,7 +270,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                 </button>
               )}
             </td>
-            <td colSpan={3 + fields.length + 1} />
+            <td colSpan={visibleColCount - 1} />
           </tr>
         </tbody>
       </table>
@@ -325,6 +338,10 @@ function TaskRow({
   workflow,
   selected,
   indicator,
+  showStatus = true,
+  showPriority = true,
+  showDue = true,
+  rowColor = null,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -335,6 +352,10 @@ function TaskRow({
   workflow: WorkflowStatus[];
   selected: boolean;
   indicator?: { blockedBy: number; blocking: number };
+  showStatus?: boolean;
+  showPriority?: boolean;
+  showDue?: boolean;
+  rowColor?: string | null;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -347,14 +368,13 @@ function TaskRow({
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
-  const borderClass = isBlocked
-    ? "border-l-2 border-l-destructive"
-    : isBlocking
-    ? "border-l-2 border-l-primary"
-    : "border-l-2 border-l-transparent";
+  const borderColor = rowColor ?? (isBlocked ? "hsl(var(--destructive))" : isBlocking ? "hsl(var(--primary))" : "transparent");
 
   return (
-    <tr className={`group border-b border-border hover:bg-accent/30 ${borderClass}`}>
+    <tr
+      className="group border-b border-border hover:bg-accent/30"
+      style={{ borderLeft: `2px solid ${borderColor}` }}
+    >
       <td className="px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
       </td>
@@ -409,64 +429,70 @@ function TaskRow({
           </div>
         )}
       </td>
-      <td className="px-3 py-1.5">
-        <Select value={task.status} onValueChange={(v) => onUpdate({ status: v })}>
-          <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-              <span className="text-xs">{status?.label ?? task.status}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                  {s.label}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </td>
-      <td className="px-3 py-1.5">
-        <Select value={task.priority} onValueChange={(v) => onUpdate({ priority: v as Task["priority"] })}>
-          <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: priority?.color }} />
-              <span className="text-xs">{priority?.label}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            {PRIORITY_OPTIONS.map((p) => (
-              <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </td>
-      <td className="px-3 py-1.5">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex h-7 w-full items-center rounded px-2 text-left text-xs hover:bg-accent">
-              {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={task.due_date ? parseISO(task.due_date) : undefined}
-              onSelect={(d) => onUpdate({ due_date: d ? format(d, "yyyy-MM-dd") : null })}
-            />
-            {task.due_date && (
-              <div className="border-t border-border p-2">
-                <Button variant="ghost" size="sm" className="w-full" onClick={() => onUpdate({ due_date: null })}>
-                  Clear
-                </Button>
-              </div>
-            )}
-          </PopoverContent>
-        </Popover>
-      </td>
+      {showStatus && (
+        <td className="px-3 py-1.5">
+          <Select value={task.status} onValueChange={(v) => onUpdate({ status: v })}>
+            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
+                <span className="text-xs">{status?.label ?? task.status}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                    {s.label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </td>
+      )}
+      {showPriority && (
+        <td className="px-3 py-1.5">
+          <Select value={task.priority} onValueChange={(v) => onUpdate({ priority: v as Task["priority"] })}>
+            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: priority?.color }} />
+                <span className="text-xs">{priority?.label}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {PRIORITY_OPTIONS.map((p) => (
+                <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </td>
+      )}
+      {showDue && (
+        <td className="px-3 py-1.5">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex h-7 w-full items-center rounded px-2 text-left text-xs hover:bg-accent">
+                {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={task.due_date ? parseISO(task.due_date) : undefined}
+                onSelect={(d) => onUpdate({ due_date: d ? format(d, "yyyy-MM-dd") : null })}
+              />
+              {task.due_date && (
+                <div className="border-t border-border p-2">
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => onUpdate({ due_date: null })}>
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+        </td>
+      )}
       {fields.map((f) => (
         <td key={f.id} className="px-3 py-1.5">
           <CustomFieldCell
