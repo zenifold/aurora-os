@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { useWorkspaceMembers } from "@/hooks/use-comments";
@@ -173,6 +173,3 @@ export function MentionText({ text }: { text: string }) {
     </>
   );
 }
-
-// Force-import to avoid unused-warning when tree-shaking
-useEffect;
