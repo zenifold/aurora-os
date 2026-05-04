@@ -45,6 +45,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
   const remove = useDeleteTask(projectId);
   const bulk = useBulkUpdateTasks(projectId);
   const createField = useCreateCustomField();
+  const { data: indicators } = useProjectRelationIndicators(projectId);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
