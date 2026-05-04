@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 /**
@@ -8,7 +8,6 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
  * Returns parsed JSON only — actual task insertion happens client-side after preview.
  */
 export const generateTasksFromPrompt = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
     z
       .object({
@@ -19,11 +18,21 @@ export const generateTasksFromPrompt = createServerFn({ method: "POST" })
       })
       .parse(data),
   )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }) => {
+    const authHeader = getRequest()?.headers.get("authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!token) {
+      return { tasks: [], tokens_used: null, model_used: null, error: "Please sign in again before using Magic Add." };
+    }
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const userId = authData.user?.id;
+    if (authError || !userId) {
+      return { tasks: [], tokens_used: null, model_used: null, error: "Your session expired. Please sign in again." };
+    }
 
     // Verify caller is a workspace member
-    const { data: membership } = await supabase
+    const { data: membership } = await supabaseAdmin
       .from("user_roles")
       .select("workspace_id")
       .eq("workspace_id", data.workspace_id)
