@@ -12,7 +12,8 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "@/lib/types";
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
-import { Plus, Calendar as CalendarIcon } from "lucide-react";
+import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 
