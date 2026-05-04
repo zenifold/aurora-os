@@ -111,6 +111,102 @@ export type Database = {
           },
         ]
       }
+      ai_automation_runs: {
+        Row: {
+          automation_id: string
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          output: string | null
+          status: string
+          task_id: string | null
+          tokens_used: number | null
+          trigger_event: string | null
+          workspace_id: string
+        }
+        Insert: {
+          automation_id: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          output?: string | null
+          status?: string
+          task_id?: string | null
+          tokens_used?: number | null
+          trigger_event?: string | null
+          workspace_id: string
+        }
+        Update: {
+          automation_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          output?: string | null
+          status?: string
+          task_id?: string | null
+          tokens_used?: number | null
+          trigger_event?: string | null
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      ai_automations: {
+        Row: {
+          agent_id: string
+          apply_action: string
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          instructions_template: string | null
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          run_count: number
+          trigger_event: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          agent_id: string
+          apply_action?: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions_template?: string | null
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          run_count?: number
+          trigger_event?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          agent_id?: string
+          apply_action?: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instructions_template?: string | null
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          run_count?: number
+          trigger_event?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       ai_task_assignments: {
         Row: {
           agent_id: string
