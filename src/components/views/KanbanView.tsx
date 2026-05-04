@@ -26,6 +26,7 @@ interface Props {
 export function KanbanView({ projectId, tasks, onTaskClick }: Props) {
   const update = useUpdateTask(projectId);
   const create = useCreateTask(projectId);
+  const { data: indicators } = useProjectRelationIndicators(projectId);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   const grouped = useMemo(() => {
