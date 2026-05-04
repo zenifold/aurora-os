@@ -183,7 +183,10 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                 onCheckedChange={(c) => toggleAll(!!c)}
               />
             </th>
-            <th className="sticky-col left-[40px] z-[6] bg-background border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground" style={{ left: widths.select }}>
+            <th
+              className="sticky-col border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              style={{ left: widths.select }}
+            >
               <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
             </th>
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
@@ -299,6 +302,24 @@ function ResizableTh({
   setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   children: React.ReactNode;
 }) {
+  return (
+    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <ResizableThInner colKey={colKey} widths={widths} setWidths={setWidths}>{children}</ResizableThInner>
+    </th>
+  );
+}
+
+function ResizableThInner({
+  colKey,
+  widths,
+  setWidths,
+  children,
+}: {
+  colKey: string;
+  widths: Record<string, number>;
+  setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  children: React.ReactNode;
+}) {
   const startRef = useRef<{ x: number; w: number } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -319,7 +340,7 @@ function ResizableTh({
   };
 
   return (
-    <th className="relative px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <>
       <div className="truncate pr-2">{children}</div>
       <div
         role="separator"
@@ -330,7 +351,7 @@ function ResizableTh({
         onPointerCancel={onPointerUp}
         className="absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize select-none touch-none hover:bg-primary/40"
       />
-    </th>
+    </>
   );
 }
 
