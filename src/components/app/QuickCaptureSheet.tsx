@@ -101,6 +101,8 @@ export function QuickCaptureSheet() {
   const [text, setText] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [overrideDate, setOverrideDate] = useState<string | null>(null);
+  const [taskType, setTaskType] = useState<TaskType>("task");
+  const [parentTaskId, setParentTaskId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -115,13 +117,19 @@ export function QuickCaptureSheet() {
 
   useEffect(() => {
     if (open) {
-      // Slight delay so sheet animation completes before focus.
       setTimeout(() => inputRef.current?.focus(), 200);
     } else {
       setText("");
       setOverrideDate(null);
+      setTaskType("task");
+      setParentTaskId(null);
     }
   }, [open]);
+
+  // Reset parent when type changes (parent must match new type's required parent)
+  useEffect(() => {
+    setParentTaskId(null);
+  }, [taskType, selectedProjectId]);
 
   const parsed = useMemo(
     () => parseInput(text, projects.map((p) => ({ name: p.name }))),
