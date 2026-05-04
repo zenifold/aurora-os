@@ -26,7 +26,7 @@ export function useCreateView(projectId: string) {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { name: string; filters?: Filter[]; sorts?: Sort[]; group_by?: string | null }) => {
+    mutationFn: async (input: { name: string; view_type?: View["view_type"]; filters?: Filter[]; sorts?: Sort[]; group_by?: string | null }) => {
       if (!ws || !user) throw new Error("No workspace");
       const { data, error } = await supabase
         .from("views")
@@ -34,7 +34,7 @@ export function useCreateView(projectId: string) {
           workspace_id: ws.id,
           project_id: projectId,
           name: input.name,
-          view_type: "table",
+          view_type: input.view_type ?? "table",
           filters: (input.filters ?? []) as never,
           sorts: (input.sorts ?? []) as never,
           group_by: input.group_by ?? null,
