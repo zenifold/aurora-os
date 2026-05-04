@@ -107,6 +107,19 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
 
   const groups = groupTasks(tasks, groupBy);
 
+  // Hierarchy tree (only used when not grouping — grouping breaks parent/child semantics)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const tree = useMemo(() => buildTaskTree(tasks), [tasks]);
+  const flat = useMemo(() => flattenTree(tree, collapsed), [tree, collapsed]);
+  const useTree = !groupBy;
+  const toggleCollapse = (id: string) => {
+    setCollapsed((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
+
   const handleAdd = async (status?: string) => {
     if (!newTitle.trim()) {
       setAdding(false);
