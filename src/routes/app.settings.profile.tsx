@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ type ThemePref = "light" | "dark" | "system";
 
 function ProfilePage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const setUITheme = useUIStore((s) => s.setTheme);
   const currentTheme = useUIStore((s) => s.theme);
   const [name, setName] = useState("");
@@ -58,6 +60,7 @@ function ProfilePage() {
     setSaving(false);
     if (error) return toast.error(error.message);
     setUITheme(theme);
+    qc.invalidateQueries({ queryKey: ["profile", user.id] });
     toast.success("Saved");
   };
 

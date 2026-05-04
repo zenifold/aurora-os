@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/hooks/use-profile";
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/hooks/use-projects";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -41,6 +43,7 @@ export function AppSidebar() {
   const setCurrent = useWorkspaceStore((s) => s.setCurrent);
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { data: projects = [] } = useProjects();
@@ -61,6 +64,8 @@ export function AppSidebar() {
   };
 
   const initials = (ws?.name ?? "A").slice(0, 2).toUpperCase();
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "You";
+  const userInitials = (profile?.display_name || user?.email || "?").slice(0, 2).toUpperCase();
 
   if (collapsed) {
     return (
@@ -138,9 +143,21 @@ export function AppSidebar() {
             )}
           </div>
 
-          <div className="mt-auto flex h-8 w-8 items-center justify-center rounded-md bg-aura-gradient">
-            <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => navigate({ to: "/app/profile" })}
+                className="mt-auto flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent/50"
+                aria-label="Profile"
+              >
+                <Avatar className="h-7 w-7">
+                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+                  <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
+                </Avatar>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{displayName}</TooltipContent>
+          </Tooltip>
         </aside>
       </TooltipProvider>
     );
@@ -157,7 +174,7 @@ export function AppSidebar() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{ws?.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+              <p className="truncate text-xs text-muted-foreground">{displayName}</p>
             </div>
             <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -230,13 +247,21 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Brand footer */}
-      <div className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-aura-gradient">
-          <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+      {/* User chip footer */}
+      <button
+        onClick={() => navigate({ to: "/app/profile" })}
+        className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/50"
+      >
+        <Avatar className="h-7 w-7">
+          {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+          <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-medium">{displayName}</p>
+          <p className="truncate text-[10px] text-muted-foreground">{user?.email}</p>
         </div>
-        <span className="text-xs font-medium text-muted-foreground">Aura</span>
-      </div>
+        <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
     </aside>
   );
 }
