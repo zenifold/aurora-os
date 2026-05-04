@@ -60,6 +60,7 @@ function ProfilePage() {
     setSaving(false);
     if (error) return toast.error(error.message);
     setUITheme(theme);
+    qc.invalidateQueries({ queryKey: ["profile", user.id] });
     toast.success("Saved");
   };
 
