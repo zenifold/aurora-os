@@ -88,6 +88,11 @@ export function MagicAddDialog({
         data: { workspace_id: ws.id, prompt: prompt.trim(), max_tasks: maxTasks },
         headers: { authorization: `Bearer ${token}` },
       });
+      const serverError = (res as { error?: unknown })?.error;
+      if (typeof serverError === "string" && serverError) {
+        toast.error(serverError);
+        return;
+      }
       const tasks = (res as { tasks?: unknown })?.tasks;
       if (!Array.isArray(tasks) || tasks.length === 0) {
         toast.error("AI didn't return any tasks. Try rephrasing your prompt.");
