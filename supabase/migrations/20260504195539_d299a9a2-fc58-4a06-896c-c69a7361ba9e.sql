@@ -1,0 +1,1 @@
+revoke execute on function public.notify_task_assignments() from public, anon, authenticated;
