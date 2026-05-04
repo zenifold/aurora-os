@@ -93,7 +93,7 @@ export function NotificationsBell() {
   const handleClick = (n: Notification) => {
     if (!n.read_at) markRead.mutate(n.id);
     setOpen(false);
-    if (n.link) navigate({ to: n.link });
+    if (n.link) navigate({ to: n.link as never });
   };
 
   return (
@@ -137,7 +137,7 @@ export function NotificationsBell() {
             className="w-full text-xs"
             onClick={() => {
               setOpen(false);
-              navigate({ to: "/app/notifications" });
+              navigate({ to: "/app/notifications" as never });
             }}
           >
             View all notifications

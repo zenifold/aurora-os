@@ -83,18 +83,15 @@ function SearchPage() {
     queryKey: ["search-comments", ws?.id, q],
     enabled,
     queryFn: async () => {
+      // Fetch recent comments and filter client-side (jsonb content not directly searchable)
       const { data } = await supabase
         .from("comments")
         .select("id, task_id, content, created_at")
         .eq("workspace_id", ws!.id)
-        .textSearch("content", q, { type: "websearch", config: "english" })
-        .limit(15)
-        .then(async (res) => {
-          // textSearch on jsonb may fail — fall back to empty
-          if (res.error) return { data: [] as typeof res.data };
-          return res;
-        });
-      return data ?? [];
+        .order("created_at", { ascending: false })
+        .limit(200);
+      const needle = q.toLowerCase();
+      return (data ?? []).filter((c) => JSON.stringify(c.content).toLowerCase().includes(needle)).slice(0, 15);
     },
   });
 
