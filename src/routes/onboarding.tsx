@@ -151,7 +151,7 @@ function Onboarding() {
     })();
   }, [user, navigate, setCurrent]);
 
-  const finalize = async (wsName: string, tmplKey: TemplateKey) => {
+  const finalize = async (wsName: string, tmplKey: TemplateKey, themeChoice: ThemeKey) => {
     if (!user) return;
     const tmpl = TEMPLATES.find((t) => t.key === tmplKey)!;
     setBusy(true);
