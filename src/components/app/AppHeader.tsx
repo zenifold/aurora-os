@@ -15,8 +15,6 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function AppHeader() {
   const { user, signOut } = useAuth();
-  const theme = useUIStore((s) => s.theme);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const navigate = useNavigate();
 
