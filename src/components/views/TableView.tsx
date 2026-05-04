@@ -338,6 +338,10 @@ function TaskRow({
   workflow,
   selected,
   indicator,
+  showStatus = true,
+  showPriority = true,
+  showDue = true,
+  rowColor = null,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -348,6 +352,10 @@ function TaskRow({
   workflow: WorkflowStatus[];
   selected: boolean;
   indicator?: { blockedBy: number; blocking: number };
+  showStatus?: boolean;
+  showPriority?: boolean;
+  showDue?: boolean;
+  rowColor?: string | null;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -360,14 +368,13 @@ function TaskRow({
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
-  const borderClass = isBlocked
-    ? "border-l-2 border-l-destructive"
-    : isBlocking
-    ? "border-l-2 border-l-primary"
-    : "border-l-2 border-l-transparent";
+  const borderColor = rowColor ?? (isBlocked ? "hsl(var(--destructive))" : isBlocking ? "hsl(var(--primary))" : "transparent");
 
   return (
-    <tr className={`group border-b border-border hover:bg-accent/30 ${borderClass}`}>
+    <tr
+      className="group border-b border-border hover:bg-accent/30"
+      style={{ borderLeft: `2px solid ${borderColor}` }}
+    >
       <td className="px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
       </td>
