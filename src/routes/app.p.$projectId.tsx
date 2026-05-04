@@ -51,6 +51,7 @@ function ProjectPage() {
   const [shareOpen, setShareOpen] = useState(false);
   const [magicOpen, setMagicOpen] = useState(false);
   const isMobile = useIsMobile();
+  const isOwner = useIsWorkspaceOwner();
 
   // Pick default view
   useEffect(() => {
@@ -74,17 +75,42 @@ function ProjectPage() {
     return applyFiltersAndSorts(tasks, activeView.filters ?? [], activeView.sorts ?? []);
   }, [tasks, activeView]);
 
+  const isLockedForMe = !!activeView?.config?.locked && !isOwner;
+
+  const duplicateAndEdit = async (
+    overrides: Partial<{ filters: Filter[]; sorts: Sort[]; group_by: string | null; config: ViewConfig }>
+  ) => {
+    if (!activeView) return;
+    const res = await createView.mutateAsync({
+      name: `${activeView.name} (copy)`,
+      view_type: activeView.view_type,
+      filters: overrides.filters ?? activeView.filters,
+      sorts: overrides.sorts ?? activeView.sorts,
+      group_by: overrides.group_by !== undefined ? overrides.group_by : activeView.group_by,
+    });
+    setActiveViewId(res.id);
+    toast.success("Duplicated locked view so you can customize");
+  };
+
+  const guard = (fn: () => void, overrides: Parameters<typeof duplicateAndEdit>[0]) => {
+    if (isLockedForMe) {
+      void duplicateAndEdit(overrides);
+      return;
+    }
+    fn();
+  };
+
   const setFilters = (filters: Filter[]) => {
-    if (activeView) updateView.mutate({ id: activeView.id, filters });
+    guard(() => activeView && updateView.mutate({ id: activeView.id, filters }), { filters });
   };
   const setSorts = (sorts: Sort[]) => {
-    if (activeView) updateView.mutate({ id: activeView.id, sorts });
+    guard(() => activeView && updateView.mutate({ id: activeView.id, sorts }), { sorts });
   };
   const setGroupBy = (group_by: string | null) => {
-    if (activeView) updateView.mutate({ id: activeView.id, group_by });
+    guard(() => activeView && updateView.mutate({ id: activeView.id, group_by }), { group_by });
   };
   const setConfig = (config: ViewConfig) => {
-    if (activeView) updateView.mutate({ id: activeView.id, config });
+    guard(() => activeView && updateView.mutate({ id: activeView.id, config }), { config });
   };
 
   const handleSaveAsView = async (name: string) => {
