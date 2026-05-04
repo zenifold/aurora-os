@@ -140,6 +140,7 @@ function ProjectPage() {
         )}
         {activeView?.view_type === "calendar" && (
           <CalendarView
+            projectId={projectId}
             tasks={filteredTasks}
             onTaskClick={(id) => setSelectedTaskId(id)}
           />
