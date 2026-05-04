@@ -162,6 +162,14 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
               </PopoverContent>
             </Popover>
           </FieldRow>
+          <FieldRow label="Repeat">
+            <RecurrencePicker
+              value={task.recurrence ?? null}
+              onChange={(rule) =>
+                update.mutate({ id: task.id, recurrence: rule as never })
+              }
+            />
+          </FieldRow>
         </div>
 
         <Tabs defaultValue="description" className="flex flex-1 flex-col overflow-hidden">
