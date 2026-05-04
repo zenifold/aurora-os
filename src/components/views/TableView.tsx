@@ -219,6 +219,7 @@ export function TableView({ projectId, tasks, fields, groupBy, onTaskClick }: Pr
                   key={t.id}
                   task={t}
                   fields={fields}
+                  workflow={workflow}
                   selected={selected.has(t.id)}
                   indicator={indicators?.get(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
@@ -321,6 +322,7 @@ function ResizableTh({
 function TaskRow({
   task,
   fields,
+  workflow,
   selected,
   indicator,
   onToggleSelect,
@@ -330,6 +332,7 @@ function TaskRow({
 }: {
   task: Task;
   fields: CustomFieldDef[];
+  workflow: WorkflowStatus[];
   selected: boolean;
   indicator?: { blockedBy: number; blocking: number };
   onToggleSelect: (c: boolean) => void;
@@ -338,6 +341,7 @@ function TaskRow({
   onDelete: () => void;
 }) {
   const [titleEdit, setTitleEdit] = useState<string | null>(null);
+  const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
