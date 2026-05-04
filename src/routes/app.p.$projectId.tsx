@@ -105,7 +105,7 @@ function ProjectPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border px-6 py-4">
+      <div className="border-b border-border px-4 py-3 lg:px-6 lg:py-4">
         <div className="flex items-center gap-3">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-lg text-base"
@@ -114,36 +114,52 @@ function ProjectPage() {
             <span className="text-lg font-semibold">{project.name.charAt(0).toUpperCase()}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-semibold leading-tight">{project.name}</h1>
+            <h1 className="truncate text-lg font-semibold leading-tight lg:text-xl">{project.name}</h1>
             {project.description && (
-              <p className="truncate text-sm text-muted-foreground">{project.description}</p>
+              <p className="hidden truncate text-sm text-muted-foreground sm:block">{project.description}</p>
             )}
           </div>
-          <PresenceStack users={presenceUsers} />
-          <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
-            <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Share
-          </Button>
-          {activeView && (
-            <ViewOptions view={activeView} fields={fields} onChange={setConfig} />
-          )}
-          <Button variant="ghost" size="icon" asChild aria-label="Project settings">
+          <div className="hidden items-center gap-2 lg:flex">
+            <PresenceStack users={presenceUsers} />
+            <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
+              <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" /> Share
+            </Button>
+            {activeView && (
+              <ViewOptions view={activeView} fields={fields} onChange={setConfig} />
+            )}
+            <Button variant="ghost" size="icon" asChild aria-label="Project settings">
+              <Link to="/app/p/$projectId/settings" params={{ projectId }}>
+                <Settings className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          {/* Mobile project actions */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            aria-label="Project settings"
+            asChild
+          >
             <Link to="/app/p/$projectId/settings" params={{ projectId }}>
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5" />
             </Link>
           </Button>
         </div>
-        <ViewTabs
-          views={views}
-          activeId={activeViewId}
-          onSelect={setActiveViewId}
-          projectId={projectId}
-        />
+        {!isMobile && (
+          <ViewTabs
+            views={views}
+            activeId={activeViewId}
+            onSelect={setActiveViewId}
+            projectId={projectId}
+          />
+        )}
       </div>
 
-      {activeView?.view_type === "table" && (
+      {!isMobile && activeView?.view_type === "table" && (
         <FilterBar
           filters={activeView.filters ?? []}
           sorts={activeView.sorts ?? []}
@@ -157,30 +173,40 @@ function ProjectPage() {
       )}
 
       <div className="min-h-0 flex-1 overflow-auto">
-        {(!activeView || activeView.view_type === "table") && (
-          <TableView
-            projectId={projectId}
-            tasks={filteredTasks}
-            fields={fields}
-            groupBy={activeView?.group_by ?? null}
-            viewConfig={activeView?.config ?? {}}
-            onTaskClick={(id) => setSelectedTaskId(id)}
-          />
-        )}
-        {activeView?.view_type === "kanban" && (
-          <KanbanView
-            projectId={projectId}
-            tasks={filteredTasks}
-            viewConfig={activeView.config ?? {}}
-            onTaskClick={(id) => setSelectedTaskId(id)}
-          />
-        )}
-        {activeView?.view_type === "calendar" && (
-          <CalendarView
+        {isMobile ? (
+          <MobileTaskList
             projectId={projectId}
             tasks={filteredTasks}
             onTaskClick={(id) => setSelectedTaskId(id)}
           />
+        ) : (
+          <>
+            {(!activeView || activeView.view_type === "table") && (
+              <TableView
+                projectId={projectId}
+                tasks={filteredTasks}
+                fields={fields}
+                groupBy={activeView?.group_by ?? null}
+                viewConfig={activeView?.config ?? {}}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
+            {activeView?.view_type === "kanban" && (
+              <KanbanView
+                projectId={projectId}
+                tasks={filteredTasks}
+                viewConfig={activeView.config ?? {}}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
+            {activeView?.view_type === "calendar" && (
+              <CalendarView
+                projectId={projectId}
+                tasks={filteredTasks}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
+          </>
         )}
       </div>
 
