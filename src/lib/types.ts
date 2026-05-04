@@ -113,6 +113,8 @@ export interface ViewConfig {
   colorRules?: ColorRule[];
   /** When true, only workspace owners can edit filters/sorts/config; others must duplicate. */
   locked?: boolean;
+  /** Canvas view: persisted x/y positions per task id */
+  canvasPositions?: Record<string, { x: number; y: number }>;
 }
 
 export interface Filter {
