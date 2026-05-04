@@ -25,6 +25,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { RichEditor } from "./RichEditor";
+import { RecurrencePicker } from "./RecurrencePicker";
 import { CommentsThread } from "./CommentsThread";
 import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
@@ -160,6 +161,14 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
                 />
               </PopoverContent>
             </Popover>
+          </FieldRow>
+          <FieldRow label="Repeat">
+            <RecurrencePicker
+              value={task.recurrence ?? null}
+              onChange={(rule) =>
+                update.mutate({ id: task.id, recurrence: rule as never })
+              }
+            />
           </FieldRow>
         </div>
 

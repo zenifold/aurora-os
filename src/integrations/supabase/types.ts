@@ -585,6 +585,8 @@ export type Database = {
           position: number
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          recurrence: Json | null
+          recurrence_parent_id: string | null
           start_date: string | null
           status: string
           tags: string[]
@@ -605,6 +607,8 @@ export type Database = {
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id: string
+          recurrence?: Json | null
+          recurrence_parent_id?: string | null
           start_date?: string | null
           status?: string
           tags?: string[]
@@ -625,6 +629,8 @@ export type Database = {
           position?: number
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string
+          recurrence?: Json | null
+          recurrence_parent_id?: string | null
           start_date?: string | null
           status?: string
           tags?: string[]
@@ -645,6 +651,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_recurrence_parent_id_fkey"
+            columns: ["recurrence_parent_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
           {
