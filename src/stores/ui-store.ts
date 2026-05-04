@@ -100,6 +100,8 @@ export const useUIStore = create<UIState>((set, get) => ({
   sidebarCollapsed: false,
   selectedTaskId: null,
   commandOpen: false,
+  mobileDrawerOpen: false,
+  quickCaptureOpen: false,
   toggleTheme: () => {
     const next: Theme = get().resolvedTheme === "dark" ? "light" : "dark";
     get().setTheme(next);
@@ -133,6 +135,8 @@ export const useUIStore = create<UIState>((set, get) => ({
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
   setSelectedTaskId: (selectedTaskId) => set({ selectedTaskId }),
   setCommandOpen: (commandOpen) => set({ commandOpen }),
+  setMobileDrawerOpen: (mobileDrawerOpen) => set({ mobileDrawerOpen }),
+  setQuickCaptureOpen: (quickCaptureOpen) => set({ quickCaptureOpen }),
 }));
 
 if (typeof window !== "undefined" && window.matchMedia) {
