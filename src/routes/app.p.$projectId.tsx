@@ -9,6 +9,7 @@ import { TableView } from "@/components/views/TableView";
 import { KanbanView } from "@/components/views/KanbanView";
 import { CalendarView } from "@/components/views/CalendarView";
 import { ViewTabs } from "@/components/views/ViewTabs";
+import { ViewOptions } from "@/components/views/ViewOptions";
 import { FilterBar } from "@/components/views/FilterBar";
 import { TaskDetailPanel } from "@/components/tasks/TaskDetailPanel";
 import { ShareDialog } from "@/components/app/ShareDialog";
@@ -18,7 +19,7 @@ import { usePresence } from "@/hooks/use-presence";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
-import type { Filter, Sort, View } from "@/lib/types";
+import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
 import { Loader2, Settings, UserPlus, Wand2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -76,6 +77,9 @@ function ProjectPage() {
   const setGroupBy = (group_by: string | null) => {
     if (activeView) updateView.mutate({ id: activeView.id, group_by });
   };
+  const setConfig = (config: ViewConfig) => {
+    if (activeView) updateView.mutate({ id: activeView.id, config });
+  };
 
   const handleSaveAsView = async (name: string) => {
     if (!activeView) return;
@@ -119,6 +123,9 @@ function ProjectPage() {
           <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Share
           </Button>
+          {activeView && (
+            <ViewOptions view={activeView} fields={fields} onChange={setConfig} />
+          )}
           <Button variant="ghost" size="icon" asChild aria-label="Project settings">
             <Link to="/app/p/$projectId/settings" params={{ projectId }}>
               <Settings className="h-4 w-4" />
