@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useProjects } from "@/hooks/use-projects";
+import { useTasks } from "@/hooks/use-tasks";
 import {
   Drawer,
   DrawerContent,
@@ -15,6 +16,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CalendarPlus,
   Tag,
@@ -26,6 +34,7 @@ import {
 } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { haptic } from "@/lib/haptics";
+import { TASK_TYPES, TASK_TYPE_META, PARENT_OF, type TaskType } from "@/lib/task-types";
 
 type ParsedTask = {
   title: string;
@@ -92,6 +101,8 @@ export function QuickCaptureSheet() {
   const [text, setText] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [overrideDate, setOverrideDate] = useState<string | null>(null);
+  const [taskType, setTaskType] = useState<TaskType>("task");
+  const [parentTaskId, setParentTaskId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -106,13 +117,19 @@ export function QuickCaptureSheet() {
 
   useEffect(() => {
     if (open) {
-      // Slight delay so sheet animation completes before focus.
       setTimeout(() => inputRef.current?.focus(), 200);
     } else {
       setText("");
       setOverrideDate(null);
+      setTaskType("task");
+      setParentTaskId(null);
     }
   }, [open]);
+
+  // Reset parent when type changes (parent must match new type's required parent)
+  useEffect(() => {
+    setParentTaskId(null);
+  }, [taskType, selectedProjectId]);
 
   const parsed = useMemo(
     () => parseInput(text, projects.map((p) => ({ name: p.name }))),
@@ -127,7 +144,23 @@ export function QuickCaptureSheet() {
         ? projects.find((p) => p.id === selectedProjectId) ?? null
         : null;
 
-  const canCreate = parsed.title.length > 0 && !!effectiveProject && !!ws && !!user;
+  // Tasks in selected project, used for the parent picker
+  const { data: projectTasks = [] } = useTasks(effectiveProject?.id);
+  const requiredParentType = PARENT_OF[taskType];
+  const validParents = useMemo(
+    () => (requiredParentType
+      ? projectTasks.filter((t) => (t.task_type ?? "task") === requiredParentType)
+      : []),
+    [projectTasks, requiredParentType]
+  );
+
+  const needsParent = requiredParentType !== null;
+  const canCreate =
+    parsed.title.length > 0 &&
+    !!effectiveProject &&
+    !!ws &&
+    !!user &&
+    (!needsParent || !!parentTaskId);
 
   const handleCreate = async (keepOpen = false) => {
     if (!canCreate || !effectiveProject) return;
@@ -151,10 +184,12 @@ export function QuickCaptureSheet() {
         created_by: user!.id,
         tags: parsed.tags,
         due_date: effectiveDate,
+        task_type: taskType,
+        parent_task_id: parentTaskId,
       } as never);
       if (error) throw error;
       haptic("success");
-      toast.success("Task added");
+      toast.success(`${TASK_TYPE_META[taskType].label} added`);
       qc.invalidateQueries({ queryKey: ["tasks", effectiveProject.id] });
       qc.invalidateQueries({ queryKey: ["my-tasks"] });
       setText("");
@@ -188,16 +223,76 @@ export function QuickCaptureSheet() {
         </DrawerHeader>
 
         <div className="space-y-3 px-4">
+          {/* Type segmented selector */}
+          <div className="flex items-center gap-1 rounded-md border border-border bg-muted/30 p-0.5">
+            {TASK_TYPES.map((t) => {
+              const meta = TASK_TYPE_META[t];
+              const Icon = meta.icon;
+              const active = taskType === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTaskType(t)}
+                  className={`flex flex-1 items-center justify-center gap-1 rounded px-2 py-1.5 text-xs font-medium transition ${
+                    active ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  style={active ? { color: meta.color } : undefined}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{meta.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
           <Input
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Buy milk tomorrow @personal #errands"
+            placeholder={
+              taskType === "initiative" ? "Launch Q3 product line" :
+              taskType === "epic" ? "Build checkout v2" :
+              taskType === "subtask" ? "Set up webhook endpoints" :
+              "Buy milk tomorrow @personal #errands"
+            }
             className="h-12 text-base"
             onKeyDown={(e) => {
               if (e.key === "Enter") handleCreate(false);
             }}
           />
+
+          {/* Parent picker (required for epic/task/subtask) */}
+          {needsParent && (
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Parent {TASK_TYPE_META[requiredParentType!].label.toLowerCase()}
+                {!parentTaskId && <span className="text-destructive"> *</span>}
+              </p>
+              <Select
+                value={parentTaskId ?? ""}
+                onValueChange={(v) => setParentTaskId(v || null)}
+                disabled={validParents.length === 0}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue
+                    placeholder={
+                      validParents.length === 0
+                        ? `No ${TASK_TYPE_META[requiredParentType!].label.toLowerCase()} in this project yet`
+                        : `Pick a ${TASK_TYPE_META[requiredParentType!].label.toLowerCase()}`
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {validParents.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Parsed chips */}
           {(effectiveDate || parsed.tags.length > 0 || parsed.projectName) && (

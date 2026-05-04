@@ -11,6 +11,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
+import { getTaskTypeMeta } from "@/lib/task-types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
@@ -207,13 +208,21 @@ function Card({
   const showTags = cardFields.includes("tags") && task.tags.length > 0;
   const hasFooter = showPriority || showDue || showAssignees || showTags;
 
+  const typeMeta = getTaskTypeMeta(task.task_type);
+  const TypeIcon = typeMeta.icon;
+  const isInitiative = typeMeta.type === "initiative";
+  const isEpic = typeMeta.type === "epic";
+  const isSubtask = typeMeta.type === "subtask";
+  const childCount = task.child_count ?? 0;
+  const completedCount = task.completed_child_count ?? 0;
+
   return (
     <div
       ref={setNodeRef}
       style={{
         transform: CSS.Translate.toString(transform),
         opacity: isDragging ? 0.4 : 1,
-        borderLeft: accent ? `3px solid ${accent}` : undefined,
+        borderLeft: `${isInitiative ? 4 : isEpic ? 3 : 2}px solid ${accent ?? typeMeta.color}`,
       }}
       {...listeners}
       {...attributes}
@@ -223,7 +232,9 @@ function Card({
           onClick();
         }
       }}
-      className="relative cursor-grab overflow-hidden rounded-md border border-border bg-card p-2.5 text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+      className={`relative cursor-grab overflow-hidden rounded-md border border-border bg-card text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
+        isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"
+      }`}
     >
       {/* Right-edge dependency strip */}
       {(isBlocked || isBlocking) && (
@@ -242,6 +253,11 @@ function Card({
       )}
 
       <div className="flex items-start gap-1.5">
+        <TypeIcon
+          className={`mt-0.5 shrink-0 ${isInitiative ? "h-4 w-4" : "h-3.5 w-3.5"}`}
+          style={{ color: typeMeta.color }}
+          aria-label={typeMeta.label}
+        />
         {isBlocked && (
           <ArrowLeftCircle
             className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive"
@@ -254,7 +270,18 @@ function Card({
             aria-label={`Blocking ${indicator?.blocking} task(s)`}
           />
         )}
-        <p className="line-clamp-2 text-sm font-medium">{task.title}</p>
+        <p className={`line-clamp-2 flex-1 ${isInitiative ? "text-sm font-bold" : isSubtask ? "text-xs" : "text-sm font-medium"} ${isSubtask && task.status === "done" ? "line-through text-muted-foreground" : ""}`}>
+          {task.title}
+        </p>
+        {(isInitiative || isEpic) && childCount > 0 && (
+          <span
+            className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+            style={{ background: typeMeta.tint, color: typeMeta.color }}
+            title={`${completedCount} of ${childCount} complete`}
+          >
+            {completedCount}/{childCount}
+          </span>
+        )}
       </div>
 
       {hasFooter && (

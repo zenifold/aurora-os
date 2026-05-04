@@ -6,6 +6,8 @@ import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
 import { colorForTask, isColumnVisible } from "@/lib/view-config";
+import { buildTaskTree, flattenTree, rollupFraction, rollupPercent } from "@/lib/task-tree";
+import { getTaskTypeMeta } from "@/lib/task-types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
@@ -104,6 +106,19 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   }, [fields]);
 
   const groups = groupTasks(tasks, groupBy);
+
+  // Hierarchy tree (only used when not grouping — grouping breaks parent/child semantics)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const tree = useMemo(() => buildTaskTree(tasks), [tasks]);
+  const flat = useMemo(() => flattenTree(tree, collapsed), [tree, collapsed]);
+  const useTree = !groupBy;
+  const toggleCollapse = (id: string) => {
+    setCollapsed((s) => {
+      const n = new Set(s);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
 
   const handleAdd = async (status?: string) => {
     if (!newTitle.trim()) {
@@ -217,18 +232,11 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </thead>
 
         <tbody>
-          {Array.from(groups.entries()).map(([key, list]) => (
-            <>
-              {groupBy && (
-                <tr key={`g-${key}`}>
-                  <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {groupBy === "status"
-                      ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
-                      : key === "__none__" ? "Empty" : key} · {list.length}
-                  </td>
-                </tr>
-              )}
-              {list.map((t) => (
+          {useTree ? (
+            flat.map((node) => {
+              const t = node.task;
+              const hasChildren = node.children.length > 0;
+              return (
                 <TaskRow
                   key={t.id}
                   task={t}
@@ -241,14 +249,53 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showDue={showDue}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   titleStickyLeft={widths.select}
+                  depth={node.depth}
+                  hasChildren={hasChildren}
+                  isCollapsed={collapsed.has(t.id)}
+                  rollup={hasChildren ? rollupFraction(node) : null}
+                  rollupPercent={hasChildren ? rollupPercent(node) : null}
+                  onToggleCollapse={() => toggleCollapse(t.id)}
                   onToggleSelect={(c) => toggleOne(t.id, c)}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
                   onDelete={() => remove.mutate(t.id)}
                 />
-              ))}
-            </>
-          ))}
+              );
+            })
+          ) : (
+            Array.from(groups.entries()).map(([key, list]) => (
+              <>
+                {groupBy && (
+                  <tr key={`g-${key}`}>
+                    <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {groupBy === "status"
+                        ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
+                        : key === "__none__" ? "Empty" : key} · {list.length}
+                    </td>
+                  </tr>
+                )}
+                {list.map((t) => (
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    fields={visibleFields}
+                    workflow={workflow}
+                    selected={selected.has(t.id)}
+                    indicator={indicators?.get(t.id)}
+                    showStatus={showStatus}
+                    showPriority={showPriority}
+                    showDue={showDue}
+                    rowColor={colorForTask(t, viewConfig, statusColorMap)}
+                    titleStickyLeft={widths.select}
+                    onToggleSelect={(c) => toggleOne(t.id, c)}
+                    onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
+                    onClickRow={() => onTaskClick(t.id)}
+                    onDelete={() => remove.mutate(t.id)}
+                  />
+                ))}
+              </>
+            ))
+          )}
 
           {/* Add row */}
           <tr className="border-b border-border">
@@ -367,6 +414,12 @@ function TaskRow({
   showDue = true,
   rowColor = null,
   titleStickyLeft = 40,
+  depth = 0,
+  hasChildren = false,
+  isCollapsed = false,
+  rollup = null,
+  rollupPercent: rollupPct = null,
+  onToggleCollapse,
   onToggleSelect,
   onUpdate,
   onClickRow,
@@ -382,6 +435,12 @@ function TaskRow({
   showDue?: boolean;
   rowColor?: string | null;
   titleStickyLeft?: number;
+  depth?: number;
+  hasChildren?: boolean;
+  isCollapsed?: boolean;
+  rollup?: { done: number; total: number } | null;
+  rollupPercent?: number | null;
+  onToggleCollapse?: () => void;
   onToggleSelect: (c: boolean) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
@@ -394,12 +453,27 @@ function TaskRow({
   const isBlocked = (indicator?.blockedBy ?? 0) > 0;
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
-  const borderColor = rowColor ?? (isBlocked ? "hsl(var(--destructive))" : isBlocking ? "hsl(var(--primary))" : "transparent");
+  const typeMeta = getTaskTypeMeta(task.task_type);
+  const TypeIcon = typeMeta.icon;
+  const indent = typeMeta.indent;
+  // Type color takes precedence over rule-based row color so hierarchy is always visible.
+  const borderColor = typeMeta.color;
+  const borderWidth =
+    typeMeta.type === "initiative" ? 4 :
+    typeMeta.type === "epic" ? 3 :
+    typeMeta.type === "subtask" ? 1 : 2;
+  const rowMinH = typeMeta.rowHeight;
+  const isInitiative = typeMeta.type === "initiative";
+  const isSubtask = typeMeta.type === "subtask";
 
   return (
     <tr
-      className="group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
-      style={{ borderLeft: `2px solid ${borderColor}` }}
+      className={`group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30 ${isInitiative ? "font-semibold" : ""}`}
+      style={{
+        borderLeft: `${borderWidth}px solid ${borderColor}`,
+        height: rowMinH,
+        background: rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+      }}
     >
       <td className="sticky-col px-3 py-1.5">
         <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
@@ -424,34 +498,74 @@ function TaskRow({
             className="h-7 text-sm"
           />
         ) : (
-          <div className="flex items-center gap-2">
-            {isBlocked && (
-              <ArrowLeftCircle
-                className="h-3.5 w-3.5 shrink-0 text-destructive"
-                aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+          <div className="flex flex-col gap-0.5" style={{ paddingLeft: indent }}>
+            <div className="flex items-center gap-1.5">
+              {/* Expand/collapse chevron */}
+              {hasChildren ? (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleCollapse?.(); }}
+                  className="flex h-4 w-4 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label={isCollapsed ? "Expand" : "Collapse"}
+                >
+                  <ChevronRightIcon
+                    className="h-3.5 w-3.5 transition-transform"
+                    style={{ transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)" }}
+                  />
+                </button>
+              ) : (
+                <span className="inline-block h-4 w-4 shrink-0" />
+              )}
+              {/* Type icon */}
+              <TypeIcon
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: typeMeta.color }}
+                aria-label={typeMeta.label}
               />
+              {isBlocked && (
+                <ArrowLeftCircle
+                  className="h-3.5 w-3.5 shrink-0 text-destructive"
+                  aria-label={`Blocked by ${indicator?.blockedBy} task(s)`}
+                />
+              )}
+              {isBlocking && (
+                <ArrowRightCircle
+                  className="h-3.5 w-3.5 shrink-0 text-primary"
+                  aria-label={`Blocking ${indicator?.blocking} task(s)`}
+                />
+              )}
+              <button
+                onClick={onClickRow}
+                className={`flex-1 truncate text-left hover:text-aura-gradient ${isSubtask && task.status === "done" ? "line-through text-muted-foreground" : ""}`}
+              >
+                {task.title}
+              </button>
+              {hasChildren && rollup && rollup.total > 0 && (
+                <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
+                  {rollup.done}/{rollup.total}
+                </span>
+              )}
+              <button
+                onClick={() => setTitleEdit(task.title)}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <span className="text-xs text-muted-foreground">edit</span>
+              </button>
+              <button
+                onClick={onDelete}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+              </button>
+            </div>
+            {/* Roll-up progress bar (parents only) */}
+            {hasChildren && rollupPct !== null && (
+              <div className="ml-[22px] mr-2 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${rollupPct}%`, background: typeMeta.color }}
+                />
+              </div>
             )}
-            {isBlocking && (
-              <ArrowRightCircle
-                className="h-3.5 w-3.5 shrink-0 text-primary"
-                aria-label={`Blocking ${indicator?.blocking} task(s)`}
-              />
-            )}
-            <button onClick={onClickRow} className="flex-1 truncate text-left hover:text-aura-gradient">
-              {task.title}
-            </button>
-            <button
-              onClick={() => setTitleEdit(task.title)}
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <span className="text-xs text-muted-foreground">edit</span>
-            </button>
-            <button
-              onClick={onDelete}
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-            </button>
           </div>
         )}
       </td>

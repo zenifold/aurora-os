@@ -13,6 +13,7 @@ import {
 } from "date-fns";
 import type { Task } from "@/lib/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/types";
+import { getTaskTypeMeta } from "@/lib/task-types";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useUpdateTask } from "@/hooks/use-tasks";
@@ -260,10 +261,12 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
               const width = length * dayPx;
               const status = STATUS_OPTIONS.find((s) => s.value === t.status);
               const priority = PRIORITY_OPTIONS.find((p) => p.value === t.priority);
+              const typeMeta = getTaskTypeMeta(t.task_type);
               const color = colorBy === "priority"
-                ? (priority?.color ?? "var(--muted-foreground)")
-                : (status?.color ?? "var(--muted-foreground)");
+                ? (priority?.color ?? typeMeta.color)
+                : (status?.color ?? typeMeta.color);
               const done = t.status === "done";
+              const barH = typeMeta.barHeight;
               return (
                 <div key={t.id} className="flex border-b border-border/50" style={{ height: ROW_H }}>
                   <div
@@ -280,11 +283,15 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                   </div>
                   <div className="relative flex-1" style={{ width: totalWidth }}>
                     <div
-                      className={`group absolute top-1.5 flex h-7 cursor-grab items-center rounded-md text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""}`}
+                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""}`}
                       style={{
+                        top: (ROW_H - barH) / 2,
+                        height: barH,
                         left,
                         width: Math.max(width, 12),
                         background: `linear-gradient(135deg, ${color}, color-mix(in oklab, ${color} 80%, transparent))`,
+                        borderRadius: t.task_type === "subtask" ? 999 : 6,
+                        border: `1px solid ${typeMeta.color}`,
                       }}
                       onClick={(e) => {
                         if (drag) return;

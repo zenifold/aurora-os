@@ -574,12 +574,15 @@ export type Database = {
       tasks: {
         Row: {
           assignee_ids: string[]
+          child_count: number
           completed_at: string | null
+          completed_child_count: number
           created_at: string
           created_by: string | null
           custom_values: Json
           description: Json | null
           due_date: string | null
+          hierarchy_path: string[]
           id: string
           parent_task_id: string | null
           position: number
@@ -587,21 +590,26 @@ export type Database = {
           project_id: string
           recurrence: Json | null
           recurrence_parent_id: string | null
+          rollup_progress: number | null
           start_date: string | null
           status: string
           tags: string[]
+          task_type: string
           title: string
           updated_at: string
           workspace_id: string
         }
         Insert: {
           assignee_ids?: string[]
+          child_count?: number
           completed_at?: string | null
+          completed_child_count?: number
           created_at?: string
           created_by?: string | null
           custom_values?: Json
           description?: Json | null
           due_date?: string | null
+          hierarchy_path?: string[]
           id?: string
           parent_task_id?: string | null
           position?: number
@@ -609,21 +617,26 @@ export type Database = {
           project_id: string
           recurrence?: Json | null
           recurrence_parent_id?: string | null
+          rollup_progress?: number | null
           start_date?: string | null
           status?: string
           tags?: string[]
+          task_type?: string
           title: string
           updated_at?: string
           workspace_id: string
         }
         Update: {
           assignee_ids?: string[]
+          child_count?: number
           completed_at?: string | null
+          completed_child_count?: number
           created_at?: string
           created_by?: string | null
           custom_values?: Json
           description?: Json | null
           due_date?: string | null
+          hierarchy_path?: string[]
           id?: string
           parent_task_id?: string | null
           position?: number
@@ -631,9 +644,11 @@ export type Database = {
           project_id?: string
           recurrence?: Json | null
           recurrence_parent_id?: string | null
+          rollup_progress?: number | null
           start_date?: string | null
           status?: string
           tags?: string[]
+          task_type?: string
           title?: string
           updated_at?: string
           workspace_id?: string
@@ -970,6 +985,7 @@ export type Database = {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
+      recalc_task_rollup: { Args: { _parent_id: string }; Returns: undefined }
     }
     Enums: {
       field_type:

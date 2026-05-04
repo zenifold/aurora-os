@@ -55,7 +55,12 @@ export function useCreateTask(projectId: string) {
   const qc = useQueryClient();
   const triggerAutomations = useTriggerAutomations();
   return useMutation({
-    mutationFn: async (input: { title: string; status?: string }) => {
+    mutationFn: async (input: {
+      title: string;
+      status?: string;
+      task_type?: "initiative" | "epic" | "task" | "subtask";
+      parent_task_id?: string | null;
+    }) => {
       if (!ws || !user) throw new Error("No workspace");
       const { data: existing } = await supabase
         .from("tasks")
@@ -74,7 +79,9 @@ export function useCreateTask(projectId: string) {
           status: input.status ?? "todo",
           position: nextPos,
           created_by: user.id,
-        })
+          task_type: input.task_type ?? "task",
+          parent_task_id: input.parent_task_id ?? null,
+        } as never)
         .select()
         .single();
       if (error) throw error;

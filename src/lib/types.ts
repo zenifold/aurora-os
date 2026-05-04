@@ -58,6 +58,11 @@ export interface Task {
   completed_at: string | null;
   recurrence?: RecurrenceRule | null;
   recurrence_parent_id?: string | null;
+  task_type?: "initiative" | "epic" | "task" | "subtask";
+  hierarchy_path?: string[];
+  child_count?: number;
+  completed_child_count?: number;
+  rollup_progress?: number | null;
 }
 
 export interface Project {
