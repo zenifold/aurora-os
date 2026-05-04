@@ -63,7 +63,7 @@ export function useUpdateTask(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Task> & { id: string }) => {
-      const { error } = await supabase.from("tasks").update(patch).eq("id", id);
+      const { error } = await supabase.from("tasks").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onMutate: async ({ id, ...patch }) => {
@@ -103,7 +103,7 @@ export function useBulkUpdateTasks(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ ids, patch }: { ids: string[]; patch: Partial<Task> }) => {
-      const { error } = await supabase.from("tasks").update(patch).in("id", ids);
+      const { error } = await supabase.from("tasks").update(patch as never).in("id", ids);
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {

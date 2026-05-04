@@ -40,7 +40,7 @@ export function useCreateCustomField() {
           workspace_id: ws.id,
           name: input.name,
           field_type: input.field_type,
-          options: input.options ? (input.options as unknown as object) : null,
+          options: (input.options ?? null) as never,
           order_index: nextIdx,
         })
         .select()

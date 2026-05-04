@@ -35,8 +35,8 @@ export function useCreateView(projectId: string) {
           project_id: projectId,
           name: input.name,
           view_type: "table",
-          filters: (input.filters ?? []) as unknown as object,
-          sorts: (input.sorts ?? []) as unknown as object,
+          filters: (input.filters ?? []) as never,
+          sorts: (input.sorts ?? []) as never,
           group_by: input.group_by ?? null,
           config: {},
           created_by: user.id,
@@ -63,7 +63,7 @@ export function useUpdateView(projectId: string) {
       if (patch.filters !== undefined) dbPatch.filters = patch.filters;
       if (patch.sorts !== undefined) dbPatch.sorts = patch.sorts;
       if (patch.group_by !== undefined) dbPatch.group_by = patch.group_by;
-      const { error } = await supabase.from("views").update(dbPatch).eq("id", id);
+      const { error } = await supabase.from("views").update(dbPatch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
