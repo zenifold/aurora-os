@@ -518,6 +518,11 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
               {summary.totalDays.toFixed(1)} d · {summary.count} sized
             </Badge>
           )}
+          {conflicts.size > 0 && (
+            <Badge variant="destructive" className="ml-1 gap-1" title="Tasks starting before their predecessor finishes">
+              ⚠ {conflicts.size} conflict{conflicts.size === 1 ? "" : "s"}
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {effortFields.length > 1 && (
