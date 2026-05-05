@@ -137,6 +137,10 @@ function MeetingDetailPage() {
           <StatusPill status={meeting.ai_status} error={meeting.ai_error} />
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <ProjectLinkSelect
+            meetingId={meeting.id}
+            value={meeting.project_id}
+          />
           {dirty && (
             <Button variant="ghost" size="sm" onClick={saveDraft}>
               <Save className="mr-1.5 h-3.5 w-3.5" /> Save
