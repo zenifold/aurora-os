@@ -25,9 +25,10 @@ import { runTransitionActions } from "@/lib/transition-actions";
 import { findTransition } from "@/lib/workflow-engine";
 import { supabase } from "@/integrations/supabase/client";
 import { colorForTask } from "@/lib/view-config";
-import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
