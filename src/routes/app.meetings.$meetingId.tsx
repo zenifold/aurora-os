@@ -12,6 +12,8 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeMeetingTranscript } from "@/server/meeting-analysis.functions";
+import { useAiAgents } from "@/hooks/use-ai";
+import { ParticipantsPanel } from "@/components/meetings/ParticipantsPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,10 @@ import {
   Tags,
   Plus,
   X,
+  Bot,
+  Users,
+  Wand2,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
