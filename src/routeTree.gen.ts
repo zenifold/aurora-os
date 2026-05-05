@@ -52,6 +52,7 @@ import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$pro
 import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$projectId.documents'
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
+import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -270,6 +271,11 @@ const AppPProjectIdAllocationsRoute =
     path: '/allocations',
     getParentRoute: () => AppPProjectIdRoute,
   } as any)
+const ApiPublicPortalTokenRoute = ApiPublicPortalTokenRouteImport.update({
+  id: '/api/public/portal/$token',
+  path: '/api/public/portal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -396,6 +404,7 @@ export interface FileRoutesById {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/documents'
@@ -486,6 +496,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources'
     | '/app/settings'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/documents'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/documents'
@@ -554,6 +566,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -859,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdAllocationsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/api/public/portal/$token': {
+      id: '/api/public/portal/$token'
+      path: '/api/public/portal/$token'
+      fullPath: '/api/public/portal/$token'
+      preLoaderRoute: typeof ApiPublicPortalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -975,6 +995,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
+  ApiPublicPortalTokenRoute: ApiPublicPortalTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
