@@ -481,7 +481,7 @@ function ConvertActionItemDialog({
 
   return (
     <Dialog open={!!item} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Convert to task</DialogTitle>
         </DialogHeader>
