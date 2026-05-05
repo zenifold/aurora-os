@@ -4,6 +4,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import type { Project } from "@/lib/types";
 import { toast } from "sonner";
+import { seedDefaultWorkflow } from "./use-workflow-templates";
 
 export function useProjects() {
   const ws = useWorkspaceStore((s) => s.current);
@@ -71,6 +72,9 @@ export function useCreateProject() {
         sorts: [],
         created_by: user.id,
       });
+
+      // Seed default workflow (3 statuses + all-pair transitions)
+      await seedDefaultWorkflow(ws.id, proj.id);
 
       return proj as Project;
     },
