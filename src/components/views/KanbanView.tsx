@@ -280,13 +280,15 @@ function Card({
   slaPct,
   onClick,
   indicator,
+  isSelected = false,
 }: {
   task: Task;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
   accent: string | null;
   slaPct: number | null;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   indicator?: { blockedBy: number; blocking: number };
+  isSelected?: boolean;
 }) {
   const { setNodeRef, transform, listeners, attributes, isDragging } = useDraggable({ id: task.id });
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
