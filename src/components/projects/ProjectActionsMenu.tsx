@@ -89,8 +89,8 @@ export function ProjectActionsMenu({ projectId }: Props) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/app/notes" search={{ q: "" }}>
-            <StickyNote className={ICON} /> Notes
+          <Link to="/app/meetings">
+            <Mic className={ICON} /> Meetings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
