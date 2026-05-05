@@ -260,6 +260,14 @@ function ProjectPage() {
                 onTaskClick={(id) => setSelectedTaskId(id)}
               />
             )}
+            {activeView?.view_type === "sprint" && (
+              <SprintView
+                projectId={projectId}
+                tasks={filteredTasks}
+                viewConfig={activeView.config ?? {}}
+                onTaskClick={(id) => setSelectedTaskId(id)}
+              />
+            )}
           </>
         )}
       </div>
