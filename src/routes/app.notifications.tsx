@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, ShieldAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/use-notifications";
+import { useMyPendingApprovals, useDecideApproval } from "@/hooks/use-project-workflow";
 import { format, formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
 import { useMemo } from "react";
 
@@ -18,6 +19,8 @@ function bucket(date: Date): string {
 
 function NotificationsPage() {
   const { data: notifications = [], isLoading } = useNotifications();
+  const { data: myApprovals = [] } = useMyPendingApprovals();
+  const decide = useDecideApproval();
   const markAll = useMarkAllNotificationsRead();
   const markRead = useMarkNotificationRead();
   const navigate = useNavigate();
@@ -51,21 +54,70 @@ function NotificationsPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-4">
-        {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
-            ))}
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Bell className="mb-4 h-12 w-12 text-muted-foreground/30" />
-            <h2 className="text-lg font-medium">No notifications yet</h2>
-            <p className="mt-1 text-sm text-muted-foreground">When teammates assign or mention you, it'll show up here.</p>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-3xl space-y-6">
-            {grouped.map(([label, items]) => (
+        <div className="mx-auto max-w-3xl space-y-6">
+          {myApprovals.length > 0 && (
+            <section>
+              <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <ShieldAlert className="h-3.5 w-3.5" /> Approvals waiting on you
+              </h2>
+              <div className="overflow-hidden rounded-lg border border-border">
+                {myApprovals.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3 last:border-b-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">Status transition approval</p>
+                      <p className="text-xs text-muted-foreground">
+                        Requested {formatDistanceToNow(new Date(a.requested_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-destructive"
+                      onClick={() => decide.mutate({ id: a.id, status: "rejected" })}
+                    >
+                      <X className="mr-1 h-3 w-3" /> Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-7 px-2"
+                      onClick={() => decide.mutate({ id: a.id, status: "approved" })}
+                    >
+                      <Check className="mr-1 h-3 w-3" /> Approve
+                    </Button>
+                    {a.task_id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2"
+                        onClick={() => navigate({ to: "/app/my-tasks" })}
+                      >
+                        Open task
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
+              ))}
+            </div>
+          ) : notifications.length === 0 && myApprovals.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <Bell className="mb-4 h-12 w-12 text-muted-foreground/30" />
+              <h2 className="text-lg font-medium">No notifications yet</h2>
+              <p className="mt-1 text-sm text-muted-foreground">When teammates assign or mention you, it'll show up here.</p>
+            </div>
+          ) : (
+            <>
+              {grouped.map(([label, items]) => (
               <section key={label}>
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</h2>
                 <div className="overflow-hidden rounded-lg border border-border">
@@ -95,9 +147,10 @@ function NotificationsPage() {
                   })}
                 </div>
               </section>
-            ))}
-          </div>
-        )}
+              ))}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -14,7 +14,13 @@ import { PRIORITY_OPTIONS } from "@/lib/types";
 import { getTaskTypeMeta } from "@/lib/task-types";
 import { useCreateTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
-import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
+import {
+  useProjectWorkflow,
+  useProjectTransitions,
+  useProjectDwellTimes,
+  DEFAULT_WORKFLOW,
+} from "@/hooks/use-project-workflow";
+import { useTransitionGuard } from "@/hooks/use-transition-guard";
 import { colorForTask } from "@/lib/view-config";
 import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,29 +38,51 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
   const create = useCreateTask(projectId);
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
+  const { data: transitions = [] } = useProjectTransitions(projectId);
+  const { data: dwellTimes } = useProjectDwellTimes(projectId);
+  const guard = useTransitionGuard();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const cardFields = viewConfig.cardFields ?? ["priority", "due_date"];
   const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
+  // Resolve task.status (which may be a name or id) to a workflow status row
+  const findStatusForTask = (t: Task) =>
+    workflow.find((s) => s.id === t.status) ??
+    workflow.find((s) => s.name.toLowerCase() === String(t.status).toLowerCase());
 
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
     for (const s of workflow) map.set(s.id, []);
     for (const t of tasks) {
-      const k = (t.status as string) ?? workflow[0]?.id ?? "todo";
-      if (!map.has(k)) map.set(k, []);
-      map.get(k)!.push(t);
+      const matched =
+        workflow.find((s) => s.id === t.status) ??
+        workflow.find((s) => s.name.toLowerCase() === String(t.status).toLowerCase());
+      const key = matched?.id ?? workflow[0]?.id ?? "todo";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(t);
     }
     return map;
   }, [tasks, workflow]);
 
-  const handleDragEnd = (e: DragEndEvent) => {
+  const handleDragEnd = async (e: DragEndEvent) => {
     const taskId = e.active.id as string;
     const overId = e.over?.id as string | undefined;
     if (!overId) return;
     const target = workflow.find((s) => `col-${s.id}` === overId);
     if (!target) return;
     const task = tasks.find((t) => t.id === taskId);
-    if (!task || task.status === target.id) return;
+    if (!task) return;
+    const fromStatus = findStatusForTask(task);
+    if (fromStatus?.id === target.id) return;
+    const destinationCount = (grouped.get(target.id) ?? []).length;
+    const result = await guard({
+      task,
+      toStatus: target,
+      fromStatus,
+      workflow,
+      transitions,
+      destinationCount,
+    });
+    if (!result.allowed) return;
     update.mutate({ id: taskId, status: target.id });
   };
 
@@ -75,6 +103,8 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
               tasks={list}
               indicators={indicators}
               cardFields={cardFields}
+              slaHours={s.sla_hours}
+              dwellTimes={dwellTimes}
               colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
               onTaskClick={onTaskClick}
@@ -95,6 +125,8 @@ function Column({
   tasks,
   indicators,
   cardFields,
+  slaHours,
+  dwellTimes,
   colorFor,
   onAdd,
   onTaskClick,
@@ -107,6 +139,8 @@ function Column({
   tasks: Task[];
   indicators?: Map<string, { blockedBy: number; blocking: number }> | Record<string, { blockedBy: number; blocking: number }>;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
+  slaHours: number | null;
+  dwellTimes?: Map<string, number>;
   colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
@@ -145,16 +179,21 @@ function Column({
       </div>
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
-        {tasks.map((t) => (
-          <Card
-            key={t.id}
-            task={t}
-            cardFields={cardFields}
-            accent={colorFor(t)}
-            onClick={() => onTaskClick(t.id)}
-            indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
-          />
-        ))}
+        {tasks.map((t) => {
+          const dwell = dwellTimes?.get(t.id);
+          const slaPct = slaHours != null && dwell != null ? dwell / slaHours : null;
+          return (
+            <Card
+              key={t.id}
+              task={t}
+              cardFields={cardFields}
+              accent={colorFor(t)}
+              slaPct={slaPct}
+              onClick={() => onTaskClick(t.id)}
+              indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
+            />
+          );
+        })}
         {adding && (
           <Input
             autoFocus
@@ -189,12 +228,14 @@ function Card({
   task,
   cardFields,
   accent,
+  slaPct,
   onClick,
   indicator,
 }: {
   task: Task;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
   accent: string | null;
+  slaPct: number | null;
   onClick: () => void;
   indicator?: { blockedBy: number; blocking: number };
 }) {
@@ -215,6 +256,15 @@ function Card({
   const isSubtask = typeMeta.type === "subtask";
   const childCount = task.child_count ?? 0;
   const completedCount = task.completed_child_count ?? 0;
+  // SLA aging: green <60%, amber 60-100%, red >100% of allotted time in this status
+  const slaTone =
+    slaPct == null
+      ? null
+      : slaPct >= 1
+        ? "hsl(var(--destructive))"
+        : slaPct >= 0.6
+          ? "hsl(38 92% 50%)"
+          : null;
 
   return (
     <div
@@ -236,6 +286,15 @@ function Card({
         isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"
       }`}
     >
+      {/* SLA aging top bar */}
+      {slaTone && (
+        <span
+          aria-hidden
+          className="absolute left-0 right-0 top-0 h-[2px]"
+          style={{ background: slaTone }}
+          title={`SLA dwell: ${(slaPct! * 100).toFixed(0)}% of budget`}
+        />
+      )}
       {/* Right-edge dependency strip */}
       {(isBlocked || isBlocking) && (
         <span
