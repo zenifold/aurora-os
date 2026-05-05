@@ -284,10 +284,34 @@ function MiniCanvas() {
 
 function ValueBar() {
   const items = [
-    { icon: Github, label: "Open source", sub: "MIT licensed", tint: "from-violet-500/20 to-fuchsia-500/10" },
-    { icon: Key, label: "BYO API key", sub: "via OpenRouter", tint: "from-sky-500/20 to-cyan-500/10" },
-    { icon: Server, label: "Self-hostable", sub: "Your data, your infra", tint: "from-emerald-500/20 to-teal-500/10" },
-    { icon: DollarSign, label: "Fair pricing", sub: "No per-seat AI tax", tint: "from-amber-500/20 to-rose-500/10" },
+    {
+      icon: Github,
+      label: "Open source",
+      sub: "MIT licensed",
+      tint: "from-violet-500/20 to-fuchsia-500/10",
+      iconBg: "bg-violet-500/15 text-violet-500 ring-violet-500/30",
+    },
+    {
+      icon: Key,
+      label: "BYO API key",
+      sub: "via OpenRouter",
+      tint: "from-sky-500/20 to-cyan-500/10",
+      iconBg: "bg-sky-500/15 text-sky-500 ring-sky-500/30",
+    },
+    {
+      icon: Server,
+      label: "Self-hostable",
+      sub: "Your data, your infra",
+      tint: "from-emerald-500/20 to-teal-500/10",
+      iconBg: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30",
+    },
+    {
+      icon: DollarSign,
+      label: "Fair pricing",
+      sub: "No per-seat AI tax",
+      tint: "from-amber-500/20 to-rose-500/10",
+      iconBg: "bg-amber-500/15 text-amber-500 ring-amber-500/30",
+    },
   ];
   return (
     <section className="relative border-y border-border/60 bg-muted/30 py-10">
@@ -301,9 +325,11 @@ function ValueBar() {
             <div
               className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br opacity-50 blur-2xl transition group-hover:opacity-90 ${i.tint}`}
             />
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-aura-gradient-subtle ring-1 ring-border/60">
-                <i.icon className="h-4 w-4 text-aura-gradient" />
+            <div className="relative flex items-center gap-3">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${i.iconBg}`}
+              >
+                <i.icon className="h-4 w-4" strokeWidth={2.25} />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{i.label}</p>
