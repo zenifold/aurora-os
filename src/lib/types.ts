@@ -165,6 +165,8 @@ export interface Project {
   start_date?: string | null;
   target_end_date?: string | null;
   target_margin_pct?: number | null;
+  division_id?: string | null;
+  folder_id?: string | null;
 }
 
 export interface View {
