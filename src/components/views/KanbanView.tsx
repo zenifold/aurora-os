@@ -86,7 +86,25 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
       destinationCount,
     });
     if (!result.allowed) return;
-    update.mutate({ id: taskId, status: target.id });
+    update.mutate(
+      { id: taskId, status: target.id },
+      {
+        onSuccess: async () => {
+          const transition = fromStatus
+            ? findTransition(transitions, fromStatus.id, target.id)
+            : undefined;
+          if (!transition?.actions?.length) return;
+          const { data: u } = await supabase.auth.getUser();
+          await runTransitionActions(transition.actions, {
+            task,
+            fromStatus,
+            toStatus: target,
+            transition,
+            actorId: u.user?.id ?? null,
+          });
+        },
+      },
+    );
   };
 
   return (
