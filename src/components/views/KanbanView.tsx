@@ -21,6 +21,9 @@ import {
   DEFAULT_WORKFLOW,
 } from "@/hooks/use-project-workflow";
 import { useTransitionGuard } from "@/hooks/use-transition-guard";
+import { runTransitionActions } from "@/lib/transition-actions";
+import { findTransition } from "@/lib/workflow-engine";
+import { supabase } from "@/integrations/supabase/client";
 import { colorForTask } from "@/lib/view-config";
 import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
