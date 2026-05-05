@@ -65,8 +65,18 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const showStatus = isColumnVisible(viewConfig, "status");
   const showPriority = isColumnVisible(viewConfig, "priority");
   const showDue = isColumnVisible(viewConfig, "due");
+  const showAssignees = isColumnVisible(viewConfig, "assignees");
+  const showTags = isColumnVisible(viewConfig, "tags");
   const visibleFields = fields.filter((f) => isColumnVisible(viewConfig, `f:${f.id}`));
-  const visibleColCount = 1 /*title*/ + (showStatus ? 1 : 0) + (showPriority ? 1 : 0) + (showDue ? 1 : 0) + visibleFields.length + 1 /*add*/;
+  const visibleColCount =
+    1 +
+    (showStatus ? 1 : 0) +
+    (showPriority ? 1 : 0) +
+    (showDue ? 1 : 0) +
+    (showAssignees ? 1 : 0) +
+    (showTags ? 1 : 0) +
+    visibleFields.length +
+    1;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -80,6 +90,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     status: 144,
     priority: 128,
     due: 128,
+    assignees: 120,
+    tags: 180,
     add: 40,
   };
   fields.forEach((f) => { defaultWidths[`f:${f.id}`] = 160; });
