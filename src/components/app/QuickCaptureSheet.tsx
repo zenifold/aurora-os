@@ -125,6 +125,7 @@ export function QuickCaptureSheet() {
       setOverrideDate(null);
       setTaskType("task");
       setParentTaskId(null);
+      setAssigneeIds([]);
     }
   }, [open]);
 
