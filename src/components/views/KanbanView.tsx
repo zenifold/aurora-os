@@ -237,7 +237,8 @@ function Column({
               cardFields={cardFields}
               accent={colorFor(t)}
               slaPct={slaPct}
-              onClick={() => onTaskClick(t.id)}
+              isSelected={selected.has(t.id)}
+              onClick={(e) => onTaskClick(t.id, e)}
               indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
             />
           );
