@@ -631,6 +631,77 @@ export type Database = {
         }
         Relationships: []
       }
+      task_status_history: {
+        Row: {
+          entered_at: string
+          from_status_id: string | null
+          from_status_name: string | null
+          id: string
+          left_at: string | null
+          task_id: string
+          to_status_id: string | null
+          to_status_name: string | null
+          transition_id: string | null
+          triggered_by: Json
+          workspace_id: string
+        }
+        Insert: {
+          entered_at?: string
+          from_status_id?: string | null
+          from_status_name?: string | null
+          id?: string
+          left_at?: string | null
+          task_id: string
+          to_status_id?: string | null
+          to_status_name?: string | null
+          transition_id?: string | null
+          triggered_by?: Json
+          workspace_id: string
+        }
+        Update: {
+          entered_at?: string
+          from_status_id?: string | null
+          from_status_name?: string | null
+          id?: string
+          left_at?: string | null
+          task_id?: string
+          to_status_id?: string | null
+          to_status_name?: string | null
+          transition_id?: string | null
+          triggered_by?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_status_history_from_status_id_fkey"
+            columns: ["from_status_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_status_history_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_status_history_to_status_id_fkey"
+            columns: ["to_status_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_status_history_transition_id_fkey"
+            columns: ["transition_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_transitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee_ids: string[]
@@ -657,6 +728,7 @@ export type Database = {
           task_type: string
           title: string
           updated_at: string
+          workflow_status_id: string | null
           workspace_id: string
         }
         Insert: {
@@ -684,6 +756,7 @@ export type Database = {
           task_type?: string
           title: string
           updated_at?: string
+          workflow_status_id?: string | null
           workspace_id: string
         }
         Update: {
@@ -711,6 +784,7 @@ export type Database = {
           task_type?: string
           title?: string
           updated_at?: string
+          workflow_status_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -736,10 +810,71 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tasks_workflow_status_id_fkey"
+            columns: ["workflow_status_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transition_approvals: {
+        Row: {
+          approver_id: string
+          comment: string | null
+          decided_at: string | null
+          id: string
+          requested_at: string
+          requested_by: string
+          status: string
+          task_id: string
+          transition_id: string
+          workspace_id: string
+        }
+        Insert: {
+          approver_id: string
+          comment?: string | null
+          decided_at?: string | null
+          id?: string
+          requested_at?: string
+          requested_by: string
+          status?: string
+          task_id: string
+          transition_id: string
+          workspace_id: string
+        }
+        Update: {
+          approver_id?: string
+          comment?: string | null
+          decided_at?: string | null
+          id?: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          task_id?: string
+          transition_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transition_approvals_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transition_approvals_transition_id_fkey"
+            columns: ["transition_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_transitions"
             referencedColumns: ["id"]
           },
         ]
@@ -880,6 +1015,141 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_statuses: {
+        Row: {
+          auto_assign_to: Json | null
+          category: string
+          color: string
+          created_at: string
+          entry_criteria: Json
+          exit_criteria: Json
+          icon: string
+          id: string
+          is_start: boolean
+          is_terminal: boolean
+          name: string
+          order_index: number
+          project_id: string
+          sla_hours: number | null
+          updated_at: string
+          wip_limit: number | null
+          workspace_id: string
+        }
+        Insert: {
+          auto_assign_to?: Json | null
+          category: string
+          color?: string
+          created_at?: string
+          entry_criteria?: Json
+          exit_criteria?: Json
+          icon?: string
+          id?: string
+          is_start?: boolean
+          is_terminal?: boolean
+          name: string
+          order_index?: number
+          project_id: string
+          sla_hours?: number | null
+          updated_at?: string
+          wip_limit?: number | null
+          workspace_id: string
+        }
+        Update: {
+          auto_assign_to?: Json | null
+          category?: string
+          color?: string
+          created_at?: string
+          entry_criteria?: Json
+          exit_criteria?: Json
+          icon?: string
+          id?: string
+          is_start?: boolean
+          is_terminal?: boolean
+          name?: string
+          order_index?: number
+          project_id?: string
+          sla_hours?: number | null
+          updated_at?: string
+          wip_limit?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_statuses_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_transitions: {
+        Row: {
+          actions: Json
+          allowed_role: string | null
+          button_label: string | null
+          confirmation_message: string | null
+          created_at: string
+          from_status_id: string
+          gates: Json
+          id: string
+          permission: string
+          project_id: string
+          to_status_id: string
+          workspace_id: string
+        }
+        Insert: {
+          actions?: Json
+          allowed_role?: string | null
+          button_label?: string | null
+          confirmation_message?: string | null
+          created_at?: string
+          from_status_id: string
+          gates?: Json
+          id?: string
+          permission?: string
+          project_id: string
+          to_status_id: string
+          workspace_id: string
+        }
+        Update: {
+          actions?: Json
+          allowed_role?: string | null
+          button_label?: string | null
+          confirmation_message?: string | null
+          created_at?: string
+          from_status_id?: string
+          gates?: Json
+          id?: string
+          permission?: string
+          project_id?: string
+          to_status_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_transitions_from_status_id_fkey"
+            columns: ["from_status_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_transitions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_transitions_to_status_id_fkey"
+            columns: ["to_status_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_statuses"
             referencedColumns: ["id"]
           },
         ]
@@ -1046,6 +1316,10 @@ export type Database = {
         Returns: boolean
       }
       recalc_task_rollup: { Args: { _parent_id: string }; Returns: undefined }
+      seed_default_workflow: {
+        Args: { _project_id: string; _workspace_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       field_type:
