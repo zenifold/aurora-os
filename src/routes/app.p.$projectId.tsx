@@ -42,7 +42,17 @@ function ProjectPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
   const { data: divisions = [] } = useDivisions();
-  const { data: parentFolder } = useFolder(project?.folder_id ?? undefined);
+  const { data: allFolders = [] } = useFolders();
+  const updateProject = useUpdateProject();
+  const folderChain = useMemo(() => {
+    const chain: { id: string; name: string }[] = [];
+    let cur = project?.folder_id ? allFolders.find((f) => f.id === project.folder_id) : undefined;
+    while (cur) {
+      chain.unshift({ id: cur.id, name: cur.name });
+      cur = cur.parent_id ? allFolders.find((f) => f.id === cur!.parent_id) : undefined;
+    }
+    return chain;
+  }, [project?.folder_id, allFolders]);
   const division = divisions.find((d) => d.id === project?.division_id);
   const { data: tasks = [], isLoading } = useTasks(projectId);
   const { data: views = [] } = useViews(projectId);
