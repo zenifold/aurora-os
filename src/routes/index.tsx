@@ -38,20 +38,20 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aura — The open-source project OS. Bring your own AI." },
+      { title: "Aura — The company OS for agencies & software delivery teams" },
       {
         name: "description",
         content:
-          "Stop renting bloated productivity suites. Aura is open source, self-hostable, and connects to your own OpenRouter key for AI — table, board, canvas, timeline, meetings, all in one.",
+          "From sales to fulfillment in one place. Aura replaces Jira, Notion, Linear, HubSpot, and Fathom for agencies and software delivery teams — pipeline, projects, sprints, meetings, financials, and client portals.",
       },
       {
         property: "og:title",
-        content: "Aura — Open-source project OS, BYO AI key",
+        content: "Aura — Company OS: Sales → Delivery → Ops",
       },
       {
         property: "og:description",
         content:
-          "Get off the $20/seat treadmill. Tables, boards, canvases, timelines, meetings AI — open source, yours forever.",
+          "Pipeline, projects, sprints, meetings AI, financials, and client portals — one open-source platform replacing Jira, Notion, Linear, HubSpot, and Fathom.",
       },
     ],
   }),
