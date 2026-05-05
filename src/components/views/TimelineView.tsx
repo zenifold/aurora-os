@@ -334,11 +334,44 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
         const startStr = format(p.start, "yyyy-MM-dd");
         const endStr = format(p.end, "yyyy-MM-dd");
         const sameRange = isSameDay(p.start, p.end);
+        const orig = taskMap.get(drag.id);
+        const origEnd = orig?.due_date ? parseISO(orig.due_date) : null;
+        const deltaDays = origEnd ? differenceInCalendarDays(p.end, origEnd) : 0;
         updateTask.mutate({
           id: drag.id,
           start_date: sameRange ? null : startStr,
           due_date: endStr,
         } as Partial<Task> & { id: string });
+
+        // Cascade: shift downstream successors when end-date moved later
+        if (cascadeMode && deltaDays !== 0) {
+          const cascaded = collectDownstream(drag.id, edgesByFrom);
+          let count = 0;
+          for (const id of cascaded) {
+            if (id === drag.id) continue;
+            const t = taskMap.get(id);
+            if (!t) continue;
+            const patch: Partial<Task> & { id: string } = { id };
+            let changed = false;
+            if (t.start_date) {
+              patch.start_date = format(addDays(parseISO(t.start_date), deltaDays), "yyyy-MM-dd");
+              changed = true;
+            }
+            if (t.due_date) {
+              patch.due_date = format(addDays(parseISO(t.due_date), deltaDays), "yyyy-MM-dd");
+              changed = true;
+            }
+            if (changed) {
+              updateTask.mutate(patch);
+              count++;
+            }
+          }
+          if (count > 0) {
+            toast.success(
+              `Shifted ${count} downstream item${count === 1 ? "" : "s"} by ${deltaDays > 0 ? "+" : ""}${deltaDays}d`,
+            );
+          }
+        }
       }
       setDrag(null);
       setTimeout(
