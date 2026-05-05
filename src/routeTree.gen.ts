@@ -22,6 +22,7 @@ import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
+import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
@@ -31,6 +32,7 @@ import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.dan
 import { Route as AppSettingsAutomationsRouteImport } from './routes/app.settings.automations'
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
+import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 
 const SignupRoute = SignupRouteImport.update({
@@ -98,6 +100,11 @@ const AppMyTasksRoute = AppMyTasksRouteImport.update({
   path: '/my-tasks',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMeetingsRoute = AppMeetingsRouteImport.update({
+  id: '/meetings',
+  path: '/meetings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -143,6 +150,11 @@ const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
   path: '/p/$projectId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMeetingsMeetingIdRoute = AppMeetingsMeetingIdRouteImport.update({
+  id: '/$meetingId',
+  path: '/$meetingId',
+  getParentRoute: () => AppMeetingsRoute,
+} as any)
 const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -155,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -163,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
@@ -179,6 +193,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -186,6 +201,7 @@ export interface FileRoutesByTo {
   '/app/search': typeof AppSearchRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
+  '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
@@ -204,6 +220,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
+  '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -212,6 +229,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
@@ -231,6 +249,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/signup'
+    | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
@@ -239,6 +258,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/invite/$token'
     | '/app/'
+    | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/settings/ai'
     | '/app/settings/automations'
@@ -255,6 +275,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/signup'
+    | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
@@ -262,6 +283,7 @@ export interface FileRouteTypes {
     | '/app/search'
     | '/invite/$token'
     | '/app'
+    | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/settings/ai'
     | '/app/settings/automations'
@@ -279,6 +301,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/signup'
+    | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
@@ -287,6 +310,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/invite/$token'
     | '/app/'
+    | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/settings/ai'
     | '/app/settings/automations'
@@ -401,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMyTasksRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/meetings': {
+      id: '/app/meetings'
+      path: '/meetings'
+      fullPath: '/app/meetings'
+      preLoaderRoute: typeof AppMeetingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/settings/': {
       id: '/app/settings/'
       path: '/'
@@ -464,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/meetings/$meetingId': {
+      id: '/app/meetings/$meetingId'
+      path: '/$meetingId'
+      fullPath: '/app/meetings/$meetingId'
+      preLoaderRoute: typeof AppMeetingsMeetingIdRouteImport
+      parentRoute: typeof AppMeetingsRoute
+    }
     '/app/p/$projectId/settings': {
       id: '/app/p/$projectId/settings'
       path: '/settings'
@@ -473,6 +511,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppMeetingsRouteChildren {
+  AppMeetingsMeetingIdRoute: typeof AppMeetingsMeetingIdRoute
+}
+
+const AppMeetingsRouteChildren: AppMeetingsRouteChildren = {
+  AppMeetingsMeetingIdRoute: AppMeetingsMeetingIdRoute,
+}
+
+const AppMeetingsRouteWithChildren = AppMeetingsRoute._addFileChildren(
+  AppMeetingsRouteChildren,
+)
 
 interface AppSettingsRouteChildren {
   AppSettingsAiRoute: typeof AppSettingsAiRoute
@@ -513,6 +563,7 @@ const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppMeetingsRoute: typeof AppMeetingsRouteWithChildren
   AppMyTasksRoute: typeof AppMyTasksRoute
   AppNotesRoute: typeof AppNotesRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -524,6 +575,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppMeetingsRoute: AppMeetingsRouteWithChildren,
   AppMyTasksRoute: AppMyTasksRoute,
   AppNotesRoute: AppNotesRoute,
   AppNotificationsRoute: AppNotificationsRoute,
@@ -547,12 +599,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

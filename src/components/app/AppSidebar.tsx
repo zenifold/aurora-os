@@ -44,6 +44,7 @@ import {
   Trash2,
   Pencil,
   StickyNote,
+  Mic,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { Project } from "@/lib/types";
@@ -109,6 +110,7 @@ export function AppSidebar() {
             <IconNav to="/app" icon={Folder} active={path === "/app"} label="Dashboard" />
             <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
             <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
+            <IconNav to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")} label="Meetings" />
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
 
@@ -216,6 +218,7 @@ export function AppSidebar() {
         <NavItem to="/app" icon={Folder} active={path === "/app"}>Dashboard</NavItem>
         <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
         <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
+        <NavItem to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")}>Meetings</NavItem>
         <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
       </nav>
 
