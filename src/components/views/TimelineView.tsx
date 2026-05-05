@@ -347,6 +347,53 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     setScenario((s) => ({ ...s, overrides: {} }));
   };
 
+  // Persist snapshots to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(snapshotsKey(projectId), JSON.stringify(snapshots));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [snapshots, projectId]);
+
+  const saveSnapshot = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const snap: ScenarioSnapshot = {
+      id: crypto.randomUUID(),
+      name: trimmed,
+      state: { ...scenario, enabled: true },
+      savedAt: new Date().toISOString(),
+    };
+    setSnapshots((s) => [...s, snap]);
+    setActiveSnapshotId(snap.id);
+    setNewSnapshotName("");
+    toast.success(`Saved scenario "${trimmed}"`);
+  };
+
+  const loadSnapshot = (id: string) => {
+    const snap = snapshots.find((s) => s.id === id);
+    if (!snap) return;
+    setScenario(snap.state);
+    setActiveSnapshotId(id);
+    setShowScenario(true);
+    toast.success(`Loaded "${snap.name}"`);
+  };
+
+  const deleteSnapshot = (id: string) => {
+    setSnapshots((s) => s.filter((x) => x.id !== id));
+    if (activeSnapshotId === id) setActiveSnapshotId(null);
+  };
+
+  const updateSnapshot = (id: string) => {
+    setSnapshots((s) =>
+      s.map((x) => (x.id === id ? { ...x, state: { ...scenario, enabled: true }, savedAt: new Date().toISOString() } : x)),
+    );
+    toast.success("Snapshot updated");
+  };
+
+  const activeSnapshot = snapshots.find((s) => s.id === activeSnapshotId) ?? null;
+
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
