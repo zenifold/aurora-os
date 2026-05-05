@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as DocsSelfHostRouteImport } from './routes/docs.self-host'
+import { Route as ClientTokenRouteImport } from './routes/client.$token'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -119,6 +120,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const DocsSelfHostRoute = DocsSelfHostRouteImport.update({
   id: '/docs/self-host',
   path: '/docs/self-host',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientTokenRoute = ClientTokenRouteImport.update({
+  id: '/client/$token',
+  path: '/client/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
@@ -357,6 +364,7 @@ export interface FileRoutesByTo {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
@@ -406,6 +414,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
@@ -456,6 +465,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
@@ -502,6 +512,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
@@ -590,6 +602,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  ClientTokenRoute: typeof ClientTokenRoute
   DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRouteWithChildren
@@ -686,6 +699,13 @@ declare module '@tanstack/react-router' {
       path: '/docs/self-host'
       fullPath: '/docs/self-host'
       preLoaderRoute: typeof DocsSelfHostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/$token': {
+      id: '/client/$token'
+      path: '/client/$token'
+      fullPath: '/client/$token'
+      preLoaderRoute: typeof ClientTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
@@ -1046,6 +1066,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  ClientTokenRoute: ClientTokenRoute,
   DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicPortalTokenRoute: ApiPublicPortalTokenRouteWithChildren,
