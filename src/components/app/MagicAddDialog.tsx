@@ -293,6 +293,10 @@ export function MagicAddDialog({
                 </div>
               ))}
             </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Assign all tasks to</p>
+              <AssigneePicker value={assigneeIds} onChange={setAssigneeIds} />
+            </div>
           </div>
         )}
 
