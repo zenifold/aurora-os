@@ -21,6 +21,9 @@ import {
   DEFAULT_WORKFLOW,
 } from "@/hooks/use-project-workflow";
 import { useTransitionGuard } from "@/hooks/use-transition-guard";
+import { runTransitionActions } from "@/lib/transition-actions";
+import { findTransition } from "@/lib/workflow-engine";
+import { supabase } from "@/integrations/supabase/client";
 import { colorForTask } from "@/lib/view-config";
 import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -83,7 +86,25 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
       destinationCount,
     });
     if (!result.allowed) return;
-    update.mutate({ id: taskId, status: target.id });
+    update.mutate(
+      { id: taskId, status: target.id },
+      {
+        onSuccess: async () => {
+          const transition = fromStatus
+            ? findTransition(transitions, fromStatus.id, target.id)
+            : undefined;
+          if (!transition?.actions?.length) return;
+          const { data: u } = await supabase.auth.getUser();
+          await runTransitionActions(transition.actions, {
+            task,
+            fromStatus,
+            toStatus: target,
+            transition,
+            actorId: u.user?.id ?? null,
+          });
+        },
+      },
+    );
   };
 
   return (
