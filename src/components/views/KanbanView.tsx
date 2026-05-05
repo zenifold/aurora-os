@@ -330,12 +330,12 @@ function Card({
       onClick={(e) => {
         if (!isDragging) {
           e.stopPropagation();
-          onClick();
+          onClick(e);
         }
       }}
-      className={`relative cursor-grab overflow-hidden rounded-md border border-border bg-card text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
-        isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"
-      }`}
+      className={`relative cursor-grab overflow-hidden rounded-md border bg-card text-left shadow-sm transition hover:shadow-md active:cursor-grabbing ${
+        isSelected ? "border-primary ring-2 ring-primary/40" : "border-border"
+      } ${isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"}`}
     >
       {/* SLA aging top bar */}
       {slaTone && (
