@@ -20,6 +20,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
@@ -87,6 +88,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotesRoute = AppNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyTasksRoute = AppMyTasksRouteImport.update({
   id: '/my-tasks',
   path: '/my-tasks',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/signup': typeof SignupRoute
   '/app/my-tasks': typeof AppMyTasksRoute
+  '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/notes'
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/notes'
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/signup'
     | '/app/my-tasks'
+    | '/app/notes'
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
@@ -373,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/app/notifications'
       preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notes': {
+      id: '/app/notes'
+      path: '/notes'
+      fullPath: '/app/notes'
+      preLoaderRoute: typeof AppNotesRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/my-tasks': {
@@ -495,6 +514,7 @@ const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppMyTasksRoute: typeof AppMyTasksRoute
+  AppNotesRoute: typeof AppNotesRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSearchRoute: typeof AppSearchRoute
@@ -505,6 +525,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppMyTasksRoute: AppMyTasksRoute,
+  AppNotesRoute: AppNotesRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppSearchRoute: AppSearchRoute,
