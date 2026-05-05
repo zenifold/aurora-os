@@ -16,7 +16,7 @@ function EscalationsPage() {
   const projectMap = new Map(projects.map((p) => [p.id, p]));
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-8">
+    <div className="animate-page-in mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-8">
       <div className="flex items-center gap-3">
         <AlertTriangle className="h-5 w-5 text-[oklch(0.65_0.2_35)]" />
         <h1 className="bg-aura-gradient bg-clip-text text-2xl font-semibold text-transparent">
@@ -28,11 +28,7 @@ function EscalationsPage() {
       </p>
 
       <div className="mt-6 space-y-2">
-        {isLoading && (
-          <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            Loading…
-          </div>
-        )}
+        {isLoading && <ListSkeleton rows={5} />}
         {!isLoading && escalations.length === 0 && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
             No active escalations. 🟢
