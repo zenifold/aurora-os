@@ -321,6 +321,23 @@ function ProjectPage() {
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} projectName={project.name} />
       <MagicAddDialog open={magicOpen} onOpenChange={setMagicOpen} projectId={projectId} />
+      <MoveToFolderDialog
+        open={moveOpen}
+        onOpenChange={setMoveOpen}
+        title="Move project"
+        current={{
+          division_id: project.division_id ?? "",
+          folder_id: project.folder_id ?? null,
+        }}
+        onConfirm={async (target) => {
+          await updateProject.mutateAsync({
+            id: project.id,
+            division_id: target.division_id,
+            folder_id: target.folder_id,
+          });
+          toast.success("Project moved");
+        }}
+      />
     </div>
   );
 }
