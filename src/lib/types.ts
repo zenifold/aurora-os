@@ -65,6 +65,28 @@ export interface Task {
   rollup_progress?: number | null;
 }
 
+export type NoteType = "freeform" | "bullet_list" | "check_list" | "sketch";
+
+export interface Note {
+  id: string;
+  workspace_id: string;
+  project_id: string | null;
+  created_by: string;
+  title: string | null;
+  content: unknown;
+  note_type: NoteType;
+  background_color: string;
+  is_pinned: boolean;
+  is_archived: boolean;
+  converted_task_id: string | null;
+  reminder_at: string | null;
+  collaborator_ids: string[];
+  pin_order: number;
+  manual_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Project {
   id: string;
   workspace_id: string;
