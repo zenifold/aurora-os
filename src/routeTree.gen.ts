@@ -57,6 +57,7 @@ import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$pr
 import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
 import { Route as ApiPublicPortalTokenUploadRouteImport } from './routes/api/public/portal.$token.upload'
 import { Route as ApiPublicPortalTokenSubmitRouteImport } from './routes/api/public/portal.$token.submit'
+import { Route as ApiPublicPortalTokenImpactRouteImport } from './routes/api/public/portal.$token.impact'
 import { Route as ApiPublicPortalTokenDeliverablesRouteImport } from './routes/api/public/portal.$token.deliverables'
 
 const TermsRoute = TermsRouteImport.update({
@@ -303,6 +304,12 @@ const ApiPublicPortalTokenSubmitRoute =
     path: '/submit',
     getParentRoute: () => ApiPublicPortalTokenRoute,
   } as any)
+const ApiPublicPortalTokenImpactRoute =
+  ApiPublicPortalTokenImpactRouteImport.update({
+    id: '/impact',
+    path: '/impact',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
 const ApiPublicPortalTokenDeliverablesRoute =
   ApiPublicPortalTokenDeliverablesRouteImport.update({
     id: '/deliverables',
@@ -358,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
@@ -407,6 +415,7 @@ export interface FileRoutesByTo {
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
@@ -459,6 +468,7 @@ export interface FileRoutesById {
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
@@ -512,6 +522,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/impact'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
   fileRoutesByTo: FileRoutesByTo
@@ -561,6 +572,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/impact'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
   id:
@@ -612,6 +624,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/impact'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
   fileRoutesById: FileRoutesById
@@ -971,6 +984,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPortalTokenSubmitRouteImport
       parentRoute: typeof ApiPublicPortalTokenRoute
     }
+    '/api/public/portal/$token/impact': {
+      id: '/api/public/portal/$token/impact'
+      path: '/impact'
+      fullPath: '/api/public/portal/$token/impact'
+      preLoaderRoute: typeof ApiPublicPortalTokenImpactRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
     '/api/public/portal/$token/deliverables': {
       id: '/api/public/portal/$token/deliverables'
       path: '/deliverables'
@@ -1085,12 +1105,14 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface ApiPublicPortalTokenRouteChildren {
   ApiPublicPortalTokenDeliverablesRoute: typeof ApiPublicPortalTokenDeliverablesRoute
+  ApiPublicPortalTokenImpactRoute: typeof ApiPublicPortalTokenImpactRoute
   ApiPublicPortalTokenSubmitRoute: typeof ApiPublicPortalTokenSubmitRoute
   ApiPublicPortalTokenUploadRoute: typeof ApiPublicPortalTokenUploadRoute
 }
 
 const ApiPublicPortalTokenRouteChildren: ApiPublicPortalTokenRouteChildren = {
   ApiPublicPortalTokenDeliverablesRoute: ApiPublicPortalTokenDeliverablesRoute,
+  ApiPublicPortalTokenImpactRoute: ApiPublicPortalTokenImpactRoute,
   ApiPublicPortalTokenSubmitRoute: ApiPublicPortalTokenSubmitRoute,
   ApiPublicPortalTokenUploadRoute: ApiPublicPortalTokenUploadRoute,
 }
