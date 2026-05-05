@@ -45,6 +45,9 @@ import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
 import { toast } from "sonner";
 import type { Folder } from "@/lib/folder-types";
 import { cn } from "@/lib/utils";
+import { PresenceStack } from "@/components/app/PresenceStack";
+import { usePresence } from "@/hooks/use-presence";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/app/f/$folderId")({
   component: FolderPage,
@@ -72,6 +75,10 @@ function FolderPage() {
   const [moveOpen, setMoveOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
+  const { user } = useAuth();
+  const { users: presenceUsers } = usePresence(`presence:folder:${folderId}`, {
+    display_name: user?.email?.split("@")[0],
+  });
 
   useEffect(() => {
     if (folder) {
@@ -252,6 +259,7 @@ function FolderPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <PresenceStack users={presenceUsers} />
               {editing ? (
                 <>
                   <Button variant="ghost" size="sm" onClick={cancelEdit}>

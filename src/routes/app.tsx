@@ -13,6 +13,7 @@ import { MobileDrawer } from "@/components/app/MobileDrawer";
 import { QuickCaptureSheet } from "@/components/app/QuickCaptureSheet";
 import { OpenRouterFirstRun } from "@/components/app/OpenRouterFirstRun";
 import { Loader2 } from "lucide-react";
+import { useWorkspaceRealtime } from "@/hooks/use-workspace-realtime";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
@@ -25,6 +26,7 @@ function AppLayout() {
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const wsLoading = useWorkspaceStore((s) => s.loading);
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
+  useWorkspaceRealtime();
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
