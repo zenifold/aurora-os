@@ -172,7 +172,7 @@ export interface View {
   project_id: string;
   workspace_id: string;
   name: string;
-  view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline";
+  view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline" | "sprint";
   config: ViewConfig;
   filters: Filter[];
   sorts: Sort[];
