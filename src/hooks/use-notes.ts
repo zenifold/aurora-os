@@ -78,7 +78,7 @@ export function useCreateNote() {
           created_by: user.id,
           title: input.title ?? null,
           note_type: input.note_type ?? "freeform",
-          content: input.content ?? defaultContent,
+          content: (input.content ?? defaultContent) as never,
           background_color: input.background_color ?? "#ffffff",
           project_id: input.project_id ?? null,
         })
@@ -98,7 +98,7 @@ export function useUpdateNote() {
   return useMutation({
     mutationFn: async (input: Partial<Note> & { id: string }) => {
       const { id, ...patch } = input;
-      const { data, error } = await supabase.from("notes").update(patch).eq("id", id).select().single();
+      const { data, error } = await supabase.from("notes").update(patch as never).eq("id", id).select().single();
       if (error) throw error;
       return data as Note;
     },
