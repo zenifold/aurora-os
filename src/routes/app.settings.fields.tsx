@@ -40,12 +40,19 @@ function FieldsPage() {
 
   const submit = async () => {
     if (!name.trim()) return;
-    const opts = type === "select" || type === "multi_select"
-      ? [
-          { id: "opt1", label: "Option 1", color: "#8b5cf6" },
-          { id: "opt2", label: "Option 2", color: "#ec4899" },
-        ]
-      : undefined;
+    let opts;
+    if (type === "select" || type === "multi_select") {
+      opts = [
+        { id: "opt1", label: "Option 1", color: "#8b5cf6" },
+        { id: "opt2", label: "Option 2", color: "#ec4899" },
+      ];
+    } else if (type === "effort") {
+      opts = [
+        { id: "hours", label: "Hours", color: "#0ea5e9" },
+        { id: "days", label: "Days", color: "#22c55e" },
+        { id: "points", label: "Story points", color: "#a855f7" },
+      ];
+    }
     await create.mutateAsync({ name: name.trim(), field_type: type, options: opts });
     setName("");
     setType("text");
@@ -66,7 +73,14 @@ function FieldsPage() {
           <Select value={type} onValueChange={(v) => setType(v as FieldType)}>
             <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {FIELD_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              {FIELD_TYPES.map((t) => (
+                <SelectItem key={t.value} value={t.value}>
+                  <div className="flex flex-col">
+                    <span>{t.label}</span>
+                    {t.hint && <span className="text-[11px] text-muted-foreground">{t.hint}</span>}
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
