@@ -1182,6 +1182,102 @@ export type Database = {
           },
         ]
       }
+      team_members: {
+        Row: {
+          created_at: string
+          hourly_bill_rate: number | null
+          hourly_cost: number | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          role: string
+          seniority: string | null
+          skills: string[]
+          updated_at: string
+          user_id: string
+          weekly_capacity_hours: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          hourly_bill_rate?: number | null
+          hourly_cost?: number | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          role?: string
+          seniority?: string | null
+          skills?: string[]
+          updated_at?: string
+          user_id: string
+          weekly_capacity_hours?: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          hourly_bill_rate?: number | null
+          hourly_cost?: number | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          role?: string
+          seniority?: string | null
+          skills?: string[]
+          updated_at?: string
+          user_id?: string
+          weekly_capacity_hours?: number
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      time_logs: {
+        Row: {
+          created_at: string
+          description: string | null
+          hourly_rate_snapshot: number | null
+          hours: number
+          id: string
+          is_billable: boolean
+          log_date: string
+          project_id: string
+          sprint_id: string | null
+          task_id: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hourly_rate_snapshot?: number | null
+          hours: number
+          id?: string
+          is_billable?: boolean
+          log_date?: string
+          project_id: string
+          sprint_id?: string | null
+          task_id: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hourly_rate_snapshot?: number | null
+          hours?: number
+          id?: string
+          is_billable?: boolean
+          log_date?: string
+          project_id?: string
+          sprint_id?: string | null
+          task_id?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       transition_approvals: {
         Row: {
           approver_id: string
