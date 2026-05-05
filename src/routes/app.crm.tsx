@@ -322,6 +322,20 @@ function CreateDealDialog({
             />
           </div>
           <div className="space-y-2">
+            <Label>Contact</Label>
+            <Select value={form.contact_id || "none"} onValueChange={(v) => setForm({ ...form, contact_id: v === "none" ? "" : v })}>
+              <SelectTrigger><SelectValue placeholder="No contact" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No contact</SelectItem>
+                {contacts.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}{c.company ? ` · ${c.company}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
             <Label>Notes</Label>
             <Textarea
               rows={2}
