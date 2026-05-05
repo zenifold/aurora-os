@@ -138,6 +138,9 @@ export function CommandPalette() {
           <CommandItem value="nav crm contacts" onSelect={() => go(() => navigate({ to: "/app/crm" }))}>
             <Users className="mr-2 h-4 w-4" /> CRM
           </CommandItem>
+          <CommandItem value="nav agent runs ai" onSelect={() => go(() => navigate({ to: "/app/agent-runs" }))}>
+            <Sparkles className="mr-2 h-4 w-4" /> Agent runs
+          </CommandItem>
           <CommandItem value="nav notifications" onSelect={() => go(() => navigate({ to: "/app/notifications" }))}>
             <Bell className="mr-2 h-4 w-4" /> Notifications
           </CommandItem>
