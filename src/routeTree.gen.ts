@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as DocsSelfHostRouteImport } from './routes/docs.self-host'
+import { Route as ClientTokenRouteImport } from './routes/client.$token'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -50,8 +51,12 @@ import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$pro
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
 import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$projectId.documents'
+import { Route as AppPProjectIdClientsRouteImport } from './routes/app.p.$projectId.clients'
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
+import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
+import { Route as ApiPublicPortalTokenSubmitRouteImport } from './routes/api/public/portal.$token.submit'
+import { Route as ApiPublicPortalTokenDeliverablesRouteImport } from './routes/api/public/portal.$token.deliverables'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -116,6 +121,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const DocsSelfHostRoute = DocsSelfHostRouteImport.update({
   id: '/docs/self-host',
   path: '/docs/self-host',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientTokenRoute = ClientTokenRouteImport.update({
+  id: '/client/$token',
+  path: '/client/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -258,6 +268,11 @@ const AppPProjectIdDocumentsRoute = AppPProjectIdDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdClientsRoute = AppPProjectIdClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdChangeOrdersRoute =
   AppPProjectIdChangeOrdersRouteImport.update({
     id: '/change-orders',
@@ -269,6 +284,23 @@ const AppPProjectIdAllocationsRoute =
     id: '/allocations',
     path: '/allocations',
     getParentRoute: () => AppPProjectIdRoute,
+  } as any)
+const ApiPublicPortalTokenRoute = ApiPublicPortalTokenRouteImport.update({
+  id: '/api/public/portal/$token',
+  path: '/api/public/portal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPortalTokenSubmitRoute =
+  ApiPublicPortalTokenSubmitRouteImport.update({
+    id: '/submit',
+    path: '/submit',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenDeliverablesRoute =
+  ApiPublicPortalTokenDeliverablesRouteImport.update({
+    id: '/deliverables',
+    path: '/deliverables',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -291,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
@@ -307,14 +340,18 @@ export interface FileRoutesByFullPath {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -334,6 +371,7 @@ export interface FileRoutesByTo {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
@@ -350,14 +388,18 @@ export interface FileRoutesByTo {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -380,6 +422,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
@@ -396,14 +439,18 @@ export interface FileRoutesById {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -427,6 +474,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
@@ -443,14 +491,18 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/submit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -470,6 +522,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app'
@@ -486,14 +539,18 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources'
     | '/app/settings'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/submit'
   id:
     | '__root__'
     | '/'
@@ -515,6 +572,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/client/$token'
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
@@ -531,14 +589,18 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -552,8 +614,10 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  ClientTokenRoute: typeof ClientTokenRoute
   DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -647,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/docs/self-host'
       fullPath: '/docs/self-host'
       preLoaderRoute: typeof DocsSelfHostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/$token': {
+      id: '/client/$token'
+      path: '/client/$token'
+      fullPath: '/client/$token'
+      preLoaderRoute: typeof ClientTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
@@ -845,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdDocumentsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/clients': {
+      id: '/app/p/$projectId/clients'
+      path: '/clients'
+      fullPath: '/app/p/$projectId/clients'
+      preLoaderRoute: typeof AppPProjectIdClientsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/change-orders': {
       id: '/app/p/$projectId/change-orders'
       path: '/change-orders'
@@ -858,6 +936,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/p/$projectId/allocations'
       preLoaderRoute: typeof AppPProjectIdAllocationsRouteImport
       parentRoute: typeof AppPProjectIdRoute
+    }
+    '/api/public/portal/$token': {
+      id: '/api/public/portal/$token'
+      path: '/api/public/portal/$token'
+      fullPath: '/api/public/portal/$token'
+      preLoaderRoute: typeof ApiPublicPortalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/portal/$token/submit': {
+      id: '/api/public/portal/$token/submit'
+      path: '/submit'
+      fullPath: '/api/public/portal/$token/submit'
+      preLoaderRoute: typeof ApiPublicPortalTokenSubmitRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/deliverables': {
+      id: '/api/public/portal/$token/deliverables'
+      path: '/deliverables'
+      fullPath: '/api/public/portal/$token/deliverables'
+      preLoaderRoute: typeof ApiPublicPortalTokenDeliverablesRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
     }
   }
 }
@@ -905,6 +1004,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 interface AppPProjectIdRouteChildren {
   AppPProjectIdAllocationsRoute: typeof AppPProjectIdAllocationsRoute
   AppPProjectIdChangeOrdersRoute: typeof AppPProjectIdChangeOrdersRoute
+  AppPProjectIdClientsRoute: typeof AppPProjectIdClientsRoute
   AppPProjectIdDocumentsRoute: typeof AppPProjectIdDocumentsRoute
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
@@ -916,6 +1016,7 @@ interface AppPProjectIdRouteChildren {
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdAllocationsRoute: AppPProjectIdAllocationsRoute,
   AppPProjectIdChangeOrdersRoute: AppPProjectIdChangeOrdersRoute,
+  AppPProjectIdClientsRoute: AppPProjectIdClientsRoute,
   AppPProjectIdDocumentsRoute: AppPProjectIdDocumentsRoute,
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
@@ -962,6 +1063,19 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ApiPublicPortalTokenRouteChildren {
+  ApiPublicPortalTokenDeliverablesRoute: typeof ApiPublicPortalTokenDeliverablesRoute
+  ApiPublicPortalTokenSubmitRoute: typeof ApiPublicPortalTokenSubmitRoute
+}
+
+const ApiPublicPortalTokenRouteChildren: ApiPublicPortalTokenRouteChildren = {
+  ApiPublicPortalTokenDeliverablesRoute: ApiPublicPortalTokenDeliverablesRoute,
+  ApiPublicPortalTokenSubmitRoute: ApiPublicPortalTokenSubmitRoute,
+}
+
+const ApiPublicPortalTokenRouteWithChildren =
+  ApiPublicPortalTokenRoute._addFileChildren(ApiPublicPortalTokenRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
@@ -973,8 +1087,10 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  ClientTokenRoute: ClientTokenRoute,
   DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
+  ApiPublicPortalTokenRoute: ApiPublicPortalTokenRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
