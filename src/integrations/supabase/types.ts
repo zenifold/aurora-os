@@ -1525,6 +1525,7 @@ export type Database = {
         | "checkbox"
         | "url"
         | "email"
+        | "effort"
       task_priority: "low" | "medium" | "high" | "urgent"
       view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline"
       workspace_role: "owner" | "member"
@@ -1665,6 +1666,7 @@ export const Constants = {
         "checkbox",
         "url",
         "email",
+        "effort",
       ],
       task_priority: ["low", "medium", "high", "urgent"],
       view_type: ["table", "kanban", "canvas", "calendar", "timeline"],

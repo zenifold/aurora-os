@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import {
   addDays,
   addMonths,
@@ -11,12 +11,31 @@ import {
   startOfMonth,
   subMonths,
 } from "date-fns";
-import type { Task } from "@/lib/types";
-import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/types";
+import type { CustomFieldDef, EffortValue, Task } from "@/lib/types";
+import { PRIORITY_OPTIONS, STATUS_OPTIONS, effortToDays } from "@/lib/types";
 import { getTaskTypeMeta } from "@/lib/task-types";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FlaskConical,
+  RotateCcw,
+  Save,
+  Sparkles,
+  Gauge,
+} from "lucide-react";
 import { useUpdateTask } from "@/hooks/use-tasks";
+import { useCustomFields } from "@/hooks/use-custom-fields";
+import { toast } from "sonner";
 
 interface Props {
   projectId: string;
@@ -25,15 +44,42 @@ interface Props {
 }
 
 type Zoom = "day" | "week" | "month";
+type ColorBy = "priority" | "status" | "effort";
 
 const ZOOM_PX: Record<Zoom, number> = { day: 36, week: 18, month: 8 };
 const ROW_H = 36;
-const LABEL_W = 240;
+const LABEL_W = 260;
+
+interface ScenarioState {
+  enabled: boolean;
+  multiplier: number; // 0.5..3
+  hoursPerDay: number;
+  overrides: Record<string, number>; // taskId -> effort multiplier override
+}
+
+const DEFAULT_SCENARIO: ScenarioState = {
+  enabled: false,
+  multiplier: 1,
+  hoursPerDay: 8,
+  overrides: {},
+};
+
+function readEffort(task: Task, effortFieldId: string | null): EffortValue | null {
+  if (!effortFieldId) return null;
+  const raw = task.custom_values?.[effortFieldId];
+  if (!raw || typeof raw !== "object") return null;
+  const v = raw as { amount?: unknown; unit?: unknown };
+  if (typeof v.amount !== "number") return null;
+  const unit = (v.unit === "hours" || v.unit === "days" || v.unit === "points") ? v.unit : "days";
+  return { amount: v.amount, unit };
+}
 
 export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [zoom, setZoom] = useState<Zoom>("week");
-  const [colorBy, setColorBy] = useState<"priority" | "status">("priority");
+  const [colorBy, setColorBy] = useState<ColorBy>("priority");
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
+  const [scenario, setScenario] = useState<ScenarioState>(DEFAULT_SCENARIO);
+  const [showScenario, setShowScenario] = useState(false);
   const [drag, setDrag] = useState<{
     id: string;
     mode: "move" | "resize-start" | "resize-end";
@@ -44,6 +90,16 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [preview, setPreview] = useState<Record<string, { start: Date; end: Date }>>({});
   const updateTask = useUpdateTask(projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: fields = [] } = useCustomFields();
+  const effortFields = useMemo(
+    () => (fields as CustomFieldDef[]).filter((f) => f.field_type === "effort"),
+    [fields],
+  );
+  const [effortFieldId, setEffortFieldId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!effortFieldId && effortFields.length > 0) setEffortFieldId(effortFields[0].id);
+  }, [effortFields, effortFieldId]);
 
   const dayPx = ZOOM_PX[zoom];
 
@@ -62,10 +118,96 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const visibleTasks = useMemo(
-    () => tasks.filter((t) => t.due_date || t.start_date),
-    [tasks]
+  // Keyboard shortcuts: ←/→ scroll, +/- zoom
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowLeft") {
+        scrollRef.current?.scrollBy({ left: -dayPx * 7, behavior: "smooth" });
+      } else if (e.key === "ArrowRight") {
+        scrollRef.current?.scrollBy({ left: dayPx * 7, behavior: "smooth" });
+      } else if (e.key === "+" || e.key === "=") {
+        setZoom((z) => (z === "month" ? "week" : "day"));
+      } else if (e.key === "-" || e.key === "_") {
+        setZoom((z) => (z === "day" ? "week" : "month"));
+      } else if (e.key.toLowerCase() === "t") {
+        setCursor(startOfMonth(new Date()));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dayPx]);
+
+  // Compute scenario-adjusted range for each task. Rules:
+  //  - if both start_date & due_date present → use them; if scenario, stretch length by multiplier.
+  //  - else if effort > 0 → derive bar from start_date (or due_date - effort, or today).
+  //  - else if only due_date → 1-day bar at due_date.
+  //  - else if only start_date → 1-day bar at start_date.
+  const taskRange = useCallback(
+    (t: Task): { start: Date; end: Date; planned: boolean } | null => {
+      const p = preview[t.id];
+      if (p) return { ...p, planned: false };
+
+      const due = t.due_date ? parseISO(t.due_date) : null;
+      const start = t.start_date ? parseISO(t.start_date) : null;
+      const effort = readEffort(t, effortFieldId);
+      const baseDays = effortToDays(effort, scenario.hoursPerDay);
+      const taskMult = scenario.overrides[t.id] ?? 1;
+      const mult = scenario.enabled ? scenario.multiplier * taskMult : 1;
+      const effortDays = Math.max(0, Math.round(baseDays * mult));
+
+      // both dates → real bar
+      if (start && due) {
+        if (scenario.enabled && effortDays > 0) {
+          // anchor at start_date, length = effortDays (min 1)
+          const len = Math.max(1, effortDays);
+          return { start, end: addDays(start, len - 1), planned: true };
+        }
+        return { start, end: due, planned: false };
+      }
+
+      if (effortDays > 0) {
+        const len = Math.max(1, effortDays);
+        if (start) return { start, end: addDays(start, len - 1), planned: true };
+        if (due) return { start: addDays(due, -(len - 1)), end: due, planned: true };
+        // no anchor: place at today
+        const today = new Date();
+        return { start: today, end: addDays(today, len - 1), planned: true };
+      }
+
+      if (due) return { start: due, end: due, planned: false };
+      if (start) return { start, end: start, planned: false };
+      return null;
+    },
+    [preview, effortFieldId, scenario],
   );
+
+  const visibleTasks = useMemo(
+    () =>
+      tasks.filter((t) => {
+        if (t.due_date || t.start_date) return true;
+        if (effortFieldId && readEffort(t, effortFieldId)) return scenario.enabled;
+        return false;
+      }),
+    [tasks, effortFieldId, scenario.enabled],
+  );
+
+  // Effort summary
+  const summary = useMemo(() => {
+    if (!effortFieldId) return null;
+    let totalDays = 0;
+    let count = 0;
+    for (const t of tasks) {
+      const e = readEffort(t, effortFieldId);
+      if (!e) continue;
+      const baseline = effortToDays(e, scenario.hoursPerDay);
+      const mult = scenario.enabled ? scenario.multiplier * (scenario.overrides[t.id] ?? 1) : 1;
+      totalDays += baseline * mult;
+      count++;
+    }
+    return { totalDays, count };
+  }, [tasks, effortFieldId, scenario]);
 
   // Build month labels & day cells
   const days = useMemo(() => {
@@ -88,16 +230,6 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     }
     return blocks;
   }, [days]);
-
-  const getRange = (t: Task): { start: Date; end: Date } | null => {
-    const p = preview[t.id];
-    if (p) return p;
-    const due = t.due_date ? parseISO(t.due_date) : null;
-    const start = t.start_date ? parseISO(t.start_date) : due;
-    const end = due ?? start;
-    if (!start || !end) return null;
-    return { start, end };
-  };
 
   // Mouse handlers for drag
   useEffect(() => {
@@ -132,12 +264,15 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
         } as Partial<Task> & { id: string });
       }
       setDrag(null);
-      // clear preview for this id after mutation completes
-      setTimeout(() => setPreview((prev) => {
-        const next = { ...prev };
-        delete next[drag.id];
-        return next;
-      }), 300);
+      setTimeout(
+        () =>
+          setPreview((prev) => {
+            const next = { ...prev };
+            delete next[drag.id];
+            return next;
+          }),
+        300,
+      );
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -151,25 +286,95 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const todayOffset = differenceInCalendarDays(new Date(), range.start) * dayPx;
   const todayInRange = todayOffset >= 0 && todayOffset <= totalWidth;
 
+  const applyScenario = async () => {
+    // Persist scenario-adjusted bars to start_date / due_date for each visible task
+    const updates = visibleTasks
+      .map((t) => {
+        const r = taskRange(t);
+        if (!r || !r.planned) return null;
+        return {
+          id: t.id,
+          start_date: format(r.start, "yyyy-MM-dd"),
+          due_date: format(r.end, "yyyy-MM-dd"),
+        };
+      })
+      .filter(Boolean) as Array<{ id: string; start_date: string; due_date: string }>;
+    if (updates.length === 0) {
+      toast.info("No effort-driven tasks to apply.");
+      return;
+    }
+    await Promise.all(
+      updates.map((u) =>
+        updateTask.mutateAsync(u as Partial<Task> & { id: string }),
+      ),
+    );
+    toast.success(`Applied scenario to ${updates.length} task${updates.length === 1 ? "" : "s"}`);
+    setScenario((s) => ({ ...s, overrides: {} }));
+  };
+
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => setCursor(startOfMonth(new Date()))}>
             Today
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCursor(subMonths(cursor, 1))}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setCursor(subMonths(cursor, 1))}
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCursor(addMonths(cursor, 1))}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setCursor(addMonths(cursor, 1))}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <span className="ml-2 text-sm font-medium">{format(cursor, "MMMM yyyy")}</span>
+          {summary && summary.count > 0 && (
+            <Badge variant="secondary" className="ml-2 gap-1">
+              <Gauge className="h-3 w-3" />
+              {summary.totalDays.toFixed(1)} d · {summary.count} sized
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
+          {effortFields.length > 1 && (
+            <Select value={effortFieldId ?? ""} onValueChange={setEffortFieldId}>
+              <SelectTrigger className="h-8 w-[160px] text-xs">
+                <SelectValue placeholder="Effort field" />
+              </SelectTrigger>
+              <SelectContent>
+                {effortFields.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button
+            variant={showScenario ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setShowScenario((s) => !s);
+              if (!scenario.enabled) setScenario((s) => ({ ...s, enabled: true }));
+            }}
+            disabled={!effortFieldId}
+            className="gap-1.5"
+            title={effortFieldId ? "Toggle scenario planning" : "Add a Level of Effort field in Settings → Custom fields"}
+          >
+            <FlaskConical className="h-3.5 w-3.5" />
+            Scenario
+          </Button>
           <div className="flex items-center gap-1 rounded-md border border-border bg-muted/30 p-0.5 text-xs">
-            {(["priority", "status"] as const).map((o) => (
+            {(["priority", "status", "effort"] as const).map((o) => (
               <button
                 key={o}
                 onClick={() => setColorBy(o)}
@@ -193,6 +398,72 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
         </div>
       </div>
 
+      {/* Scenario panel */}
+      {showScenario && effortFieldId && (
+        <div className="flex flex-wrap items-center gap-4 border-b border-border bg-aura-gradient-subtle px-4 py-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="font-medium">Scenario</span>
+            <button
+              className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
+              onClick={() => setScenario((s) => ({ ...s, enabled: !s.enabled }))}
+            >
+              {scenario.enabled ? "● Live" : "○ Off"}
+            </button>
+          </div>
+          <div className="flex min-w-[260px] items-center gap-3">
+            <span className="text-muted-foreground">Effort multiplier</span>
+            <Slider
+              value={[scenario.multiplier * 100]}
+              min={50}
+              max={300}
+              step={10}
+              className="w-44"
+              onValueChange={(v) => setScenario((s) => ({ ...s, multiplier: v[0] / 100 }))}
+            />
+            <span className="w-10 text-right font-mono">{Math.round(scenario.multiplier * 100)}%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">Hours / day</span>
+            <input
+              type="number"
+              min="1"
+              max="24"
+              value={scenario.hoursPerDay}
+              onChange={(e) =>
+                setScenario((s) => ({ ...s, hoursPerDay: Math.max(1, Number(e.target.value) || 8) }))
+              }
+              className="h-7 w-14 rounded border border-border bg-background px-2 text-xs"
+            />
+          </div>
+          <div className="flex-1" />
+          {[0.75, 1, 1.25, 1.5, 2].map((m) => (
+            <button
+              key={m}
+              onClick={() => setScenario((s) => ({ ...s, multiplier: m }))}
+              className={`rounded border px-2 py-1 text-[11px] ${
+                Math.abs(scenario.multiplier - m) < 0.01
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {m === 1 ? "Realistic" : m < 1 ? `Optimistic ${m}×` : `Buffer ${m}×`}
+            </button>
+          ))}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1"
+            onClick={() => setScenario(DEFAULT_SCENARIO)}
+          >
+            <RotateCcw className="h-3 w-3" /> Reset
+          </Button>
+          <Button size="sm" className="h-7 gap-1" onClick={applyScenario}>
+            <Save className="h-3 w-3" /> Apply to dates
+          </Button>
+        </div>
+      )}
+
       {/* Timeline body */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
         <div className="relative" style={{ width: LABEL_W + totalWidth }}>
@@ -203,7 +474,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                 className="sticky left-0 z-30 shrink-0 border-r border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground"
                 style={{ width: LABEL_W }}
               >
-                Task
+                Task {effortFieldId ? "· effort" : ""}
               </div>
               <div className="flex">
                 {monthBlocks.map((b, i) => (
@@ -249,11 +520,13 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
           {/* Rows */}
           {visibleTasks.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-              No tasks with dates yet. Add a due or start date to see them here.
+              {effortFieldId
+                ? "No tasks with dates or effort yet. Add a due date or fill in the Level of Effort field."
+                : "No tasks with dates yet. Add a due or start date — or create a Level of Effort field in Settings → Custom fields to plan with effort."}
             </div>
           ) : (
             visibleTasks.map((t) => {
-              const r = getRange(t);
+              const r = taskRange(t);
               if (!r) return null;
               const startOffset = differenceInCalendarDays(r.start, range.start);
               const length = Math.max(1, differenceInCalendarDays(r.end, r.start) + 1);
@@ -262,34 +535,77 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
               const status = STATUS_OPTIONS.find((s) => s.value === t.status);
               const priority = PRIORITY_OPTIONS.find((p) => p.value === t.priority);
               const typeMeta = getTaskTypeMeta(t.task_type);
-              const color = colorBy === "priority"
-                ? (priority?.color ?? typeMeta.color)
-                : (status?.color ?? typeMeta.color);
+              const effort = readEffort(t, effortFieldId);
+              const effortDays = effortToDays(effort, scenario.hoursPerDay);
+              let color = typeMeta.color;
+              if (colorBy === "priority") color = priority?.color ?? typeMeta.color;
+              else if (colorBy === "status") color = status?.color ?? typeMeta.color;
+              else if (colorBy === "effort") {
+                // gradient from teal (small) → amber → red (huge)
+                if (effortDays === 0) color = "oklch(0.7 0.02 240)";
+                else if (effortDays < 2) color = "oklch(0.7 0.12 180)";
+                else if (effortDays < 5) color = "oklch(0.7 0.14 80)";
+                else if (effortDays < 10) color = "oklch(0.65 0.18 40)";
+                else color = "oklch(0.6 0.22 25)";
+              }
               const done = t.status === "done";
               const barH = typeMeta.barHeight;
+              const taskMult = scenario.overrides[t.id] ?? 1;
               return (
-                <div key={t.id} className="flex border-b border-border/50" style={{ height: ROW_H }}>
+                <div
+                  key={t.id}
+                  className="flex border-b border-border/50"
+                  style={{ height: ROW_H }}
+                >
                   <div
                     className="sticky left-0 z-10 flex shrink-0 items-center gap-2 border-r border-border bg-background px-3 text-sm"
                     style={{ width: LABEL_W }}
                   >
                     <button
                       onClick={() => onTaskClick(t.id)}
-                      className="truncate text-left hover:underline"
+                      className="min-w-0 flex-1 truncate text-left hover:underline"
                       title={t.title}
                     >
                       {t.title}
                     </button>
+                    {effort && (
+                      <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                        {effort.amount}
+                        {effort.unit === "hours" ? "h" : effort.unit === "days" ? "d" : "p"}
+                      </span>
+                    )}
+                    {scenario.enabled && effort && (
+                      <select
+                        value={taskMult}
+                        onChange={(e) =>
+                          setScenario((s) => ({
+                            ...s,
+                            overrides: { ...s.overrides, [t.id]: Number(e.target.value) },
+                          }))
+                        }
+                        className="h-5 shrink-0 rounded border border-border bg-background text-[10px]"
+                        title="Per-task scenario multiplier"
+                      >
+                        <option value={0.5}>0.5×</option>
+                        <option value={0.75}>0.75×</option>
+                        <option value={1}>1×</option>
+                        <option value={1.25}>1.25×</option>
+                        <option value={1.5}>1.5×</option>
+                        <option value={2}>2×</option>
+                      </select>
+                    )}
                   </div>
                   <div className="relative flex-1" style={{ width: totalWidth }}>
                     <div
-                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""}`}
+                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""} ${r.planned ? "ring-1 ring-primary/40" : ""}`}
                       style={{
                         top: (ROW_H - barH) / 2,
                         height: barH,
                         left,
                         width: Math.max(width, 12),
-                        background: `linear-gradient(135deg, ${color}, color-mix(in oklab, ${color} 80%, transparent))`,
+                        background: r.planned
+                          ? `repeating-linear-gradient(45deg, ${color}, ${color} 6px, color-mix(in oklab, ${color} 70%, transparent) 6px, color-mix(in oklab, ${color} 70%, transparent) 12px)`
+                          : `linear-gradient(135deg, ${color}, color-mix(in oklab, ${color} 80%, transparent))`,
                         borderRadius: t.task_type === "subtask" ? 999 : 6,
                         border: `1px solid ${typeMeta.color}`,
                       }}
@@ -300,6 +616,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                       }}
                       onMouseDown={(e) => {
                         if ((e.target as HTMLElement).dataset.handle) return;
+                        if (r.planned) return; // don't drag planned bars; persist via Apply
                         e.preventDefault();
                         setDrag({
                           id: t.id,
@@ -309,40 +626,56 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                           origEnd: r.end,
                         });
                       }}
+                      title={
+                        r.planned
+                          ? "Planned from effort — Apply scenario to commit dates"
+                          : `${format(r.start, "MMM d")} → ${format(r.end, "MMM d")}`
+                      }
                     >
-                      <div
-                        data-handle="start"
-                        className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize rounded-l-md bg-black/20 opacity-0 group-hover:opacity-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDrag({
-                            id: t.id,
-                            mode: "resize-start",
-                            startX: e.clientX,
-                            origStart: r.start,
-                            origEnd: r.end,
-                          });
-                        }}
-                      />
-                      <span className="mx-2 truncate" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
+                      {!r.planned && (
+                        <div
+                          data-handle="start"
+                          className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize rounded-l-md bg-black/20 opacity-0 group-hover:opacity-100"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDrag({
+                              id: t.id,
+                              mode: "resize-start",
+                              startX: e.clientX,
+                              origStart: r.start,
+                              origEnd: r.end,
+                            });
+                          }}
+                        />
+                      )}
+                      <span
+                        className="mx-2 truncate"
+                        style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                      >
                         {t.title}
+                        {r.planned && " ·"}
+                        {r.planned && (
+                          <span className="ml-1 opacity-80">{length}d</span>
+                        )}
                       </span>
-                      <div
-                        data-handle="end"
-                        className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize rounded-r-md bg-black/20 opacity-0 group-hover:opacity-100"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDrag({
-                            id: t.id,
-                            mode: "resize-end",
-                            startX: e.clientX,
-                            origStart: r.start,
-                            origEnd: r.end,
-                          });
-                        }}
-                      />
+                      {!r.planned && (
+                        <div
+                          data-handle="end"
+                          className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize rounded-r-md bg-black/20 opacity-0 group-hover:opacity-100"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDrag({
+                              id: t.id,
+                              mode: "resize-end",
+                              startX: e.clientX,
+                              origStart: r.start,
+                              origEnd: r.end,
+                            });
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
