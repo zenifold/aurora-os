@@ -359,6 +359,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
           </tr>
         </tbody>
       </table>
+      <BulkActionBar projectId={projectId} selected={selected} onClear={() => setSelected(new Set())} />
     </div>
   );
 }
