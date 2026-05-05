@@ -358,6 +358,165 @@ export type Database = {
         }
         Relationships: []
       }
+      client_deliverables: {
+        Row: {
+          client_deadline: string | null
+          client_instructions: string | null
+          client_portal_access_id: string | null
+          created_at: string
+          deliverable_type: string
+          downstream_task_ids: string[]
+          id: string
+          impact_description: string | null
+          max_revisions: number
+          project_id: string
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          revision_count: number
+          submitted_at: string | null
+          submitted_by: string | null
+          submitted_content: Json | null
+          task_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_deadline?: string | null
+          client_instructions?: string | null
+          client_portal_access_id?: string | null
+          created_at?: string
+          deliverable_type: string
+          downstream_task_ids?: string[]
+          id?: string
+          impact_description?: string | null
+          max_revisions?: number
+          project_id: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision_count?: number
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_content?: Json | null
+          task_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_deadline?: string | null
+          client_instructions?: string | null
+          client_portal_access_id?: string | null
+          created_at?: string
+          deliverable_type?: string
+          downstream_task_ids?: string[]
+          id?: string
+          impact_description?: string | null
+          max_revisions?: number
+          project_id?: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          revision_count?: number
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_content?: Json | null
+          task_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_deliverables_client_portal_access_id_fkey"
+            columns: ["client_portal_access_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_deliverables_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "client_portal_access"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_portal_access: {
+        Row: {
+          access_token: string
+          avatar_url: string | null
+          can_see_financials: boolean
+          can_see_team_names: boolean
+          can_see_timeline: boolean
+          company: string | null
+          created_at: string
+          custom_brand_color: string | null
+          email: string
+          id: string
+          invited_at: string
+          invited_by: string | null
+          is_active: boolean
+          last_login_at: string | null
+          name: string
+          project_id: string
+          role: string
+          token_expires_at: string | null
+          updated_at: string
+          visible_task_types: string[]
+          workspace_id: string
+        }
+        Insert: {
+          access_token?: string
+          avatar_url?: string | null
+          can_see_financials?: boolean
+          can_see_team_names?: boolean
+          can_see_timeline?: boolean
+          company?: string | null
+          created_at?: string
+          custom_brand_color?: string | null
+          email: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          is_active?: boolean
+          last_login_at?: string | null
+          name: string
+          project_id: string
+          role?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          visible_task_types?: string[]
+          workspace_id: string
+        }
+        Update: {
+          access_token?: string
+          avatar_url?: string | null
+          can_see_financials?: boolean
+          can_see_team_names?: boolean
+          can_see_timeline?: boolean
+          company?: string | null
+          created_at?: string
+          custom_brand_color?: string | null
+          email?: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          is_active?: boolean
+          last_login_at?: string | null
+          name?: string
+          project_id?: string
+          role?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          visible_task_types?: string[]
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -1077,6 +1236,44 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: []
+      }
+      portal_activity_log: {
+        Row: {
+          activity_type: string
+          client_portal_access_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          project_id: string
+          workspace_id: string
+        }
+        Insert: {
+          activity_type: string
+          client_portal_access_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          project_id: string
+          workspace_id: string
+        }
+        Update: {
+          activity_type?: string
+          client_portal_access_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          project_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_activity_log_client_portal_access_id_fkey"
+            columns: ["client_portal_access_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_access"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
