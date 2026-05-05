@@ -117,3 +117,32 @@ export function AppHeader() {
     </header>
   );
 }
+
+function HubMenu({
+  label,
+  icon,
+  items,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  items: { to: string; label: string }[];
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
+          {icon}
+          {label}
+          <ChevronDown className="h-3 w-3 opacity-60" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-48">
+        {items.map((it, i) => (
+          <DropdownMenuItem key={i} asChild>
+            <Link to={it.to}>{it.label}</Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
