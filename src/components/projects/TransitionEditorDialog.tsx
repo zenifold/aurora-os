@@ -495,3 +495,136 @@ function GateRow({
     </div>
   );
 }
+
+const ACTION_LABELS: Record<string, string> = {
+  notify: "Notify users",
+  set_field: "Set field",
+  post_comment: "Post comment",
+  create_subtask: "Create subtask",
+  webhook: "Call webhook",
+};
+
+function ActionRow({
+  action,
+  onChange,
+  onRemove,
+}: {
+  action: WorkflowAction;
+  onChange: (patch: Record<string, unknown>) => void;
+  onRemove: () => void;
+}) {
+  const cfg = action.config as Record<string, unknown>;
+  const type = action.type as string;
+
+  return (
+    <div className="space-y-2 rounded-md border border-border bg-muted/20 p-2.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium">{ACTION_LABELS[type] ?? type}</span>
+        <button onClick={onRemove} className="text-muted-foreground hover:text-destructive" aria-label="Remove action">
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {type === "notify" && (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-[11px]">
+            <Switch
+              checked={Boolean(cfg.assignees)}
+              onCheckedChange={(c) => onChange({ assignees: c })}
+            />
+            <span className="text-muted-foreground">Notify current assignees</span>
+          </div>
+          <Input
+            value={String(cfg.title ?? "")}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="Notification title"
+            className="h-7 text-xs"
+          />
+          <Input
+            value={String(cfg.body ?? "")}
+            onChange={(e) => onChange({ body: e.target.value })}
+            placeholder="Notification body"
+            className="h-7 text-xs"
+          />
+        </div>
+      )}
+
+      {type === "set_field" && (
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          <Select value={String(cfg.field ?? "priority")} onValueChange={(v) => onChange({ field: v })}>
+            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="priority" className="text-xs">Priority</SelectItem>
+              <SelectItem value="due_date" className="text-xs">Due date (relative days)</SelectItem>
+              <SelectItem value="tags" className="text-xs">Tags (comma list)</SelectItem>
+              <SelectItem value="assignee_ids" className="text-xs">Clear assignees</SelectItem>
+            </SelectContent>
+          </Select>
+          {cfg.field === "priority" && (
+            <Select value={String(cfg.value ?? "high")} onValueChange={(v) => onChange({ value: v })}>
+              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {["low", "medium", "high", "urgent"].map((p) => (
+                  <SelectItem key={p} value={p} className="text-xs">{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {cfg.field === "due_date" && (
+            <Input
+              type="number"
+              value={Number(cfg.relative_days ?? 7)}
+              onChange={(e) => onChange({ relative_days: Number(e.target.value) })}
+              className="h-7 text-xs"
+              placeholder="Days from now"
+            />
+          )}
+          {cfg.field === "tags" && (
+            <Input
+              value={Array.isArray(cfg.value) ? (cfg.value as string[]).join(", ") : ""}
+              onChange={(e) =>
+                onChange({
+                  value: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                  mode: "append",
+                })
+              }
+              placeholder="tag1, tag2"
+              className="h-7 text-xs"
+            />
+          )}
+          {cfg.field === "assignee_ids" && (
+            <div className="flex items-center text-[11px] text-muted-foreground">Will clear all assignees</div>
+          )}
+        </div>
+      )}
+
+      {type === "post_comment" && (
+        <Textarea
+          value={String(cfg.body ?? "")}
+          onChange={(e) => onChange({ body: e.target.value })}
+          placeholder="Comment body"
+          rows={2}
+          className="text-xs"
+        />
+      )}
+
+      {type === "create_subtask" && (
+        <Input
+          value={String(cfg.title ?? "")}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="Subtask title"
+          className="h-7 text-xs"
+        />
+      )}
+
+      {type === "webhook" && (
+        <Input
+          value={String(cfg.url ?? "")}
+          onChange={(e) => onChange({ url: e.target.value })}
+          placeholder="https://example.com/hook"
+          className="h-7 text-xs"
+        />
+      )}
+    </div>
+  );
+}
