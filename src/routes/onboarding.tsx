@@ -23,12 +23,14 @@ import {
   Moon,
   Monitor,
 } from "lucide-react";
+import { WORKSPACE_PRESETS } from "@/lib/workspace-presets";
+import { applyPresetToWorkspace } from "@/lib/workspace-preset-seeder";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-type Step = "choose" | "name" | "theme" | "template";
+type Step = "choose" | "name" | "preset" | "theme" | "template";
 type TemplateKey = "blank" | "sprint" | "content" | "bugs" | "personal";
 type ThemeKey = "light" | "dark" | "system";
 
@@ -131,6 +133,7 @@ function Onboarding() {
   const [wsName, setWsName] = useState("");
   const [theme, setTheme] = useState<ThemeKey>("system");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>("blank");
+  const [selectedPreset, setSelectedPreset] = useState<string>("blank");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
