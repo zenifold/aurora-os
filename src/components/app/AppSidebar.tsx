@@ -121,6 +121,8 @@ export function AppSidebar() {
                 <IconNav to="/app/contacts" icon={Users} active={path.startsWith("/app/contacts")} label="Contacts" />
               </>
             )}
+            <IconNav to="/app/resources" icon={UsersRound} active={path === "/app/resources"} label="Resources" />
+            <IconNav to="/app/resources/capacity" icon={CalendarRange} active={path.startsWith("/app/resources/capacity")} label="Capacity" />
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
 
