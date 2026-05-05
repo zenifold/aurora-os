@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import { PRIORITY_OPTIONS, type TaskPriority } from "@/lib/types";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 function initials(n?: string | null) {
   if (!n) return "?";
@@ -244,5 +243,3 @@ export function BulkActionBar({ projectId, selected, onClear }: Props) {
     </div>
   );
 }
-
-export const _hint = cn; // keep cn import used
