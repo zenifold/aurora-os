@@ -189,6 +189,16 @@ function ProjectPage() {
                 <FileEdit className="mr-1.5 h-4 w-4" /> Change orders
               </Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild title="Allocations">
+              <Link to="/app/p/$projectId/allocations" params={{ projectId }}>
+                <UsersRound className="mr-1.5 h-4 w-4" /> Allocations
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild title="Documents">
+              <Link to="/app/p/$projectId/documents" params={{ projectId }}>
+                <FileText className="mr-1.5 h-4 w-4" /> Documents
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
             </Button>
