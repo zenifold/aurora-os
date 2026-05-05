@@ -749,6 +749,38 @@ function CustomFieldCell({ field, value, onChange }: { field: CustomFieldDef; va
         </div>
       );
     }
+    case "effort": {
+      const v = (value && typeof value === "object" ? value : null) as { amount?: number; unit?: string } | null;
+      const amount = v?.amount ?? "";
+      const unit = (v?.unit ?? "days") as "hours" | "days" | "points";
+      const update = (next: { amount?: number | ""; unit?: string }) => {
+        const merged = { amount: next.amount ?? amount, unit: next.unit ?? unit };
+        if (merged.amount === "" || merged.amount === null) onChange(null);
+        else onChange({ amount: Number(merged.amount), unit: merged.unit });
+      };
+      return (
+        <div className="flex items-center gap-1">
+          <Input
+            type="number"
+            min="0"
+            step="0.5"
+            defaultValue={amount === "" ? "" : String(amount)}
+            onBlur={(e) => update({ amount: e.target.value === "" ? "" : Number(e.target.value) })}
+            className="h-7 w-16 border-none bg-transparent text-xs hover:bg-accent"
+          />
+          <Select value={unit} onValueChange={(u) => update({ unit: u })}>
+            <SelectTrigger className="h-7 w-[70px] border-none bg-transparent text-[11px] hover:bg-accent">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hours">hrs</SelectItem>
+              <SelectItem value="days">days</SelectItem>
+              <SelectItem value="points">pts</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
     default:
       return <span className="text-xs text-muted-foreground">—</span>;
   }
