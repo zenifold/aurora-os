@@ -29,6 +29,7 @@ import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } fro
 import { Input } from "@/components/ui/input";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
+import { BulkActionBar } from "@/components/views/BulkActionBar";
 
 interface Props {
   projectId: string;
