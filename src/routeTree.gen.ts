@@ -51,6 +51,7 @@ import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$pro
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
 import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$projectId.documents'
+import { Route as AppPProjectIdClientsRouteImport } from './routes/app.p.$projectId.clients'
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
 import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
@@ -267,6 +268,11 @@ const AppPProjectIdDocumentsRoute = AppPProjectIdDocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdClientsRoute = AppPProjectIdClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdChangeOrdersRoute =
   AppPProjectIdChangeOrdersRouteImport.update({
     id: '/change-orders',
@@ -337,6 +343,7 @@ export interface FileRoutesByFullPath {
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
@@ -434,6 +442,7 @@ export interface FileRoutesById {
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
@@ -485,6 +494,7 @@ export interface FileRouteTypes {
     | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
@@ -532,6 +542,7 @@ export interface FileRouteTypes {
     | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
@@ -581,6 +592,7 @@ export interface FileRouteTypes {
     | '/api/public/portal/$token'
     | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/clients'
     | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
@@ -904,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdDocumentsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/clients': {
+      id: '/app/p/$projectId/clients'
+      path: '/clients'
+      fullPath: '/app/p/$projectId/clients'
+      preLoaderRoute: typeof AppPProjectIdClientsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/change-orders': {
       id: '/app/p/$projectId/change-orders'
       path: '/change-orders'
@@ -985,6 +1004,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 interface AppPProjectIdRouteChildren {
   AppPProjectIdAllocationsRoute: typeof AppPProjectIdAllocationsRoute
   AppPProjectIdChangeOrdersRoute: typeof AppPProjectIdChangeOrdersRoute
+  AppPProjectIdClientsRoute: typeof AppPProjectIdClientsRoute
   AppPProjectIdDocumentsRoute: typeof AppPProjectIdDocumentsRoute
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
@@ -996,6 +1016,7 @@ interface AppPProjectIdRouteChildren {
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdAllocationsRoute: AppPProjectIdAllocationsRoute,
   AppPProjectIdChangeOrdersRoute: AppPProjectIdChangeOrdersRoute,
+  AppPProjectIdClientsRoute: AppPProjectIdClientsRoute,
   AppPProjectIdDocumentsRoute: AppPProjectIdDocumentsRoute,
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
