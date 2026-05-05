@@ -50,7 +50,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const create = useCreateTask(projectId);
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
-  const bulk = useBulkUpdateTasks(projectId);
+  const bulk = null;
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const getIndicator = (id: string) => {
