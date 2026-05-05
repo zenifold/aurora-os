@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Sparkles, Loader2, Wand2, X } from "lucide-react";
+import { AssigneePicker } from "@/components/tasks/AssigneePicker";
 
 type Generated = {
   title: string;
@@ -55,6 +56,7 @@ export function MagicAddDialog({
   const [generated, setGenerated] = useState<Generated[] | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [inserting, setInserting] = useState(false);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [meta, setMeta] = useState<{ tokens: number | null; model: string | null }>({
     tokens: null,
     model: null,
@@ -65,6 +67,7 @@ export function MagicAddDialog({
     setGenerated(null);
     setSelected(new Set());
     setMeta({ tokens: null, model: null });
+    setAssigneeIds([]);
   };
 
   const close = () => {
@@ -142,6 +145,7 @@ export function MagicAddDialog({
         status: "todo",
         position: nextPos,
         created_by: user.id,
+        assignee_ids: assigneeIds,
         description: t.description
           ? {
               type: "doc",
@@ -288,6 +292,10 @@ export function MagicAddDialog({
                   </button>
                 </div>
               ))}
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Assign all tasks to</p>
+              <AssigneePicker value={assigneeIds} onChange={setAssigneeIds} />
             </div>
           </div>
         )}

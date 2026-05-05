@@ -29,6 +29,7 @@ import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } fro
 import { Input } from "@/components/ui/input";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
+import { BulkActionBar } from "@/components/views/BulkActionBar";
 
 interface Props {
   projectId: string;
@@ -47,6 +48,19 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
   const guard = useTransitionGuard();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const cardFields = viewConfig.cardFields ?? ["priority", "due_date"];
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelect = (id: string, mode: "single" | "additive") => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (mode === "additive") {
+        if (next.has(id)) next.delete(id); else next.add(id);
+      } else {
+        if (next.size === 1 && next.has(id)) next.clear();
+        else { next.clear(); next.add(id); }
+      }
+      return next;
+    });
+  };
   const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
   // Resolve task.status (which may be a name or id) to a workflow status row
   const findStatusForTask = (t: Task) =>
@@ -129,11 +143,21 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
               dwellTimes={dwellTimes}
               colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
-              onTaskClick={onTaskClick}
+              onTaskClick={(id, e) => {
+                if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) {
+                  toggleSelect(id, "additive");
+                } else if (selected.size > 0) {
+                  toggleSelect(id, "additive");
+                } else {
+                  onTaskClick(id);
+                }
+              }}
+              selected={selected}
             />
           );
         })}
       </div>
+      <BulkActionBar projectId={projectId} selected={selected} onClear={() => setSelected(new Set())} />
     </DndContext>
   );
 }
@@ -152,6 +176,7 @@ function Column({
   colorFor,
   onAdd,
   onTaskClick,
+  selected,
 }: {
   id: string;
   title: string;
@@ -165,7 +190,8 @@ function Column({
   dwellTimes?: Map<string, number>;
   colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
-  onTaskClick: (id: string) => void;
+  onTaskClick: (id: string, e?: React.MouseEvent) => void;
+  selected: Set<string>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const [adding, setAdding] = useState(false);
@@ -211,7 +237,8 @@ function Column({
               cardFields={cardFields}
               accent={colorFor(t)}
               slaPct={slaPct}
-              onClick={() => onTaskClick(t.id)}
+              isSelected={selected.has(t.id)}
+              onClick={(e) => onTaskClick(t.id, e)}
               indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
             />
           );
@@ -253,13 +280,15 @@ function Card({
   slaPct,
   onClick,
   indicator,
+  isSelected = false,
 }: {
   task: Task;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
   accent: string | null;
   slaPct: number | null;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   indicator?: { blockedBy: number; blocking: number };
+  isSelected?: boolean;
 }) {
   const { setNodeRef, transform, listeners, attributes, isDragging } = useDraggable({ id: task.id });
   const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
@@ -301,12 +330,12 @@ function Card({
       onClick={(e) => {
         if (!isDragging) {
           e.stopPropagation();
-          onClick();
+          onClick(e);
         }
       }}
-      className={`relative cursor-grab overflow-hidden rounded-md border border-border bg-card text-left shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${
-        isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"
-      }`}
+      className={`relative cursor-grab overflow-hidden rounded-md border bg-card text-left shadow-sm transition hover:shadow-md active:cursor-grabbing ${
+        isSelected ? "border-primary ring-2 ring-primary/40" : "border-border"
+      } ${isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"}`}
     >
       {/* SLA aging top bar */}
       {slaTone && (

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CustomFieldDef, Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
-import { useCreateTask, useUpdateTask, useDeleteTask, useBulkUpdateTasks } from "@/hooks/use-tasks";
+import { useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
 import { useProjectWorkflow, DEFAULT_WORKFLOW, type WorkflowStatus } from "@/hooks/use-project-workflow";
 import { groupTasks } from "@/lib/filtering";
@@ -50,7 +50,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const create = useCreateTask(projectId);
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
-  const bulk = useBulkUpdateTasks(projectId);
+  
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
   const getIndicator = (id: string) => {
@@ -190,40 +190,12 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     await createField.mutateAsync({ name, field_type: type, options: opts });
   };
 
+  const allSelected = tasks.length > 0 && selected.size === tasks.length;
+
   return (
     <div className="min-w-max [&_.sticky-col]:sticky [&_.sticky-col]:left-0 [&_.sticky-col]:z-[5] [&_.sticky-col]:bg-background">
-      {selected.size > 0 && (
-        <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-aura-gradient-subtle px-4 py-2 text-sm">
-          <span className="font-medium">{selected.size} selected</span>
-          <div className="flex-1" />
-          <Select onValueChange={(v) => bulk.mutate({ ids: Array.from(selected), patch: { status: v } })}>
-            <SelectTrigger className="h-7 w-32"><SelectValue placeholder="Set status" /></SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive"
-            onClick={() => {
-              if (confirm(`Delete ${selected.size} tasks?`)) {
-                Array.from(selected).forEach((id) => remove.mutate(id));
-                setSelected(new Set());
-              }
-            }}
-          >
-            <Trash2 className="mr-1.5 h-4 w-4" /> Delete
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setSelected(new Set())}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       <table className="border-collapse text-sm" style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}>
         <colgroup>
-          <col style={{ width: widths.select }} />
           <col style={{ width: widths.title }} />
           {showStatus && <col style={{ width: widths.status }} />}
           {showPriority && <col style={{ width: widths.priority }} />}
@@ -235,17 +207,29 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="sticky-col px-3 py-2">
-              <Checkbox
-                checked={tasks.length > 0 && selected.size === tasks.length}
-                onCheckedChange={(c) => toggleAll(!!c)}
-              />
-            </th>
             <th
               className="sticky-col border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-              style={{ left: widths.select }}
+              style={{ left: 0 }}
             >
-              <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleAll(!allSelected)}
+                  aria-label={allSelected ? "Deselect all" : "Select all"}
+                  aria-pressed={allSelected}
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
+                    allSelected
+                      ? "border-primary bg-primary"
+                      : selected.size > 0
+                      ? "border-primary bg-primary/30"
+                      : "border-border opacity-40 hover:opacity-100 hover:border-primary"
+                  }`}
+                >
+                  {allSelected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+                  {!allSelected && selected.size > 0 && <span className="h-0.5 w-2 rounded-full bg-primary-foreground" />}
+                </button>
+                <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+              </div>
             </th>
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
@@ -314,7 +298,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
               <>
                 {groupBy && (
                   <tr key={`g-${key}`}>
-                    <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <td colSpan={visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {groupBy === "status"
                         ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
                         : key === "__none__" ? "Empty" : key} · {list.length}
@@ -348,8 +332,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
 
           {/* Add row */}
           <tr className="border-b border-border">
-            <td className="sticky-col px-3 py-1.5" />
-            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: widths.select }}>
+            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: 0 }}>
               {adding ? (
                 <Input
                   autoFocus
@@ -376,6 +359,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
           </tr>
         </tbody>
       </table>
+      <BulkActionBar projectId={projectId} selected={selected} onClear={() => setSelected(new Set())} />
     </div>
   );
 }
@@ -521,29 +505,19 @@ function TaskRow({
 
   return (
     <tr
-      className={`group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30 ${isInitiative ? "font-semibold" : ""}`}
+      className={`group border-b border-border transition-colors ${
+        selected
+          ? "bg-primary/10 [&_.sticky-col]:!bg-primary/10 hover:bg-primary/15 [&:hover_.sticky-col]:!bg-primary/15"
+          : "hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
+      } ${isInitiative ? "font-semibold" : ""}`}
       style={{
         borderLeft: `${borderWidth}px solid ${borderColor}`,
         height: rowMinH,
-        background: rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+        background: !selected && rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+        boxShadow: selected ? `inset 3px 0 0 0 hsl(var(--primary))` : undefined,
       }}
     >
-      <td className="sticky-col px-3 py-1.5">
-        <button
-          type="button"
-          onClick={(e) => onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey })}
-          aria-label={selected ? "Deselect row" : "Select row"}
-          aria-pressed={selected}
-          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-            selected
-              ? "border-primary bg-primary"
-              : "border-border bg-transparent opacity-0 group-hover:opacity-100 hover:border-primary"
-          }`}
-        >
-          {selected && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
-        </button>
-      </td>
-      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
+      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: 0 }}>
         {titleEdit !== null ? (
           <Input
             autoFocus
@@ -565,6 +539,23 @@ function TaskRow({
         ) : (
           <div className="flex flex-col gap-0.5" style={{ paddingLeft: indent }}>
             <div className="flex items-center gap-1.5">
+              {/* Selection handle (replaces checkbox column) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
+                }}
+                aria-label={selected ? "Deselect row" : "Select row (shift-click for range, ⌘/ctrl-click to add)"}
+                aria-pressed={selected}
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
+                  selected
+                    ? "border-primary bg-primary"
+                    : "border-border/70 opacity-0 group-hover:opacity-100 hover:border-primary hover:bg-primary/10"
+                }`}
+              >
+                {selected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+              </button>
               {/* Expand/collapse chevron */}
               {hasChildren ? (
                 <button

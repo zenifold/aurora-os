@@ -35,6 +35,7 @@ import {
 import { addDays, format } from "date-fns";
 import { haptic } from "@/lib/haptics";
 import { TASK_TYPES, TASK_TYPE_META, PARENT_OF, type TaskType } from "@/lib/task-types";
+import { AssigneePicker } from "@/components/tasks/AssigneePicker";
 
 type ParsedTask = {
   title: string;
@@ -104,6 +105,7 @@ export function QuickCaptureSheet() {
   const [taskType, setTaskType] = useState<TaskType>("task");
   const [parentTaskId, setParentTaskId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Default to "Personal" project, else first project.
@@ -123,6 +125,7 @@ export function QuickCaptureSheet() {
       setOverrideDate(null);
       setTaskType("task");
       setParentTaskId(null);
+      setAssigneeIds([]);
     }
   }, [open]);
 
@@ -186,6 +189,7 @@ export function QuickCaptureSheet() {
         due_date: effectiveDate,
         task_type: taskType,
         parent_task_id: parentTaskId,
+        assignee_ids: assigneeIds,
       } as never);
       if (error) throw error;
       haptic("success");
@@ -293,6 +297,12 @@ export function QuickCaptureSheet() {
               </Select>
             </div>
           )}
+
+          {/* Assignees */}
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Assignees</p>
+            <AssigneePicker value={assigneeIds} onChange={setAssigneeIds} />
+          </div>
 
           {/* Parsed chips */}
           {(effectiveDate || parsed.tags.length > 0 || parsed.projectName) && (
