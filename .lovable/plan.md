@@ -13,10 +13,15 @@
 - Shared marketing chrome (Navbar / Footer) extracted from index
 - New pricing model: Free self-hosted • Hosted Cloud • Team support
 
-## Next up
-1. ✅ ~~Self-host docs route~~ (`/docs/self-host` shipped)
-2. ✅ ~~OpenRouter key onboarding — first-run modal~~ (shipped)
-3. ✅ ~~GitHub repo link + star CTA in nav and footer~~ (shipped)
+## Agency delivery layer (in progress)
+1. ✅ **Sprints v1** — schema + planning mode + capacity stats (this turn)
+2. Resource & capacity management (team_members, utilization grid, smart auto-assign)
+3. Milestones & phases (Gantt-style + payment milestones)
+4. Financial tracking & margins (project_financials, time_log_rates, dashboard)
+5. Delivery health score (weighted, radar chart)
+6. (deferred) Client portal
+
+## Other
 4. **Comparison page** ("Aura vs Notion / Asana / Monday")
 5. **Meetings**: speaker attribution + decision log dedicated tab
 6. **Timeline**: dependency lines (use task_relations) + critical path highlight
