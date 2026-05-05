@@ -207,6 +207,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
               )}
 
               <ApprovalsPanel task={task} />
+              <ClientDeliverableSection task={task} />
               <TaskRelationsSection task={task} />
             </TabsContent>
 
