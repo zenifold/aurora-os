@@ -256,6 +256,15 @@ function Card({
   const isSubtask = typeMeta.type === "subtask";
   const childCount = task.child_count ?? 0;
   const completedCount = task.completed_child_count ?? 0;
+  // SLA aging: green <60%, amber 60-100%, red >100% of allotted time in this status
+  const slaTone =
+    slaPct == null
+      ? null
+      : slaPct >= 1
+        ? "hsl(var(--destructive))"
+        : slaPct >= 0.6
+          ? "hsl(38 92% 50%)"
+          : null;
 
   return (
     <div
@@ -277,6 +286,15 @@ function Card({
         isInitiative ? "p-3 ring-1 ring-inset" : isSubtask ? "p-2" : "p-2.5"
       }`}
     >
+      {/* SLA aging top bar */}
+      {slaTone && (
+        <span
+          aria-hidden
+          className="absolute left-0 right-0 top-0 h-[2px]"
+          style={{ background: slaTone }}
+          title={`SLA dwell: ${(slaPct! * 100).toFixed(0)}% of budget`}
+        />
+      )}
       {/* Right-edge dependency strip */}
       {(isBlocked || isBlocking) && (
         <span
