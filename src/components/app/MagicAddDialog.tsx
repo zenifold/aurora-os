@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Sparkles, Loader2, Wand2, X } from "lucide-react";
+import { AssigneePicker } from "@/components/tasks/AssigneePicker";
 
 type Generated = {
   title: string;
