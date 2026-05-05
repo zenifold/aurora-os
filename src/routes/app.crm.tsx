@@ -245,6 +245,7 @@ function CreateDealDialog({
   trigger?: React.ReactNode;
 }) {
   const create = useCreateDeal();
+  const { data: contacts = [] } = useContacts();
   const firstOpen = stages.find((s) => s.stage_type === "open");
   const [form, setForm] = useState({
     title: "",
@@ -252,6 +253,7 @@ function CreateDealDialog({
     value: "",
     expected_close_date: "",
     description: "",
+    contact_id: "",
   });
 
   const submit = async () => {
@@ -263,9 +265,10 @@ function CreateDealDialog({
       value: form.value ? Number(form.value) : null,
       expected_close_date: form.expected_close_date || null,
       description: form.description.trim() || null,
+      contact_id: form.contact_id || null,
       probability: stage?.default_probability ?? 25,
     });
-    setForm({ title: "", stage_id: firstOpen?.id ?? "", value: "", expected_close_date: "", description: "" });
+    setForm({ title: "", stage_id: firstOpen?.id ?? "", value: "", expected_close_date: "", description: "", contact_id: "" });
     onOpenChange(false);
   };
 
