@@ -23,12 +23,14 @@ import {
   Moon,
   Monitor,
 } from "lucide-react";
+import { WORKSPACE_PRESETS } from "@/lib/workspace-presets";
+import { applyPresetToWorkspace } from "@/lib/workspace-preset-seeder";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
 });
 
-type Step = "choose" | "name" | "theme" | "template";
+type Step = "choose" | "name" | "preset" | "theme" | "template";
 type TemplateKey = "blank" | "sprint" | "content" | "bugs" | "personal";
 type ThemeKey = "light" | "dark" | "system";
 
@@ -131,6 +133,7 @@ function Onboarding() {
   const [wsName, setWsName] = useState("");
   const [theme, setTheme] = useState<ThemeKey>("system");
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>("blank");
+  const [selectedPreset, setSelectedPreset] = useState<string>("blank");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -151,9 +154,15 @@ function Onboarding() {
     })();
   }, [user, navigate, setCurrent]);
 
-  const finalize = async (wsName: string, tmplKey: TemplateKey, themeChoice: ThemeKey) => {
+  const finalize = async (
+    wsName: string,
+    tmplKey: TemplateKey,
+    themeChoice: ThemeKey,
+    presetKey: string,
+  ) => {
     if (!user) return;
     const tmpl = TEMPLATES.find((t) => t.key === tmplKey)!;
+    const preset = WORKSPACE_PRESETS.find((p) => p.key === presetKey);
     setBusy(true);
     try {
       const baseSlug = slugify(wsName);
@@ -172,6 +181,16 @@ function Onboarding() {
       ]);
       if (roleErr) throw roleErr;
       if (memErr) throw memErr;
+
+      // Apply preset (seeds divisions + folders). Default Delivery/Ops/Sales
+      // already exist from the seed_default_divisions trigger; preset merges in.
+      if (preset && preset.divisions.length > 0) {
+        try {
+          await applyPresetToWorkspace(ws.id, user.id, preset);
+        } catch (e) {
+          console.error("Preset seed failed", e);
+        }
+      }
 
       const { data: proj, error: projErr } = await supabase
         .from("projects")
@@ -246,7 +265,11 @@ function Onboarding() {
   }
 
   const progress =
-    step === "choose" ? 25 : step === "name" ? 50 : step === "theme" ? 75 : 100;
+    step === "choose" ? 20
+    : step === "name" ? 40
+    : step === "preset" ? 60
+    : step === "theme" ? 80
+    : 100;
 
   const THEMES: { key: ThemeKey; label: string; description: string; icon: typeof Sun }[] = [
     { key: "light", label: "Light", description: "Bright and clean.", icon: Sun },
@@ -333,7 +356,7 @@ function Onboarding() {
               className="mt-6 space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (wsName.trim()) setStep("theme");
+                if (wsName.trim()) setStep("preset");
               }}
             >
               <div>
@@ -358,10 +381,64 @@ function Onboarding() {
           </div>
         )}
 
-        {step === "theme" && (
+        {step === "preset" && (
           <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
             <button
               onClick={() => setStep("name")}
+              className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <h1 className="text-2xl font-semibold">Pick a workspace preset</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              We'll seed divisions and folders to match how your team works. You can change everything later.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {WORKSPACE_PRESETS.map((p) => {
+                const Icon = p.icon;
+                const active = selectedPreset === p.key;
+                return (
+                  <button
+                    key={p.key}
+                    onClick={() => setSelectedPreset(p.key)}
+                    className={`group relative rounded-xl border bg-background p-4 text-left transition-all hover:shadow-pop ${
+                      active
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <div
+                      className="flex h-9 w-9 items-center justify-center rounded-lg"
+                      style={{ backgroundColor: `${p.accentColor}22`, color: p.accentColor }}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <h3 className="mt-3 text-sm font-semibold">{p.name}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{p.tagline}</p>
+                    <p className="mt-2 text-[11px] leading-snug text-muted-foreground/80">
+                      {p.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={() => setStep("theme")}
+                className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
+              >
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === "theme" && (
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
+            <button
+              onClick={() => setStep("preset")}
               className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" /> Back
@@ -458,7 +535,7 @@ function Onboarding() {
                 Cancel
               </Button>
               <Button
-                onClick={() => wsName.trim() && finalize(wsName.trim(), selectedTemplate, theme)}
+                onClick={() => wsName.trim() && finalize(wsName.trim(), selectedTemplate, theme, selectedPreset)}
                 disabled={busy || !wsName.trim()}
                 className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
               >
