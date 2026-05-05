@@ -538,6 +538,23 @@ function TaskRow({
         ) : (
           <div className="flex flex-col gap-0.5" style={{ paddingLeft: indent }}>
             <div className="flex items-center gap-1.5">
+              {/* Selection handle (replaces checkbox column) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey });
+                }}
+                aria-label={selected ? "Deselect row" : "Select row (shift-click for range, ⌘/ctrl-click to add)"}
+                aria-pressed={selected}
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
+                  selected
+                    ? "border-primary bg-primary"
+                    : "border-border/70 opacity-0 group-hover:opacity-100 hover:border-primary hover:bg-primary/10"
+                }`}
+              >
+                {selected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+              </button>
               {/* Expand/collapse chevron */}
               {hasChildren ? (
                 <button
