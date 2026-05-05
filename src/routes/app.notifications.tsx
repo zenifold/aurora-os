@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Bell, Check } from "lucide-react";
+import { Bell, Check, ShieldAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/use-notifications";
+import { useMyPendingApprovals, useDecideApproval } from "@/hooks/use-project-workflow";
 import { format, formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
 import { useMemo } from "react";
 
@@ -18,6 +19,8 @@ function bucket(date: Date): string {
 
 function NotificationsPage() {
   const { data: notifications = [], isLoading } = useNotifications();
+  const { data: myApprovals = [] } = useMyPendingApprovals();
+  const decide = useDecideApproval();
   const markAll = useMarkAllNotificationsRead();
   const markRead = useMarkNotificationRead();
   const navigate = useNavigate();
