@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +17,15 @@ import {
   Activity,
   FileEdit,
   Users,
-  StickyNote,
   Mic,
   FileText,
   DollarSign,
   MoreHorizontal,
+  Move,
 } from "lucide-react";
+import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
+import { useProject, useUpdateProject } from "@/hooks/use-projects";
+import { toast } from "sonner";
 
 interface Props {
   projectId: string;
