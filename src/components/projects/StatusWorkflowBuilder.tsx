@@ -62,7 +62,7 @@ export function StatusWorkflowBuilder({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-base font-medium">Status pipeline</h3>
           <p className="text-sm text-muted-foreground">
@@ -80,7 +80,7 @@ export function StatusWorkflowBuilder({ projectId }: { projectId: string }) {
             })
           }
           disabled={createStatus.isPending}
-          className="bg-aura-gradient text-primary-foreground hover:opacity-90"
+          className="w-full bg-aura-gradient text-primary-foreground hover:opacity-90 sm:w-auto"
         >
           <Plus className="mr-1.5 h-3.5 w-3.5" /> Add status
         </Button>
@@ -143,7 +143,7 @@ function SortableStatusCard({
         transition,
         opacity: isDragging ? 0.4 : 1,
       }}
-      className="w-64 rounded-lg border border-border bg-card p-3 shadow-sm"
+      className="w-full rounded-lg border border-border bg-card p-3 shadow-sm sm:w-64"
     >
       <div className="mb-2 flex items-center gap-2">
         <button
