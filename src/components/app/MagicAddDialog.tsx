@@ -145,6 +145,7 @@ export function MagicAddDialog({
         status: "todo",
         position: nextPos,
         created_by: user.id,
+        assignee_ids: assigneeIds,
         description: t.description
           ? {
               type: "doc",
