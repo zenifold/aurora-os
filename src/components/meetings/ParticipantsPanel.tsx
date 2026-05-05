@@ -31,10 +31,10 @@ export function ParticipantsPanel({ meetingId }: Props) {
 
   const linkedIds = new Set(participants.map((p) => p.user_id).filter(Boolean) as string[]);
 
-  const addFromMember = (m: { id: string; display_name?: string | null; email?: string | null }) => {
+  const addFromMember = (m: { id: string; display_name?: string | null }) => {
     add.mutate({
       meeting_id: meetingId,
-      email: m.email ?? `${m.id.slice(0, 8)}@workspace.local`,
+      email: `${m.id.slice(0, 8)}@workspace.local`,
       name: m.display_name ?? null,
       user_id: m.id,
     });
