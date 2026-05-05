@@ -32,6 +32,7 @@ import { ActivityFeed } from "./ActivityFeed";
 import { TaskAiPanel } from "./TaskAiPanel";
 import { TaskRelationsSection } from "./TaskRelationsSection";
 import { ApprovalsPanel } from "./ApprovalsPanel";
+import { StatusHistoryTimeline } from "./StatusHistoryTimeline";
 import { Sparkles } from "lucide-react";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
@@ -220,7 +221,8 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
               <TaskAiPanel task={task} />
             </TabsContent>
 
-            <TabsContent value="activity" className="mt-0">
+            <TabsContent value="activity" className="mt-0 space-y-6">
+              <StatusHistoryTimeline taskId={task.id} />
               <ActivityFeed taskId={task.id} />
             </TabsContent>
           </div>
