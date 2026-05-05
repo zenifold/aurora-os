@@ -35,6 +35,7 @@ import {
 import { useCreateCustomField } from "@/hooks/use-custom-fields";
 import type { FieldType } from "@/lib/types";
 import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
+import { BulkActionBar } from "@/components/views/BulkActionBar";
 
 interface Props {
   projectId: string;
@@ -153,11 +154,31 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const toggleAll = (checked: boolean) => {
     setSelected(checked ? new Set(tasks.map((t) => t.id)) : new Set());
   };
-  const toggleOne = (id: string, checked: boolean) => {
-    const next = new Set(selected);
-    if (checked) next.add(id);
-    else next.delete(id);
-    setSelected(next);
+  const lastSelectedRef = useRef<string | null>(null);
+  const toggleOne = (id: string, opts?: { range?: boolean; additive?: boolean }) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (opts?.range && lastSelectedRef.current) {
+        const flatIds = (useTree ? flat.map((n) => n.task.id) : tasks.map((t) => t.id));
+        const a = flatIds.indexOf(lastSelectedRef.current);
+        const b = flatIds.indexOf(id);
+        if (a >= 0 && b >= 0) {
+          const [lo, hi] = a < b ? [a, b] : [b, a];
+          for (let i = lo; i <= hi; i++) next.add(flatIds[i]);
+          return next;
+        }
+      }
+      if (!opts?.additive && !opts?.range) {
+        // single-toggle
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+      } else {
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+      }
+      lastSelectedRef.current = id;
+      return next;
+    });
   };
 
   const addField = async (type: FieldType) => {
@@ -281,7 +302,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   rollup={hasChildren ? rollupFraction(node) : null}
                   rollupPercent={hasChildren ? rollupPercent(node) : null}
                   onToggleCollapse={() => toggleCollapse(t.id)}
-                  onToggleSelect={(c) => toggleOne(t.id, c)}
+                  onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
                   onDelete={() => remove.mutate(t.id)}
@@ -315,7 +336,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                     showTags={showTags}
                     rowColor={colorForTask(t, viewConfig, statusColorMap)}
                     titleStickyLeft={widths.select}
-                    onToggleSelect={(c) => toggleOne(t.id, c)}
+                    onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                     onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                     onClickRow={() => onTaskClick(t.id)}
                     onDelete={() => remove.mutate(t.id)}
@@ -473,7 +494,7 @@ function TaskRow({
   rollup?: { done: number; total: number } | null;
   rollupPercent?: number | null;
   onToggleCollapse?: () => void;
-  onToggleSelect: (c: boolean) => void;
+  onToggleSelect: (e?: { metaKey?: boolean; ctrlKey?: boolean; shiftKey?: boolean }) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
   onDelete: () => void;
@@ -508,7 +529,19 @@ function TaskRow({
       }}
     >
       <td className="sticky-col px-3 py-1.5">
-        <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
+        <button
+          type="button"
+          onClick={(e) => onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey })}
+          aria-label={selected ? "Deselect row" : "Select row"}
+          aria-pressed={selected}
+          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+            selected
+              ? "border-primary bg-primary"
+              : "border-border bg-transparent opacity-0 group-hover:opacity-100 hover:border-primary"
+          }`}
+        >
+          {selected && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
+        </button>
       </td>
       <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
         {titleEdit !== null ? (

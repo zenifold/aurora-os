@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { Task } from "@/lib/types";
 import { toast } from "sonner";
 
+/** Fetch the entire descendant subtree of a parent task using hierarchy_path. */
 export function useSubtasks(parentTaskId: string | null) {
   return useQuery({
     queryKey: ["subtasks", parentTaskId],
@@ -13,7 +14,7 @@ export function useSubtasks(parentTaskId: string | null) {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .eq("parent_task_id", parentTaskId!)
+        .contains("hierarchy_path", [parentTaskId!])
         .order("position");
       if (error) throw error;
       return (data ?? []) as Task[];
@@ -26,23 +27,27 @@ export function useCreateSubtask(parent: Task) {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (title: string) => {
+    mutationFn: async (input: string | { title: string; parent_task_id?: string }) => {
       if (!ws || !user) throw new Error("Not signed in");
+      const title = typeof input === "string" ? input : input.title;
+      const parentId =
+        typeof input === "string" ? parent.id : input.parent_task_id ?? parent.id;
       const { data: existing } = await supabase
         .from("tasks")
         .select("position")
-        .eq("parent_task_id", parent.id)
+        .eq("parent_task_id", parentId)
         .order("position", { ascending: false })
         .limit(1);
       const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
       const { error } = await supabase.from("tasks").insert({
         workspace_id: ws.id,
         project_id: parent.project_id,
-        parent_task_id: parent.id,
+        parent_task_id: parentId,
         title,
         status: "todo",
         position: nextPos,
         created_by: user.id,
+        task_type: "task",
       });
       if (error) throw error;
     },
@@ -65,6 +70,53 @@ export function useToggleSubtask(parentId: string) {
           completed_at: done ? new Date().toISOString() : null,
         })
         .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["subtasks", parentId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateSubtask(parentId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Partial<Task> & { id: string }) => {
+      const { error } = await supabase.from("tasks").update(patch as never).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["subtasks", parentId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useReparentSubtask(parentId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, new_parent_id }: { id: string; new_parent_id: string }) => {
+      // Position to the end of the new parent
+      const { data: existing } = await supabase
+        .from("tasks")
+        .select("position")
+        .eq("parent_task_id", new_parent_id)
+        .order("position", { ascending: false })
+        .limit(1);
+      const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+      const { error } = await supabase
+        .from("tasks")
+        .update({ parent_task_id: new_parent_id, position: nextPos })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["subtasks", parentId] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useReorderSubtask(parentId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, position }: { id: string; position: number }) => {
+      const { error } = await supabase.from("tasks").update({ position }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["subtasks", parentId] }),
