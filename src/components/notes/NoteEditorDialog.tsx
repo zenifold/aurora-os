@@ -80,14 +80,14 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="max-w-2xl gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-2xl"
+        className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-[100vw] flex-col gap-0 overflow-hidden rounded-none border-0 p-0 shadow-2xl sm:h-auto sm:max-h-[90vh] sm:w-auto sm:max-w-2xl sm:rounded-2xl"
         style={{ backgroundColor: color }}
       >
         {/* Toolbar */}
         <TooltipProvider delayDuration={200}>
-          <div className="flex items-center justify-between gap-2 border-b border-black/5 bg-black/[0.02] px-3 py-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 bg-black/[0.02] px-2 py-2 pt-safe sm:flex-nowrap sm:px-3">
             {/* Type */}
-            <div className="inline-flex items-center gap-0.5 rounded-md bg-black/5 p-0.5">
+            <div className="inline-flex shrink-0 items-center gap-0.5 rounded-md bg-black/5 p-0.5">
               {TYPE_OPTIONS.map((opt) => {
                 const Icon = opt.icon;
                 const active = type === opt.value;
@@ -101,11 +101,11 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
                           setDirty(true);
                         }}
                         className={cn(
-                          "rounded p-1.5 transition-colors",
+                          "rounded p-2 transition-colors sm:p-1.5",
                           active ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900",
                         )}
                       >
-                        <Icon className="h-3.5 w-3.5" />
+                        <Icon className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>{opt.label}</TooltipContent>
@@ -114,8 +114,8 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
               })}
             </div>
 
-            {/* Color picker */}
-            <div className="flex items-center gap-1">
+            {/* Color picker — horizontally scrollable on tight widths */}
+            <div className="order-3 -mx-2 flex w-full items-center gap-1 overflow-x-auto px-2 sm:order-none sm:mx-0 sm:w-auto sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {NOTE_COLORS.map((c) => (
                 <Tooltip key={c.hex}>
                   <TooltipTrigger asChild>
@@ -126,7 +126,7 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
                         setDirty(true);
                       }}
                       className={cn(
-                        "h-5 w-5 rounded-full border border-slate-300 transition-transform hover:scale-110",
+                        "h-6 w-6 shrink-0 rounded-full border border-slate-300 transition-transform hover:scale-110 sm:h-5 sm:w-5",
                         color.toLowerCase() === c.hex.toLowerCase() && "ring-2 ring-slate-500 ring-offset-1",
                       )}
                       style={{ backgroundColor: c.hex }}
@@ -138,18 +138,18 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
               ))}
             </div>
 
-            <div className="flex items-center gap-0.5">
+            <div className="flex shrink-0 items-center gap-0.5">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
                     onClick={() => togglePin.mutate(note)}
                     className={cn(
-                      "rounded-md p-1.5 transition-colors hover:bg-black/5",
+                      "rounded-md p-2 transition-colors hover:bg-black/5 sm:p-1.5",
                       note.is_pinned ? "text-amber-600" : "text-slate-500",
                     )}
                   >
-                    <Pin className="h-3.5 w-3.5" fill={note.is_pinned ? "currentColor" : "none"} />
+                    <Pin className="h-4 w-4 sm:h-3.5 sm:w-3.5" fill={note.is_pinned ? "currentColor" : "none"} />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>{note.is_pinned ? "Unpin" : "Pin"}</TooltipContent>
@@ -162,9 +162,9 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
                       update.mutate({ id: note.id, is_archived: !note.is_archived });
                       onOpenChange(false);
                     }}
-                    className="rounded-md p-1.5 text-slate-500 transition-colors hover:bg-black/5"
+                    className="rounded-md p-2 text-slate-500 transition-colors hover:bg-black/5 sm:p-1.5"
                   >
-                    <Archive className="h-3.5 w-3.5" />
+                    <Archive className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>{note.is_archived ? "Unarchive" : "Archive"}</TooltipContent>
@@ -179,9 +179,9 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
                         onOpenChange(false);
                       }
                     }}
-                    className="rounded-md p-1.5 text-slate-500 transition-colors hover:bg-black/5 hover:text-destructive"
+                    className="rounded-md p-2 text-slate-500 transition-colors hover:bg-black/5 hover:text-destructive sm:p-1.5"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>Delete</TooltipContent>
@@ -189,16 +189,16 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
               <button
                 type="button"
                 onClick={() => handleClose(false)}
-                className="rounded-md p-1.5 text-slate-500 transition-colors hover:bg-black/5"
+                className="rounded-md p-2 text-slate-500 transition-colors hover:bg-black/5 sm:p-1.5"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
               </button>
             </div>
           </div>
         </TooltipProvider>
 
         {/* Title */}
-        <div className="px-5 pt-4">
+        <div className="px-4 pt-4 sm:px-5">
           <Input
             value={title}
             onChange={(e) => {
@@ -211,7 +211,7 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
         </div>
 
         {/* Content */}
-        <div className="max-h-[60vh] overflow-y-auto px-5 pb-4 pt-2 text-slate-900">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-2 text-slate-900 sm:max-h-[60vh] sm:flex-none sm:px-5">
           <NoteEditor
             content={content}
             noteType={type}

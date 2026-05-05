@@ -62,25 +62,46 @@ function NotesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-6">
       {/* Header */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            {archived ? "Archived notes" : "Notes"}
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "note" : "notes"}
-          </p>
+      <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
+        <div className="flex items-center justify-between gap-2 sm:block">
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
+              {archived ? "Archived notes" : "Notes"}
+            </h1>
+            <p className="text-[11px] text-muted-foreground sm:text-xs">
+              {filtered.length} {filtered.length === 1 ? "note" : "notes"}
+            </p>
+          </div>
+          {/* Mobile-only New button (in header row) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="bg-aura-gradient hover:opacity-90 sm:hidden">
+                <Plus className="mr-1 h-3.5 w-3.5" /> New
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleCreate("freeform")}>
+                <FileText className="mr-2 h-3.5 w-3.5" /> Freeform note
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleCreate("bullet_list")}>
+                <BulletIcon className="mr-2 h-3.5 w-3.5" /> Bullet list
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleCreate("check_list")}>
+                <ListChecks className="mr-2 h-3.5 w-3.5" /> Check list
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search notes"
-              className="h-8 w-48 pl-7 text-sm"
+              className="h-9 w-full pl-7 text-sm sm:h-8 sm:w-48"
             />
             {search && (
               <button
@@ -91,7 +112,7 @@ function NotesPage() {
               </button>
             )}
           </div>
-          <div className="inline-flex items-center rounded-md border border-border bg-background p-0.5">
+          <div className="hidden items-center rounded-md border border-border bg-background p-0.5 sm:inline-flex">
             <button
               onClick={() => setView("grid")}
               className={cn(
@@ -115,7 +136,7 @@ function NotesPage() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="bg-aura-gradient hover:opacity-90">
+              <Button size="sm" className="hidden bg-aura-gradient hover:opacity-90 sm:inline-flex">
                 <Plus className="mr-1 h-3.5 w-3.5" /> New
               </Button>
             </DropdownMenuTrigger>
@@ -134,8 +155,8 @@ function NotesPage() {
         </div>
       </div>
 
-      {/* Filter chips */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
+      {/* Filter chips — horizontally scrollable on mobile */}
+      <div className="mb-4 -mx-3 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {(
           [
             { id: "all", label: "All" },
@@ -149,7 +170,7 @@ function NotesPage() {
             key={f.id}
             onClick={() => setFilter(f.id)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs transition-colors",
+              "shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs transition-colors",
               filter === f.id
                 ? "border-transparent bg-aura-gradient text-primary-foreground"
                 : "border-border bg-background text-muted-foreground hover:text-foreground",

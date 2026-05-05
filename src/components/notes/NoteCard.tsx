@@ -56,7 +56,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
           }}
           className={cn(
             "rounded-md p-1 transition-colors hover:bg-black/5",
-            note.is_pinned ? "text-amber-600" : "text-slate-400 opacity-0 group-hover:opacity-100",
+            note.is_pinned ? "text-amber-600" : "text-slate-400 lg:opacity-0 lg:group-hover:opacity-100",
           )}
           aria-label={note.is_pinned ? "Unpin" : "Pin"}
         >
@@ -97,7 +97,7 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
             <button
               type="button"
               onClick={(e) => e.stopPropagation()}
-              className="rounded-md p-1 text-slate-400 opacity-0 transition-colors hover:bg-black/5 hover:text-slate-700 group-hover:opacity-100"
+              className="rounded-md p-1 text-slate-400 transition-colors hover:bg-black/5 hover:text-slate-700 lg:opacity-0 lg:group-hover:opacity-100"
               aria-label="Note options"
             >
               <MoreHorizontal className="h-3.5 w-3.5" />

@@ -44,11 +44,13 @@ export function MobileTopBar({ title, showBack = false }: Props) {
       ? "Today"
       : path.startsWith("/app/my-tasks")
         ? "My Tasks"
-        : path.startsWith("/app/settings")
-          ? "Settings"
-          : path.startsWith("/app/notifications")
-            ? "Notifications"
-            : "");
+        : path.startsWith("/app/notes")
+          ? "Notes"
+          : path.startsWith("/app/settings")
+            ? "Settings"
+            : path.startsWith("/app/notifications")
+              ? "Notifications"
+              : "");
 
   return (
     <header
