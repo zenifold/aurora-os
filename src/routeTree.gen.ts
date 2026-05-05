@@ -21,6 +21,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as DocsSelfHostRouteImport } from './routes/docs.self-host'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -98,6 +99,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSelfHostRoute = DocsSelfHostRouteImport.update({
+  id: '/docs/self-host',
+  path: '/docs/self-host',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
+  '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
     | '/app/meetings/$meetingId'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/search'
+    | '/docs/self-host'
     | '/invite/$token'
     | '/app'
     | '/app/meetings/$meetingId'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/search'
     | '/app/settings'
+    | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
     | '/app/meetings/$meetingId'
@@ -394,6 +406,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
 }
 
@@ -481,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/self-host': {
+      id: '/docs/self-host'
+      path: '/docs/self-host'
+      fullPath: '/docs/self-host'
+      preLoaderRoute: typeof DocsSelfHostRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
@@ -699,6 +719,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport

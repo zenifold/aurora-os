@@ -131,9 +131,9 @@ export function MarketingFooter() {
             />
             <FooterCol
               title="Open source"
+              mixed={[{ label: "Self-host guide", to: "/docs/self-host" }]}
               external={[
                 { label: "GitHub", href: GITHUB_URL },
-                { label: "Self-host guide", href: `${GITHUB_URL}#self-hosting` },
                 { label: "OpenRouter", href: "https://openrouter.ai" },
                 { label: "Report an issue", href: `${GITHUB_URL}/issues` },
                 { label: "Changelog", href: `${GITHUB_URL}/releases` },
