@@ -85,8 +85,14 @@ function CrmPage() {
 
   if (stagesLoading || dealsLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="animate-page-in flex h-full flex-col">
+        <div className="border-b border-border px-4 py-3 lg:px-6 lg:py-4">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="mt-2 h-3 w-64" />
+        </div>
+        <div className="flex-1 overflow-hidden p-4 lg:p-6">
+          <KanbanSkeleton columns={5} />
+        </div>
       </div>
     );
   }
