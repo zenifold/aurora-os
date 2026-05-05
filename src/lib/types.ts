@@ -110,6 +110,40 @@ export interface Note {
   updated_at: string;
 }
 
+export type ProjectPhase =
+  | "discovery"
+  | "design"
+  | "development"
+  | "review"
+  | "launch"
+  | "complete"
+  | "on_hold";
+export type ProjectHealth = "on_track" | "at_risk" | "critical" | "on_hold";
+export type ContractType = "tm" | "fixed" | "retainer";
+
+export const PROJECT_PHASES: { value: ProjectPhase; label: string }[] = [
+  { value: "discovery", label: "Discovery" },
+  { value: "design", label: "Design" },
+  { value: "development", label: "Development" },
+  { value: "review", label: "Review" },
+  { value: "launch", label: "Launch" },
+  { value: "complete", label: "Complete" },
+  { value: "on_hold", label: "On hold" },
+];
+
+export const PROJECT_HEALTH: Record<ProjectHealth, { label: string; color: string; dot: string }> = {
+  on_track: { label: "On track", color: "oklch(0.7 0.16 145)", dot: "🟢" },
+  at_risk: { label: "At risk", color: "oklch(0.75 0.17 80)", dot: "🟡" },
+  critical: { label: "Critical", color: "oklch(0.6 0.22 25)", dot: "🔴" },
+  on_hold: { label: "On hold", color: "oklch(0.7 0.02 240)", dot: "⏸" },
+};
+
+export const CONTRACT_TYPES: Record<ContractType, string> = {
+  tm: "Time & Materials",
+  fixed: "Fixed Fee",
+  retainer: "Retainer",
+};
+
 export interface Project {
   id: string;
   workspace_id: string;
@@ -123,6 +157,14 @@ export interface Project {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_client_project?: boolean;
+  client_name?: string | null;
+  phase?: ProjectPhase;
+  health?: ProjectHealth;
+  contract_type?: ContractType;
+  start_date?: string | null;
+  target_end_date?: string | null;
+  target_margin_pct?: number | null;
 }
 
 export interface View {
