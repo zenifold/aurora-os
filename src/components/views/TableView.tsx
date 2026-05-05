@@ -504,29 +504,19 @@ function TaskRow({
 
   return (
     <tr
-      className={`group border-b border-border hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30 ${isInitiative ? "font-semibold" : ""}`}
+      className={`group border-b border-border transition-colors ${
+        selected
+          ? "bg-primary/10 [&_.sticky-col]:!bg-primary/10 hover:bg-primary/15 [&:hover_.sticky-col]:!bg-primary/15"
+          : "hover:bg-accent/30 [&:hover_.sticky-col]:bg-accent/30"
+      } ${isInitiative ? "font-semibold" : ""}`}
       style={{
         borderLeft: `${borderWidth}px solid ${borderColor}`,
         height: rowMinH,
-        background: rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+        background: !selected && rowColor ? `color-mix(in oklab, ${rowColor} 6%, transparent)` : undefined,
+        boxShadow: selected ? `inset 3px 0 0 0 hsl(var(--primary))` : undefined,
       }}
     >
-      <td className="sticky-col px-3 py-1.5">
-        <button
-          type="button"
-          onClick={(e) => onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey })}
-          aria-label={selected ? "Deselect row" : "Select row"}
-          aria-pressed={selected}
-          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-            selected
-              ? "border-primary bg-primary"
-              : "border-border bg-transparent opacity-0 group-hover:opacity-100 hover:border-primary"
-          }`}
-        >
-          {selected && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
-        </button>
-      </td>
-      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
+      <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: 0 }}>
         {titleEdit !== null ? (
           <Input
             autoFocus
