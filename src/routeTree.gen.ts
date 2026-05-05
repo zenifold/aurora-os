@@ -50,6 +50,7 @@ import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
+import { Route as AppPProjectIdOverviewRouteImport } from './routes/app.p.$projectId.overview'
 import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
@@ -268,6 +269,11 @@ const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdOverviewRoute = AppPProjectIdOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdMilestonesRoute = AppPProjectIdMilestonesRouteImport.update({
   id: '/milestones',
   path: '/milestones',
@@ -383,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
+  '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
+  '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
@@ -492,6 +500,7 @@ export interface FileRoutesById {
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
+  '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
@@ -549,6 +558,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
+    | '/app/p/$projectId/overview'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
@@ -602,6 +612,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
+    | '/app/p/$projectId/overview'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
@@ -657,6 +668,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
+    | '/app/p/$projectId/overview'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
@@ -971,6 +983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdSettingsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/overview': {
+      id: '/app/p/$projectId/overview'
+      path: '/overview'
+      fullPath: '/app/p/$projectId/overview'
+      preLoaderRoute: typeof AppPProjectIdOverviewRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/milestones': {
       id: '/app/p/$projectId/milestones'
       path: '/milestones'
@@ -1106,6 +1125,7 @@ interface AppPProjectIdRouteChildren {
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
   AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
+  AppPProjectIdOverviewRoute: typeof AppPProjectIdOverviewRoute
   AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
   AppPProjectIdSprintsRoute: typeof AppPProjectIdSprintsRoute
 }
@@ -1118,6 +1138,7 @@ const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
   AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
+  AppPProjectIdOverviewRoute: AppPProjectIdOverviewRoute,
   AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
   AppPProjectIdSprintsRoute: AppPProjectIdSprintsRoute,
 }
