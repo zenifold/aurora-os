@@ -32,7 +32,17 @@ import {
   Save,
   Sparkles,
   Gauge,
+  Bookmark,
+  Trash2,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { useUpdateTask } from "@/hooks/use-tasks";
 import { useCustomFields } from "@/hooks/use-custom-fields";
 import { toast } from "sonner";
