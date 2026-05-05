@@ -113,7 +113,10 @@ export function AppSidebar() {
             <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
             <IconNav to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")} label="Meetings" />
             {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
-              <IconNav to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")} label="CRM" />
+              <>
+                <IconNav to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")} label="CRM" />
+                <IconNav to="/app/contacts" icon={Users} active={path.startsWith("/app/contacts")} label="Contacts" />
+              </>
             )}
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>

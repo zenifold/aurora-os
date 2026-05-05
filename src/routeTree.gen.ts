@@ -30,6 +30,7 @@ import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
+import { Route as AppContactsRouteImport } from './routes/app.contacts'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppSettingsResourcesRouteImport } from './routes/app.settings.resources'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
@@ -152,6 +153,11 @@ const AppCrmRoute = AppCrmRouteImport.update({
   path: '/crm',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContactsRoute = AppContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/contacts'
     | '/app/crm'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/contacts'
     | '/app/crm'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/contacts'
     | '/app/crm'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -631,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCrmRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/contacts': {
+      id: '/app/contacts'
+      path: '/contacts'
+      fullPath: '/app/contacts'
+      preLoaderRoute: typeof AppContactsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/settings/': {
       id: '/app/settings/'
       path: '/'
@@ -807,6 +826,7 @@ const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppContactsRoute: typeof AppContactsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppMeetingsRoute: typeof AppMeetingsRouteWithChildren
   AppMyTasksRoute: typeof AppMyTasksRoute
@@ -820,6 +840,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppContactsRoute: AppContactsRoute,
   AppCrmRoute: AppCrmRoute,
   AppMeetingsRoute: AppMeetingsRouteWithChildren,
   AppMyTasksRoute: AppMyTasksRoute,
