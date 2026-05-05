@@ -1,0 +1,1 @@
+ALTER TYPE public.view_type ADD VALUE IF NOT EXISTS 'sprint';
