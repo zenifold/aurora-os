@@ -35,6 +35,7 @@ import {
 import { addDays, format } from "date-fns";
 import { haptic } from "@/lib/haptics";
 import { TASK_TYPES, TASK_TYPE_META, PARENT_OF, type TaskType } from "@/lib/task-types";
+import { AssigneePicker } from "@/components/tasks/AssigneePicker";
 
 type ParsedTask = {
   title: string;
