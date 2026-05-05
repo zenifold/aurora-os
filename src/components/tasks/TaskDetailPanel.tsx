@@ -34,7 +34,11 @@ import { TaskRelationsSection } from "./TaskRelationsSection";
 import { ApprovalsPanel } from "./ApprovalsPanel";
 import { StatusHistoryTimeline } from "./StatusHistoryTimeline";
 import { ClientDeliverableSection } from "./ClientDeliverableSection";
-import { Sparkles } from "lucide-react";
+import { AssigneePicker } from "./AssigneePicker";
+import { TagsEditor } from "./TagsEditor";
+import { CustomFieldsSection } from "./CustomFieldsSection";
+import { Sparkles, Users, Tag as TagIcon, Flag, Clock, Hash } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
 import { useAuth } from "@/lib/auth-context";
@@ -79,6 +83,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   }
 
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
+  const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
 
   return (
     <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -90,11 +95,43 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
             : "flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl"
         }
       >
-        <SheetHeader className="space-y-3 border-b border-border px-6 py-4">
+        <SheetHeader
+          className="space-y-3 border-b border-border px-6 py-4"
+          style={{
+            background: status?.color
+              ? `linear-gradient(180deg, ${status.color}10 0%, transparent 100%)`
+              : undefined,
+          }}
+        >
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">{status?.label}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                style={{
+                  background: `${status?.color ?? "#888"}22`,
+                  color: status?.color,
+                }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: status?.color }} />
+                {status?.label}
+              </span>
+              {priority && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                  style={{
+                    background: `${priority.color}22`,
+                    color: priority.color,
+                  }}
+                >
+                  <Flag className="h-3 w-3" />
+                  {priority.label}
+                </span>
+              )}
+              {task.task_type && task.task_type !== "task" && (
+                <Badge variant="outline" className="text-[10px] uppercase">
+                  {task.task_type}
+                </Badge>
+              )}
             </div>
             {viewers.length > 0 && (
               <div className="flex items-center gap-2">
@@ -114,65 +151,83 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
           />
         </SheetHeader>
 
-        <div className="grid grid-cols-2 gap-4 border-b border-border px-6 py-4">
-          <FieldRow label="Status">
-            <Select value={task.status} onValueChange={(v) => update.mutate({ id: task.id, status: v })}>
-              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </FieldRow>
-          <FieldRow label="Priority">
-            <Select value={task.priority} onValueChange={(v) => update.mutate({ id: task.id, priority: v as Task["priority"] })}>
-              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </FieldRow>
-          <FieldRow label="Due date">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
-                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                  {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : "Set date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={task.due_date ? parseISO(task.due_date) : undefined}
-                  onSelect={(d) => update.mutate({ id: task.id, due_date: d ? format(d, "yyyy-MM-dd") : null })}
-                />
-              </PopoverContent>
-            </Popover>
-          </FieldRow>
-          <FieldRow label="Start date">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
-                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                  {task.start_date ? format(parseISO(task.start_date), "MMM d, yyyy") : "Set date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={task.start_date ? parseISO(task.start_date) : undefined}
-                  onSelect={(d) => update.mutate({ id: task.id, start_date: d ? format(d, "yyyy-MM-dd") : null })}
-                />
-              </PopoverContent>
-            </Popover>
-          </FieldRow>
-          <FieldRow label="Repeat">
-            <RecurrencePicker
-              value={task.recurrence ?? null}
-              onChange={(rule) =>
-                update.mutate({ id: task.id, recurrence: rule as never })
-              }
-            />
-          </FieldRow>
+        <div className="space-y-4 border-b border-border bg-muted/20 px-6 py-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <FieldRow label="Status" icon={<span className="h-2 w-2 rounded-full" style={{ background: status?.color }} />}>
+              <Select value={task.status} onValueChange={(v) => update.mutate({ id: task.id, status: v })}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FieldRow>
+            <FieldRow label="Priority" icon={<Flag className="h-3 w-3" style={{ color: priority?.color }} />}>
+              <Select value={task.priority} onValueChange={(v) => update.mutate({ id: task.id, priority: v as Task["priority"] })}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PRIORITY_OPTIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FieldRow>
+            <FieldRow label="Start date" icon={<CalendarIcon className="h-3 w-3" />}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
+                    {task.start_date ? format(parseISO(task.start_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={task.start_date ? parseISO(task.start_date) : undefined}
+                    onSelect={(d) => update.mutate({ id: task.id, start_date: d ? format(d, "yyyy-MM-dd") : null })}
+                  />
+                </PopoverContent>
+              </Popover>
+            </FieldRow>
+            <FieldRow label="Due date" icon={<CalendarIcon className="h-3 w-3" />}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 w-full justify-start font-normal">
+                    {task.due_date ? format(parseISO(task.due_date), "MMM d, yyyy") : <span className="text-muted-foreground">Set date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={task.due_date ? parseISO(task.due_date) : undefined}
+                    onSelect={(d) => update.mutate({ id: task.id, due_date: d ? format(d, "yyyy-MM-dd") : null })}
+                  />
+                </PopoverContent>
+              </Popover>
+            </FieldRow>
+            <FieldRow label="Repeat" icon={<Clock className="h-3 w-3" />}>
+              <RecurrencePicker
+                value={task.recurrence ?? null}
+                onChange={(rule) => update.mutate({ id: task.id, recurrence: rule as never })}
+              />
+            </FieldRow>
+            <FieldRow label="Created" icon={<Hash className="h-3 w-3" />}>
+              <div className="flex h-8 items-center text-xs text-muted-foreground">
+                {format(parseISO(task.created_at), "MMM d, yyyy")}
+              </div>
+            </FieldRow>
+          </div>
+
+          <div className="space-y-3">
+            <FieldRow label="Assignees" icon={<Users className="h-3 w-3" />}>
+              <AssigneePicker
+                value={task.assignee_ids ?? []}
+                onChange={(ids) => update.mutate({ id: task.id, assignee_ids: ids as never })}
+              />
+            </FieldRow>
+            <FieldRow label="Tags" icon={<TagIcon className="h-3 w-3" />}>
+              <TagsEditor
+                value={task.tags ?? []}
+                onChange={(tags) => update.mutate({ id: task.id, tags: tags as never })}
+              />
+            </FieldRow>
+          </div>
         </div>
 
         <Tabs defaultValue="description" className="flex flex-1 flex-col overflow-hidden">
@@ -192,19 +247,8 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
                 onBlur={(json) => update.mutate({ id: task.id, description: json as never })}
               />
 
-              {fields.length > 0 && (
-                <div>
-                  <Label>Custom fields</Label>
-                  <div className="mt-2 space-y-2">
-                    {fields.map((f) => (
-                      <div key={f.id} className="flex items-center gap-3">
-                        <span className="w-32 text-xs text-muted-foreground">{f.name}</span>
-                        <span className="text-sm">{String(task.custom_values?.[f.id] ?? "—")}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <CustomFieldsSection task={task} fields={fields} />
+
 
               <ApprovalsPanel task={task} />
               <ClientDeliverableSection task={task} />
@@ -251,10 +295,13 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {icon}
+        {label}
+      </Label>
       <div className="mt-1.5">{children}</div>
     </div>
   );
