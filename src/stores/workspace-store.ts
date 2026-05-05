@@ -1,12 +1,16 @@
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 
+export type WorkspaceKind = "sales" | "delivery" | "hybrid";
+
 export interface Workspace {
   id: string;
   name: string;
   slug: string;
   owner_id: string;
   plan: string;
+  kind: WorkspaceKind;
+  linked_delivery_workspace_id: string | null;
 }
 
 interface WorkspaceState {
@@ -31,7 +35,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({ loading: true });
     const { data, error } = await supabase
       .from("workspaces")
-      .select("id, name, slug, owner_id, plan")
+      .select("id, name, slug, owner_id, plan, kind, linked_delivery_workspace_id")
       .order("created_at", { ascending: true });
     if (error) {
       console.error("Fetch workspaces error:", error);
