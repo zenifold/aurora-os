@@ -64,7 +64,7 @@ function NotesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-6">
+    <div className="animate-page-in mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-6">
       {/* Header */}
       <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
         <div className="flex items-center justify-between gap-2 sm:block">
