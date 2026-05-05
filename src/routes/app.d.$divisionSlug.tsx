@@ -88,23 +88,53 @@ function DeliveryOverview({ division }: { division: Division }) {
         )}
 
         <SectionHeader title="All projects" />
-        {divisionProjects.length === 0 ? (
-          <EmptyHint text="No projects in this division yet." />
-        ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {divisionProjects.map((p) => (
-              <Link key={p.id} to="/app/p/$projectId" params={{ projectId: p.id }}>
-                <Card className="cursor-pointer p-3 transition-colors hover:border-primary/50">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: p.color }} />
-                    <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
-                    {p.health && <HealthBadge health={p.health} />}
+        {(() => {
+          const unfiled = divisionProjects.filter((p) => !p.folder_id && !p.is_archived);
+          return (
+            <>
+              {unfiled.length > 0 && (
+                <div className="mb-4 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                      Unfiled · {unfiled.length}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">Use "Move to folder…" on each project to organize.</span>
                   </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {unfiled.map((p) => (
+                      <Link key={p.id} to="/app/p/$projectId" params={{ projectId: p.id }}>
+                        <Card className="cursor-pointer p-3 transition-colors hover:border-primary/50">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: p.color }} />
+                            <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
+                            {p.health && <HealthBadge health={p.health} />}
+                          </div>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {divisionProjects.length === 0 ? (
+                <EmptyHint text="No projects in this division yet." />
+              ) : (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {divisionProjects.map((p) => (
+                    <Link key={p.id} to="/app/p/$projectId" params={{ projectId: p.id }}>
+                      <Card className="cursor-pointer p-3 transition-colors hover:border-primary/50">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: p.color }} />
+                          <span className="flex-1 truncate text-sm font-medium">{p.name}</span>
+                          {p.health && <HealthBadge health={p.health} />}
+                        </div>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </div>
   );
