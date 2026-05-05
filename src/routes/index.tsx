@@ -284,22 +284,31 @@ function MiniCanvas() {
 
 function ValueBar() {
   const items = [
-    { icon: Github, label: "Open source", sub: "MIT licensed" },
-    { icon: Key, label: "BYO API key", sub: "via OpenRouter" },
-    { icon: Server, label: "Self-hostable", sub: "Your data, your infra" },
-    { icon: DollarSign, label: "Fair pricing", sub: "No per-seat AI tax" },
+    { icon: Github, label: "Open source", sub: "MIT licensed", tint: "from-violet-500/20 to-fuchsia-500/10" },
+    { icon: Key, label: "BYO API key", sub: "via OpenRouter", tint: "from-sky-500/20 to-cyan-500/10" },
+    { icon: Server, label: "Self-hostable", sub: "Your data, your infra", tint: "from-emerald-500/20 to-teal-500/10" },
+    { icon: DollarSign, label: "Fair pricing", sub: "No per-seat AI tax", tint: "from-amber-500/20 to-rose-500/10" },
   ];
   return (
-    <section className="border-y border-border/60 bg-muted/30 py-8">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-6 px-6 md:grid-cols-4">
+    <section className="relative border-y border-border/60 bg-muted/30 py-10">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-6 md:grid-cols-4">
         {items.map((i) => (
-          <div key={i.label} className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-aura-gradient-subtle">
-              <i.icon className="h-4 w-4 text-aura-gradient" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold">{i.label}</p>
-              <p className="text-xs text-muted-foreground">{i.sub}</p>
+          <div
+            key={i.label}
+            className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition hover:-translate-y-0.5 hover:border-border hover:shadow-elegant"
+          >
+            <div
+              className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br opacity-50 blur-2xl transition group-hover:opacity-90 ${i.tint}`}
+            />
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-aura-gradient-subtle ring-1 ring-border/60">
+                <i.icon className="h-4 w-4 text-aura-gradient" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{i.label}</p>
+                <p className="truncate text-xs text-muted-foreground">{i.sub}</p>
+              </div>
             </div>
           </div>
         ))}
@@ -314,49 +323,84 @@ function ViewsShowcase() {
   const features = [
     {
       icon: TableIcon,
-      title: "Table when you need structure",
+      eyebrow: "01 — Structure",
+      title: "Table",
+      tagline: "when you need structure",
       body: "Spreadsheet-fast inline editing. Custom field types including Level of Effort that drives timeline scenarios.",
+      tint: "from-violet-500/25 via-fuchsia-500/10 to-transparent",
+      ring: "ring-violet-500/30",
+      visual: <MiniTable />,
     },
     {
       icon: Kanban,
-      title: "Board when you need flow",
+      eyebrow: "02 — Flow",
+      title: "Board",
+      tagline: "when you need flow",
       body: "Drag tasks across statuses with WIP limits and a visual workflow engine you can customize per project.",
+      tint: "from-sky-500/25 via-cyan-500/10 to-transparent",
+      ring: "ring-sky-500/30",
+      visual: <MiniBoard />,
     },
     {
       icon: Layers,
-      title: "Canvas when you need clarity",
+      eyebrow: "03 — Clarity",
+      title: "Canvas",
+      tagline: "when you need clarity",
       body: "Infinite whiteboard for spatial planning. Same tasks, freeform layout — no separate Miro tab.",
+      tint: "from-amber-500/25 via-rose-500/10 to-transparent",
+      ring: "ring-amber-500/30",
+      visual: <MiniCanvas />,
     },
   ];
   return (
-    <section className="mx-auto max-w-6xl px-6 py-24">
+    <section className="relative mx-auto max-w-6xl px-6 py-24">
       <div className="text-center">
-        <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+          <Layers className="h-3 w-3" /> One database, many lenses
+        </span>
+        <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
           One source of truth. <span className="text-aura-gradient">Every angle.</span>
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+        <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
           Every task is the same task — whether you're scanning a row, dragging a card, sketching
           on a canvas, or planning a Gantt scenario.
         </p>
       </div>
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
+      <div className="mt-14 grid gap-6 md:grid-cols-3">
         {features.map((f) => (
-          <div
+          <article
             key={f.title}
-            className="rounded-2xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop"
+            className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition hover:-translate-y-1 hover:shadow-pop hover:ring-2 ${f.ring}`}
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-aura-gradient-subtle">
-              <f.icon className="h-5 w-5 text-aura-gradient" />
+            <div
+              className={`pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60 transition group-hover:opacity-100 ${f.tint}`}
+            />
+            <div className="relative border-b border-border/60 bg-background/60 p-3 backdrop-blur">
+              {f.visual}
             </div>
-            <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-            <p className="mt-1.5 text-sm text-muted-foreground">{f.body}</p>
-          </div>
+            <div className="relative flex flex-1 flex-col p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                  {f.eyebrow}
+                </span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient text-primary-foreground shadow-pop">
+                  <f.icon className="h-4 w-4" />
+                </div>
+              </div>
+              <h3 className="mt-3 text-xl font-semibold tracking-tight">
+                {f.title}{" "}
+                <span className="font-normal text-muted-foreground">{f.tagline}</span>
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+            </div>
+          </article>
         ))}
       </div>
-      <div className="mt-10 text-center">
-        <Button asChild variant="outline">
+      <div className="mt-12 text-center">
+        <Button asChild variant="outline" className="group">
           <Link to="/features">
-            See all features <ArrowRight className="ml-1.5 h-4 w-4" />
+            See all features
+            <ArrowRight className="ml-1.5 h-4 w-4 transition group-hover:translate-x-0.5" />
           </Link>
         </Button>
       </div>
