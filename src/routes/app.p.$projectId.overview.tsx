@@ -121,8 +121,10 @@ function OverviewPage() {
     );
   }
 
-  const phaseMeta = project.phase ? PROJECT_PHASE_META[project.phase] : null;
-  const healthMeta = project.health ? PROJECT_HEALTH_META[project.health] : null;
+  const phaseMeta = project.phase
+    ? PROJECT_PHASES.find((p) => p.value === project.phase) ?? null
+    : null;
+  const healthMeta = project.health ? PROJECT_HEALTH[project.health] : null;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-8">
@@ -153,7 +155,9 @@ function OverviewPage() {
             <h1 className="text-2xl font-semibold tracking-tight">{project.name}</h1>
             {phaseMeta && <Badge variant="secondary">{phaseMeta.label}</Badge>}
             {healthMeta && (
-              <Badge className={healthMeta.tone}>{healthMeta.label}</Badge>
+              <Badge variant="outline" style={{ color: healthMeta.color, borderColor: healthMeta.color }}>
+                {healthMeta.label}
+              </Badge>
             )}
             {project.is_client_project && (
               <Badge variant="outline">
@@ -193,11 +197,11 @@ function OverviewPage() {
             <p className="text-xs text-muted-foreground">Budget burn</p>
             <p className="text-xl font-semibold">
               {summary.contractValue
-                ? `${Math.round(((summary.spent ?? 0) / summary.contractValue) * 100)}%`
+                ? `${Math.round(summary.burnPct)}%`
                 : "—"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {formatMoney(summary.spent, financials?.currency ?? "USD")} spent
+              {formatMoney(summary.loggedCost, financials?.currency ?? "USD")} cost
             </p>
           </CardContent>
         </Card>
