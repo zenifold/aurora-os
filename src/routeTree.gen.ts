@@ -37,6 +37,7 @@ import { Route as AppEscalationsRouteImport } from './routes/app.escalations'
 import { Route as AppDeliveryRouteImport } from './routes/app.delivery'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppContactsRouteImport } from './routes/app.contacts'
+import { Route as AppAgentRunsRouteImport } from './routes/app.agent-runs'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppResourcesIndexRouteImport } from './routes/app.resources.index'
 import { Route as AppSettingsResourcesRouteImport } from './routes/app.settings.resources'
@@ -207,6 +208,11 @@ const AppCrmRoute = AppCrmRouteImport.update({
 const AppContactsRoute = AppContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAgentRunsRoute = AppAgentRunsRouteImport.update({
+  id: '/agent-runs',
+  path: '/agent-runs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
@@ -383,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/agent-runs': typeof AppAgentRunsRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
@@ -443,6 +450,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/agent-runs': typeof AppAgentRunsRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/app/agent-runs': typeof AppAgentRunsRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/agent-runs'
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/agent-runs'
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
@@ -687,6 +698,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/signup'
     | '/terms'
+    | '/app/agent-runs'
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
@@ -951,6 +963,13 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/app/contacts'
       preLoaderRoute: typeof AppContactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/agent-runs': {
+      id: '/app/agent-runs'
+      path: '/agent-runs'
+      fullPath: '/app/agent-runs'
+      preLoaderRoute: typeof AppAgentRunsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/settings/': {
@@ -1256,6 +1275,7 @@ const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppAgentRunsRoute: typeof AppAgentRunsRoute
   AppContactsRoute: typeof AppContactsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppDeliveryRoute: typeof AppDeliveryRoute
@@ -1279,6 +1299,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAgentRunsRoute: AppAgentRunsRoute,
   AppContactsRoute: AppContactsRoute,
   AppCrmRoute: AppCrmRoute,
   AppDeliveryRoute: AppDeliveryRoute,

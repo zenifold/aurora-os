@@ -146,7 +146,7 @@ function AgentRunsPage() {
           task_id: row.task_id,
           agent_id: row.agent_id,
           instructions: row.instructions,
-          created_by: row.created_by,
+          
           status: "queued",
         })
         .select("id")
