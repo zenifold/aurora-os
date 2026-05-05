@@ -664,6 +664,28 @@ function TaskRow({
           </Popover>
         </td>
       )}
+      {showAssignees && (
+        <td className="px-3 py-1.5">
+          {task.assignee_ids.length > 0 ? (
+            <AssigneeAvatars ids={task.assignee_ids} max={3} size={22} />
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </td>
+      )}
+      {showTags && (
+        <td className="px-3 py-1.5">
+          <div className="flex flex-wrap gap-1">
+            {task.tags.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+            {task.tags.slice(0, 3).map((t) => (
+              <span key={t} className="rounded-full bg-accent/60 px-1.5 py-0.5 text-[10px] text-accent-foreground">
+                #{t}
+              </span>
+            ))}
+            {task.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>}
+          </div>
+        </td>
+      )}
       {fields.map((f) => (
         <td key={f.id} className="px-3 py-1.5">
           <CustomFieldCell
