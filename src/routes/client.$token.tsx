@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   usePortalSession,
   usePortalDeliverables,
   useSubmitPortalDeliverable,
+  useUploadPortalFile,
+  usePortalImpact,
   type PortalDeliverableView,
+  type PortalImpactNode,
 } from "@/hooks/use-client-portal";
 import {
   DELIVERABLE_TYPE_LABELS,
@@ -14,16 +17,38 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Loader2, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Upload,
+  Paperclip,
+  AlertTriangle,
+  ArrowRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/client/$token")({
   component: PortalPage,
 });
 
+function formatDeadline(date: string | null): { label: string; tone: "ok" | "soon" | "overdue" } {
+  if (!date) return { label: "No deadline", tone: "ok" };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(date);
+  const diff = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return { label: `${Math.abs(diff)}d overdue`, tone: "overdue" };
+  if (diff === 0) return { label: "Due today", tone: "soon" };
+  if (diff <= 3) return { label: `Due in ${diff}d`, tone: "soon" };
+  return { label: `Due ${d.toLocaleDateString()}`, tone: "ok" };
+}
+
 function PortalPage() {
   const { token } = Route.useParams();
   const { data: session, isLoading, error } = usePortalSession(token);
   const { data: deliverables = [] } = usePortalDeliverables(token);
+  const { data: impact = [] } = usePortalImpact(token);
 
   if (isLoading) {
     return (
@@ -53,6 +78,7 @@ function PortalPage() {
   const completed = deliverables.filter(
     (d) => d.review_status === "approved" || d.review_status === "submitted",
   );
+  const overdueImpact = impact.filter((n) => n.is_overdue && n.downstream.length > 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +103,7 @@ function PortalPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <main className="mx-auto max-w-5xl space-y-8 px-6 py-8">
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Your action items {pending.length > 0 && <span className="text-foreground">· {pending.length}</span>}
@@ -95,6 +121,20 @@ function PortalPage() {
             </div>
           )}
         </section>
+
+        {overdueImpact.length > 0 && (
+          <section>
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Impact map · what's blocked right now
+            </h2>
+            <div className="space-y-3">
+              {overdueImpact.map((node) => (
+                <ImpactCard key={node.deliverable_id} node={node} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {completed.length > 0 && (
           <section>
@@ -121,26 +161,76 @@ function PortalPage() {
   );
 }
 
+function ImpactCard({ node }: { node: PortalImpactNode }) {
+  const deadline = formatDeadline(node.client_deadline);
+  return (
+    <Card className="border-destructive/40 bg-destructive/5 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="destructive">{deadline.label}</Badge>
+        <Badge variant="secondary">{DELIVERABLE_TYPE_LABELS[node.deliverable_type as keyof typeof DELIVERABLE_TYPE_LABELS] ?? node.deliverable_type}</Badge>
+        <span className="text-sm font-medium">{node.task_title}</span>
+      </div>
+      {node.impact_description && (
+        <p className="mt-2 text-xs text-muted-foreground">{node.impact_description}</p>
+      )}
+      <div className="mt-3 space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">Currently blocking:</p>
+        {node.downstream.map((t) => (
+          <div key={t.id} className="flex items-center gap-2 text-xs">
+            <ArrowRight className="h-3 w-3 text-destructive" />
+            <span className="font-medium">{t.title}</span>
+            {t.due_date && (
+              <span className="text-muted-foreground">· planned {t.due_date}</span>
+            )}
+            <Badge variant="outline" className="ml-auto text-[10px] capitalize">
+              {t.status.replace(/_/g, " ")}
+            </Badge>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function DeliverableCard({ d, token }: { d: PortalDeliverableView; token: string }) {
   const submit = useSubmitPortalDeliverable(token);
+  const upload = useUploadPortalFile(token);
+  const fileInput = useRef<HTMLInputElement>(null);
   const [comments, setComments] = useState("");
   const [decision, setDecision] = useState<string>("");
 
   const isRevision = d.review_status === "needs_revision";
+  const deadline = formatDeadline(d.client_deadline);
+  const files =
+    (d.submitted_content as { files?: Array<{ name: string; path: string; size: number }> } | null)
+      ?.files ?? [];
+
+  const allowsUpload =
+    d.deliverable_type === "content_upload" ||
+    d.deliverable_type === "data_provision" ||
+    d.deliverable_type === "signature";
 
   return (
     <Card className="space-y-3 p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{DELIVERABLE_TYPE_LABELS[d.deliverable_type]}</Badge>
             {isRevision && <Badge variant="destructive">Revision requested</Badge>}
           </div>
           <h3 className="mt-2 text-base font-semibold">{d.task_title}</h3>
         </div>
         {d.client_deadline && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3.5 w-3.5" /> Due {d.client_deadline}
+          <div
+            className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${
+              deadline.tone === "overdue"
+                ? "bg-destructive/10 text-destructive"
+                : deadline.tone === "soon"
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "text-muted-foreground"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" /> {deadline.label}
           </div>
         )}
       </div>
@@ -180,6 +270,42 @@ function DeliverableCard({ d, token }: { d: PortalDeliverableView; token: string
         </div>
       )}
 
+      {allowsUpload && (
+        <div className="space-y-2">
+          <input
+            ref={fileInput}
+            type="file"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) upload.mutate({ deliverable_id: d.id, file: f });
+              e.target.value = "";
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInput.current?.click()}
+            disabled={upload.isPending}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {upload.isPending ? "Uploading…" : "Attach file"}
+          </Button>
+          {files.length > 0 && (
+            <ul className="space-y-1 text-xs text-muted-foreground">
+              {files.map((f) => (
+                <li key={f.path} className="flex items-center gap-2">
+                  <Paperclip className="h-3 w-3" />
+                  <span>{f.name}</span>
+                  <span className="text-[10px]">({Math.round(f.size / 1024)} KB)</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <Textarea
         value={comments}
         onChange={(e) => setComments(e.target.value)}
@@ -187,7 +313,7 @@ function DeliverableCard({ d, token }: { d: PortalDeliverableView; token: string
         rows={3}
       />
 
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
           {d.revision_count > 0 && `Revision ${d.revision_count} of ${d.max_revisions}`}
         </span>
