@@ -865,7 +865,61 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
             />
           )}
 
-          {/* Rows */}
+          {/* Dependency arrows */}
+          {visibleTasks.length > 0 && (
+            <svg
+              className="pointer-events-none absolute z-[5]"
+              style={{
+                left: LABEL_W,
+                top: 0,
+                width: totalWidth,
+                height: visibleTasks.length * ROW_H + 60,
+                overflow: "visible",
+              }}
+            >
+              <defs>
+                <marker id="dep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--muted-foreground))" />
+                </marker>
+                <marker id="dep-arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--destructive))" />
+                </marker>
+              </defs>
+              {edges.map((e) => {
+                const fromIdx = rowIndex.get(e.from);
+                const toIdx = rowIndex.get(e.to);
+                if (fromIdx === undefined || toIdx === undefined) return null;
+                const fromT = taskMap.get(e.from);
+                const toT = taskMap.get(e.to);
+                if (!fromT || !toT) return null;
+                const fromR = taskRange(fromT);
+                const toR = taskRange(toT);
+                if (!fromR || !toR) return null;
+                // header height ≈ 60 (months + days)
+                const HEADER = 60;
+                const x1 = (differenceInCalendarDays(fromR.end, range.start) + 1) * dayPx;
+                const y1 = HEADER + fromIdx * ROW_H + ROW_H / 2;
+                const x2 = differenceInCalendarDays(toR.start, range.start) * dayPx;
+                const y2 = HEADER + toIdx * ROW_H + ROW_H / 2;
+                const bad = conflicts.has(e.to);
+                const stroke = bad ? "hsl(var(--destructive))" : "color-mix(in oklab, hsl(var(--muted-foreground)) 60%, transparent)";
+                const midX = Math.max(x1 + 8, x2 - 8);
+                const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+                return (
+                  <path
+                    key={e.id}
+                    d={d}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth={bad ? 1.75 : 1.25}
+                    strokeDasharray={bad ? undefined : "4 3"}
+                    markerEnd={bad ? "url(#dep-arrow-bad)" : "url(#dep-arrow)"}
+                  />
+                );
+              })}
+            </svg>
+          )}
+
           {visibleTasks.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
               {effortFieldId
