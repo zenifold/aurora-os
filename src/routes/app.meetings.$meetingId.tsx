@@ -184,13 +184,14 @@ function MeetingDetailPage() {
         {/* Sidebar */}
         <div className="p-3 sm:p-4 lg:p-6">
           <Tabs defaultValue="summary">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="summary"><FileText className="mr-1.5 h-3.5 w-3.5" />Summary</TabsTrigger>
               <TabsTrigger value="actions">
                 <ListChecks className="mr-1.5 h-3.5 w-3.5" />
                 Actions {actionItems.length > 0 && <Badge variant="secondary" className="ml-1.5 h-4 px-1 text-[10px]">{actionItems.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="topics"><Tags className="mr-1.5 h-3.5 w-3.5" />Topics</TabsTrigger>
+              <TabsTrigger value="people"><Users className="mr-1.5 h-3.5 w-3.5" />People</TabsTrigger>
             </TabsList>
 
             <TabsContent value="summary" className="mt-4 space-y-4">
@@ -214,6 +215,10 @@ function MeetingDetailPage() {
               ) : (
                 <EmptyHint text="Run analysis to extract topics." />
               )}
+            </TabsContent>
+
+            <TabsContent value="people" className="mt-4">
+              <ParticipantsPanel meetingId={meeting.id} />
             </TabsContent>
           </Tabs>
 
