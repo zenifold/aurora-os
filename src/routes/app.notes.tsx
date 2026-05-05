@@ -183,7 +183,7 @@ function NotesPage() {
         ))}
       </div>
 
-      {isLoading && <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>}
+      {isLoading && <CardGridSkeleton count={6} />}
 
       {!isLoading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 py-16 text-center">
