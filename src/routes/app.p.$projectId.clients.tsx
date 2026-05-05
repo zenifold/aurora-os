@@ -5,8 +5,10 @@ import {
   useClientAccess,
   useInviteClient,
   useRevokeClientAccess,
+  useDeliverables,
   buildPortalUrl,
 } from "@/hooks/use-client-portal";
+import { DELIVERABLE_TYPE_LABELS, REVIEW_STATUS_LABELS } from "@/lib/client-portal-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +42,7 @@ function ClientsPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
   const { data: clients = [] } = useClientAccess(projectId);
+  const { data: deliverables = [] } = useDeliverables(projectId);
   const invite = useInviteClient();
   const revoke = useRevokeClientAccess();
 
@@ -172,14 +175,33 @@ function ClientsPage() {
                 </tr>
               </thead>
               <tbody>
-                {clients.map((c) => (
-                  <tr key={c.id} className="border-t border-border">
+                {clients.map((c) => {
+                  const clientDeliverables = deliverables.filter(
+                    (d) => d.client_portal_access_id === c.id,
+                  );
+                  return (
+                  <tr key={c.id} className="border-t border-border align-top">
                     <td className="px-3 py-2">
                       <div>
                         <p className="font-medium">{c.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {c.email}{c.company ? ` · ${c.company}` : ""}
                         </p>
+                        {clientDeliverables.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {clientDeliverables.map((d) => (
+                              <li key={d.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Badge variant="secondary" className="text-[10px]">
+                                  {DELIVERABLE_TYPE_LABELS[d.deliverable_type]}
+                                </Badge>
+                                <span>{d.client_deadline ?? "no deadline"}</span>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {REVIEW_STATUS_LABELS[d.review_status]}
+                                </Badge>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     </td>
                     <td className="px-3 py-2">
@@ -197,7 +219,8 @@ function ClientsPage() {
                       </Button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

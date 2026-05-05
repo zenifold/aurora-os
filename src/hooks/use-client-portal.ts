@@ -276,8 +276,61 @@ export function useSubmitPortalDeliverable(token: string | undefined) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portal_deliverables", token] });
+      qc.invalidateQueries({ queryKey: ["portal_impact", token] });
       toast.success("Submitted to the team");
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUploadPortalFile(token: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { deliverable_id: string; file: File }) => {
+      const fd = new FormData();
+      fd.append("deliverable_id", input.deliverable_id);
+      fd.append("file", input.file);
+      const res = await fetch(`/api/public/portal/${token}/upload`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+      return (await res.json()) as { ok: true; path: string; name: string };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portal_deliverables", token] });
+      toast.success("File uploaded");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export interface PortalImpactNode {
+  deliverable_id: string;
+  task_id: string;
+  task_title: string;
+  deliverable_type: string;
+  client_deadline: string | null;
+  review_status: string;
+  is_overdue: boolean;
+  impact_description: string | null;
+  downstream: Array<{
+    id: string;
+    title: string;
+    status: string;
+    due_date: string | null;
+    start_date: string | null;
+  }>;
+}
+
+export function usePortalImpact(token: string | undefined) {
+  return useQuery({
+    queryKey: ["portal_impact", token],
+    enabled: !!token,
+    queryFn: async (): Promise<PortalImpactNode[]> => {
+      const res = await fetch(`/api/public/portal/${token}/impact`);
+      if (!res.ok) throw new Error(`Failed (${res.status})`);
+      return (await res.json()) as PortalImpactNode[];
+    },
   });
 }
