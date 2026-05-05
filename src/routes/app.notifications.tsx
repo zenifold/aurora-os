@@ -104,11 +104,7 @@ function NotificationsPage() {
           )}
 
           {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
-              ))}
-            </div>
+            <ListSkeleton rows={5} />
           ) : notifications.length === 0 && myApprovals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <Bell className="mb-4 h-12 w-12 text-muted-foreground/30" />
