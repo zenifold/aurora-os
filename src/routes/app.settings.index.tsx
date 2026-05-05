@@ -174,6 +174,45 @@ function WorkspaceSettings() {
         </div>
       </section>
 
+      <section className="max-w-xl space-y-5 rounded-xl border border-border bg-card p-6">
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Workspace type</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Defines what this workspace is used for. Sales workspaces show the CRM. Delivery workspaces hold projects. Hybrid shows both.
+          </p>
+        </div>
+
+        <div>
+          <Label>Type</Label>
+          <Select value={kind} onValueChange={(v) => setKind(v as WorkspaceKind)}>
+            <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hybrid">Hybrid — sales + delivery</SelectItem>
+              <SelectItem value="sales">Sales — CRM pipeline only</SelectItem>
+              <SelectItem value="delivery">Delivery — projects only</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {(kind === "sales" || kind === "hybrid") && (
+          <div>
+            <Label>Linked delivery workspace</Label>
+            <Select value={linkedDelivery || "none"} onValueChange={(v) => setLinkedDelivery(v === "none" ? "" : v)}>
+              <SelectTrigger className="mt-1.5"><SelectValue placeholder="None" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {deliveryOptions.map((w) => (
+                  <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              When deals are won, projects are auto-created in this workspace.
+            </p>
+          </div>
+        )}
+      </section>
+
       <section className="max-w-xl rounded-xl border border-border bg-card p-6">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Plan</h3>
         <p className="mt-3 text-sm">
