@@ -103,6 +103,8 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
               tasks={list}
               indicators={indicators}
               cardFields={cardFields}
+              slaHours={s.sla_hours}
+              dwellTimes={dwellTimes}
               colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
               onTaskClick={onTaskClick}
