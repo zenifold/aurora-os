@@ -30,6 +30,7 @@ import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
+import { Route as AppSettingsResourcesRouteImport } from './routes/app.settings.resources'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
 import { Route as AppSettingsFieldsRouteImport } from './routes/app.settings.fields'
@@ -147,6 +148,11 @@ const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsResourcesRoute = AppSettingsResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/app/settings/fields': typeof AppSettingsFieldsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
+    | '/app/settings/resources'
     | '/app/settings/'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
+    | '/app/settings/resources'
     | '/app/settings'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/app/settings/fields'
     | '/app/settings/members'
     | '/app/settings/profile'
+    | '/app/settings/resources'
     | '/app/settings/'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -571,6 +583,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsIndexRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/resources': {
+      id: '/app/settings/resources'
+      path: '/resources'
+      fullPath: '/app/settings/resources'
+      preLoaderRoute: typeof AppSettingsResourcesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/profile': {
       id: '/app/settings/profile'
       path: '/profile'
@@ -671,6 +690,7 @@ interface AppSettingsRouteChildren {
   AppSettingsFieldsRoute: typeof AppSettingsFieldsRoute
   AppSettingsMembersRoute: typeof AppSettingsMembersRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
+  AppSettingsResourcesRoute: typeof AppSettingsResourcesRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
@@ -682,6 +702,7 @@ const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsFieldsRoute: AppSettingsFieldsRoute,
   AppSettingsMembersRoute: AppSettingsMembersRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
+  AppSettingsResourcesRoute: AppSettingsResourcesRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
