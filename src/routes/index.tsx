@@ -122,7 +122,7 @@ function Hero() {
           MIT licensed · No credit card · Free forever for solo & self-host
         </p>
 
-        <ProductPreview />
+        
       </div>
     </section>
   );
