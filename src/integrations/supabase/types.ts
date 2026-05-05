@@ -1421,47 +1421,71 @@ export type Database = {
       }
       projects: {
         Row: {
+          client_name: string | null
           color: string
+          contract_type: string
           created_at: string
           created_by: string | null
           description: string | null
+          health: string
           icon: string
           id: string
           is_archived: boolean
+          is_client_project: boolean
           name: string
           parent_id: string | null
+          phase: string
           position: number
           settings: Json
+          start_date: string | null
+          target_end_date: string | null
+          target_margin_pct: number | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          client_name?: string | null
           color?: string
+          contract_type?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
+          health?: string
           icon?: string
           id?: string
           is_archived?: boolean
+          is_client_project?: boolean
           name: string
           parent_id?: string | null
+          phase?: string
           position?: number
           settings?: Json
+          start_date?: string | null
+          target_end_date?: string | null
+          target_margin_pct?: number | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          client_name?: string | null
           color?: string
+          contract_type?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
+          health?: string
           icon?: string
           id?: string
           is_archived?: boolean
+          is_client_project?: boolean
           name?: string
           parent_id?: string | null
+          phase?: string
           position?: number
           settings?: Json
+          start_date?: string | null
+          target_end_date?: string | null
+          target_margin_pct?: number | null
           updated_at?: string
           workspace_id?: string
         }
@@ -2282,6 +2306,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          position: string | null
           role: Database["public"]["Enums"]["workspace_role"]
           user_id: string
           workspace_id: string
@@ -2289,6 +2314,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          position?: string | null
           role?: Database["public"]["Enums"]["workspace_role"]
           user_id: string
           workspace_id: string
@@ -2296,6 +2322,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          position?: string | null
           role?: Database["public"]["Enums"]["workspace_role"]
           user_id?: string
           workspace_id?: string
