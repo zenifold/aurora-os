@@ -19,7 +19,7 @@
 3. Resources v2 — per-task estimates feeding allocation, smart auto-assign by skill
 4. ✅ **Milestones v1** — schema + timeline view with delivery/payment/gate/review types
 5. Milestones v2 — Gantt-style chart, dependencies, auto status from sprint/task progress
-6. Financial tracking & margins (project_financials dashboard, time-logs → revenue)
+6. ✅ **Financials v1** — project_financials table, margin/burn/payment dashboard at /financials
 7. Delivery health score (weighted, radar chart)
 8. (deferred) Client portal
 
