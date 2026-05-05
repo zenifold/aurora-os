@@ -43,6 +43,7 @@ import {
   ChevronRight,
   Trash2,
   Pencil,
+  StickyNote,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { Project } from "@/lib/types";
@@ -107,6 +108,7 @@ export function AppSidebar() {
           <nav className="flex flex-col items-center gap-1">
             <IconNav to="/app" icon={Folder} active={path === "/app"} label="Dashboard" />
             <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
+            <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
 
@@ -213,6 +215,7 @@ export function AppSidebar() {
       <nav className="space-y-0.5 px-2 py-3">
         <NavItem to="/app" icon={Folder} active={path === "/app"}>Dashboard</NavItem>
         <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
+        <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
         <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
       </nav>
 
