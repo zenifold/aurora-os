@@ -302,7 +302,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   rollup={hasChildren ? rollupFraction(node) : null}
                   rollupPercent={hasChildren ? rollupPercent(node) : null}
                   onToggleCollapse={() => toggleCollapse(t.id)}
-                  onToggleSelect={(c) => toggleOne(t.id, c)}
+                  onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
                   onDelete={() => remove.mutate(t.id)}
@@ -336,7 +336,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                     showTags={showTags}
                     rowColor={colorForTask(t, viewConfig, statusColorMap)}
                     titleStickyLeft={widths.select}
-                    onToggleSelect={(c) => toggleOne(t.id, c)}
+                    onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                     onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                     onClickRow={() => onTaskClick(t.id)}
                     onDelete={() => remove.mutate(t.id)}
@@ -494,7 +494,7 @@ function TaskRow({
   rollup?: { done: number; total: number } | null;
   rollupPercent?: number | null;
   onToggleCollapse?: () => void;
-  onToggleSelect: (c: boolean) => void;
+  onToggleSelect: (e?: { metaKey?: boolean; ctrlKey?: boolean; shiftKey?: boolean }) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
   onDelete: () => void;
@@ -529,7 +529,19 @@ function TaskRow({
       }}
     >
       <td className="sticky-col px-3 py-1.5">
-        <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
+        <button
+          type="button"
+          onClick={(e) => onToggleSelect({ metaKey: e.metaKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey })}
+          aria-label={selected ? "Deselect row" : "Select row"}
+          aria-pressed={selected}
+          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+            selected
+              ? "border-primary bg-primary"
+              : "border-border bg-transparent opacity-0 group-hover:opacity-100 hover:border-primary"
+          }`}
+        >
+          {selected && <span className="h-2 w-2 rounded-full bg-primary-foreground" />}
+        </button>
       </td>
       <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: titleStickyLeft }}>
         {titleEdit !== null ? (
