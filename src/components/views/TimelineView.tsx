@@ -45,6 +45,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUpdateTask } from "@/hooks/use-tasks";
 import { useCustomFields } from "@/hooks/use-custom-fields";
+import { useProjectDependencyEdges, type DependencyEdge } from "@/hooks/use-project-relations";
 import { toast } from "sonner";
 
 interface Props {
