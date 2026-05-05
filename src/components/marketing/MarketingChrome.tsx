@@ -65,79 +65,143 @@ export function MarketingHeader() {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-border bg-muted/30">
+    <footer className="relative border-t border-border bg-muted/30">
       <div className="h-px w-full bg-aura-gradient" />
-      <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-4">
-        <div>
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-aura-gradient">
-              <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid gap-12 md:grid-cols-12">
+          <div className="md:col-span-5">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient shadow-pop">
+                <Sparkles className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
+              </div>
+              <span className="text-lg font-semibold tracking-tight">Aura</span>
+              <span className="ml-1 rounded-full border border-border bg-card/60 px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                v1.0
+              </span>
+            </Link>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              The open-source project OS. Tables, boards, canvases, timelines, meetings AI — all
+              in one place. Bring your own AI key and pay providers directly.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium transition hover:border-foreground/30 hover:shadow-elegant"
+              >
+                <Github className="h-3.5 w-3.5" /> Star on GitHub
+              </a>
+              <a
+                href="https://twitter.com/aura_app"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Twitter"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+              >
+                <Twitter className="h-3.5 w-3.5" />
+              </a>
+              <a
+                href="mailto:hello@aura.app"
+                aria-label="Email"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition hover:border-foreground/30 hover:text-foreground"
+              >
+                <Mail className="h-3.5 w-3.5" />
+              </a>
             </div>
-            <span className="font-semibold">Aura</span>
-          </Link>
-          <p className="mt-3 text-sm text-muted-foreground">
-            The open-source project OS. Bring your own AI.
-          </p>
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium transition hover:border-foreground/30"
-          >
-            <Github className="h-3.5 w-3.5" /> Star on GitHub
-          </a>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-2 py-0.5">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                All systems operational
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card/60 px-2 py-0.5 font-mono uppercase tracking-wider">
+                MIT
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 md:col-span-7 md:grid-cols-3">
+            <FooterCol
+              title="Product"
+              links={[
+                { label: "Features", to: "/features" },
+                { label: "How it works", to: "/how-it-works" },
+                { label: "Pricing", to: "/pricing" },
+              ]}
+            />
+            <FooterCol
+              title="Open source"
+              external={[
+                { label: "GitHub", href: GITHUB_URL },
+                { label: "Self-host guide", href: `${GITHUB_URL}#self-hosting` },
+                { label: "OpenRouter", href: "https://openrouter.ai" },
+                { label: "Report an issue", href: `${GITHUB_URL}/issues` },
+                { label: "Changelog", href: `${GITHUB_URL}/releases` },
+              ]}
+            />
+            <FooterCol
+              title="Company"
+              mixed={[
+                { label: "Log in", to: "/login" },
+                { label: "Sign up", to: "/signup" },
+                { label: "Privacy", to: "/privacy" },
+                { label: "Terms", to: "/terms" },
+              ]}
+            />
+          </div>
         </div>
-        <FooterCol
-          title="Product"
-          links={[
-            { label: "Features", to: "/features" },
-            { label: "How it works", to: "/how-it-works" },
-            { label: "Pricing", to: "/pricing" },
-          ]}
-        />
-        <FooterCol
-          title="Open source"
-          external={[
-            { label: "GitHub", href: GITHUB_URL },
-            { label: "Self-host guide", href: `${GITHUB_URL}#self-hosting` },
-            { label: "OpenRouter", href: "https://openrouter.ai" },
-            { label: "Report an issue", href: `${GITHUB_URL}/issues` },
-          ]}
-        />
-        <FooterCol
-          title="Account"
-          links={[
-            { label: "Log in", to: "/login" },
-            { label: "Sign up", to: "/signup" },
-          ]}
-        />
-      </div>
-      <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Aura · MIT licensed · Built for people, not pricing pages.
+
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground md:flex-row">
+          <p>© {new Date().getFullYear()} Aura. All rights reserved.</p>
+          <p className="inline-flex items-center gap-1.5">
+            Built with <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> for people, not
+            pricing pages.
+          </p>
+        </div>
       </div>
     </footer>
   );
 }
 
-type FooterLink = { label: string; to: "/features" | "/how-it-works" | "/pricing" | "/login" | "/signup" };
+type FooterLink = {
+  label: string;
+  to: "/features" | "/how-it-works" | "/pricing" | "/login" | "/signup" | "/privacy" | "/terms";
+};
 type ExternalLink = { label: string; href: string };
 
 function FooterCol({
   title,
   links,
   external,
+  mixed,
 }: {
   title: string;
   links?: FooterLink[];
   external?: ExternalLink[];
+  mixed?: FooterLink[];
 }) {
   return (
     <div>
-      <h4 className="text-sm font-semibold">{title}</h4>
-      <ul className="mt-3 space-y-2">
+      <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground/80">
+        {title}
+      </h4>
+      <ul className="mt-4 space-y-2.5">
         {links?.map((l) => (
           <li key={l.label}>
-            <Link to={l.to} className="text-sm text-muted-foreground transition hover:text-foreground">
+            <Link
+              to={l.to}
+              className="text-sm text-muted-foreground transition hover:text-foreground"
+            >
+              {l.label}
+            </Link>
+          </li>
+        ))}
+        {mixed?.map((l) => (
+          <li key={l.label}>
+            <Link
+              to={l.to}
+              className="text-sm text-muted-foreground transition hover:text-foreground"
+            >
               {l.label}
             </Link>
           </li>
