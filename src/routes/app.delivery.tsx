@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useDeliverySnapshot, type DeliveryProjectStats } from "@/hooks/use-delivery";
-import { PROJECT_HEALTH, CONTRACT_TYPES, PROJECT_PHASES } from "@/lib/types";
+import { PROJECT_HEALTH, CONTRACT_TYPES, PROJECT_PHASES, type ProjectPhase } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
