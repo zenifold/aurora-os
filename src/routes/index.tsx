@@ -27,25 +27,31 @@ import {
   CheckCircle2,
   GitBranch,
   MessageSquare,
+  Briefcase,
+  Target,
+  Rocket,
+  LineChart,
+  FileText,
+  Receipt,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aura — The open-source project OS. Bring your own AI." },
+      { title: "Aura — The company OS for agencies & software delivery teams" },
       {
         name: "description",
         content:
-          "Stop renting bloated productivity suites. Aura is open source, self-hostable, and connects to your own OpenRouter key for AI — table, board, canvas, timeline, meetings, all in one.",
+          "From sales to fulfillment in one place. Aura replaces Jira, Notion, Linear, HubSpot, and Fathom for agencies and software delivery teams — pipeline, projects, sprints, meetings, financials, and client portals.",
       },
       {
         property: "og:title",
-        content: "Aura — Open-source project OS, BYO AI key",
+        content: "Aura — Company OS: Sales → Delivery → Ops",
       },
       {
         property: "og:description",
         content:
-          "Get off the $20/seat treadmill. Tables, boards, canvases, timelines, meetings AI — open source, yours forever.",
+          "Pipeline, projects, sprints, meetings AI, financials, and client portals — one open-source platform replacing Jira, Notion, Linear, HubSpot, and Fathom.",
       },
     ],
   }),
@@ -65,7 +71,9 @@ function Landing() {
       <MarketingHeader />
       <main>
         <Hero />
-        <ValueBar />
+        <LifecycleStrip />
+        <ReplacesBar />
+        <LifecycleShowcase />
         <ViewsShowcase />
         <CapabilitiesShowcase />
         <Manifesto />
@@ -90,17 +98,17 @@ function Hero() {
           rel="noreferrer"
           className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition hover:text-foreground"
         >
-          <Github className="h-3 w-3" />
-          Now open source — star us on GitHub
+          <Sparkles className="h-3 w-3" />
+          The company OS for agencies & delivery teams
           <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
         </a>
         <h1 className="mt-6 max-w-4xl text-balance text-5xl font-bold tracking-tight md:text-7xl">
-          Quit your <span className="text-aura-gradient">$20/seat</span> productivity tax.
+          From <span className="text-aura-gradient">first pitch</span> to final invoice.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-          Aura is the open-source project OS. Tables, boards, canvases, timelines, meetings AI —
-          all in one place. Self-host it, or use ours. Bring your own OpenRouter key and pay only
-          for the AI you actually use.
+          Aura is the open-source operating system for agencies and software delivery teams.
+          Pipeline, projects, sprints, meetings AI, financials, and client portals — one
+          platform replacing Jira, Notion, Linear, HubSpot, and Fathom.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button
@@ -119,10 +127,8 @@ function Hero() {
           </Button>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          MIT licensed · No credit card · Free forever for solo & self-host
+          MIT licensed · No credit card · Sales → Delivery → Ops in one workspace
         </p>
-
-        
       </div>
     </section>
   );
@@ -289,6 +295,156 @@ function MiniCanvas() {
 
 
 /* ─── Value bar ─────────────────────────────────────── */
+
+/* ─── Lifecycle strip ───────────────────────────────── */
+
+function LifecycleStrip() {
+  const stages = [
+    { icon: Target, label: "Sales", sub: "Pipeline & deals", tint: "from-violet-500/20 to-fuchsia-500/10", iconBg: "bg-violet-500/15 text-violet-500 ring-violet-500/30" },
+    { icon: Briefcase, label: "Projects", sub: "Scope & SOWs", tint: "from-sky-500/20 to-cyan-500/10", iconBg: "bg-sky-500/15 text-sky-500 ring-sky-500/30" },
+    { icon: Rocket, label: "Delivery", sub: "Sprints & tasks", tint: "from-emerald-500/20 to-teal-500/10", iconBg: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30" },
+    { icon: LineChart, label: "Ops", sub: "Health & financials", tint: "from-amber-500/20 to-rose-500/10", iconBg: "bg-amber-500/15 text-amber-500 ring-amber-500/30" },
+  ];
+  return (
+    <section className="relative border-y border-border/60 bg-muted/30 py-10">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-6 md:grid-cols-4">
+        {stages.map((s, i) => (
+          <div key={s.label} className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition hover:-translate-y-0.5 hover:border-border hover:shadow-elegant">
+            <div className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br opacity-50 blur-2xl transition group-hover:opacity-90 ${s.tint}`} />
+            <div className="relative flex items-center gap-3">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${s.iconBg}`}>
+                <s.icon className="h-4 w-4" strokeWidth={2.25} />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">
+                  <span className="mr-1.5 font-mono text-[10px] text-muted-foreground">0{i + 1}</span>
+                  {s.label}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{s.sub}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Replaces bar ──────────────────────────────────── */
+
+function ReplacesBar() {
+  const tools = [
+    { name: "Jira", role: "Issues & sprints" },
+    { name: "Linear", role: "Engineering tracker" },
+    { name: "Notion", role: "Docs & wiki" },
+    { name: "HubSpot", role: "CRM & pipeline" },
+    { name: "Fathom", role: "Meeting AI" },
+    { name: "Asana", role: "PM & tasks" },
+    { name: "Harvest", role: "Time & invoicing" },
+  ];
+  return (
+    <section className="mx-auto max-w-6xl px-6 py-16 text-center">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+        <Layers className="h-3 w-3" /> One platform, one bill
+      </span>
+      <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
+        Replaces <span className="text-aura-gradient">your whole stack.</span>
+      </h2>
+      <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+        Stop paying seven vendors to do one job. Aura unifies the tools agencies and delivery teams already glue together.
+      </p>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+        {tools.map((t) => (
+          <span key={t.name} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs backdrop-blur">
+            <span className="font-semibold text-muted-foreground line-through decoration-rose-500/70 decoration-2">{t.name}</span>
+            <span className="text-[10px] text-muted-foreground">{t.role}</span>
+          </span>
+        ))}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-aura-gradient px-3 py-1 text-xs font-semibold text-primary-foreground shadow-pop">
+          <Sparkles className="h-3 w-3" /> Aura · all of it
+        </span>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Lifecycle showcase ────────────────────────────── */
+
+function LifecycleShowcase() {
+  const lanes = [
+    {
+      icon: Target,
+      eyebrow: "Sales",
+      title: "Pipeline that flows into delivery",
+      body: "Track deals, proposals, and SOWs. When a deal closes, the project, scope, and budget spin up automatically — no copy-paste between CRM and PM.",
+      bullets: ["Deal stages & forecasting", "Proposal → SOW → Project", "Account & contact CRM"],
+      iconClass: "bg-violet-500/15 text-violet-500 ring-violet-500/30",
+      tint: "from-violet-500/20 to-fuchsia-500/5",
+    },
+    {
+      icon: Rocket,
+      eyebrow: "Delivery",
+      title: "Sprints, milestones, and the work itself",
+      body: "Backlog grooming, sprint planning with capacity, milestones, and every view your team needs — table, board, timeline, canvas, and a real Sprint view.",
+      bullets: ["Sprint planning & capacity", "Milestones & timelines", "Tasks · docs · meetings"],
+      iconClass: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30",
+      tint: "from-emerald-500/20 to-teal-500/5",
+    },
+    {
+      icon: LineChart,
+      eyebrow: "Ops",
+      title: "Financials, health, and client portals",
+      body: "Budget burn, margin, and project health on a single dashboard. Share scoped portals with clients for status, change orders, and approvals — without giving up the keys.",
+      bullets: ["Budget burn & margin", "Project health scoring", "Client portals & change orders"],
+      iconClass: "bg-amber-500/15 text-amber-500 ring-amber-500/30",
+      tint: "from-amber-500/20 to-rose-500/5",
+    },
+  ];
+  return (
+    <section className="relative border-t border-border/60 bg-muted/20">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <Workflow className="h-3 w-3" /> Sales → Delivery → Ops
+          </span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
+            One workspace.{" "}
+            <span className="text-aura-gradient">The whole lifecycle.</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+            Built for agencies and software delivery teams who are tired of stitching CRM, PM, docs, meetings, and finance together.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {lanes.map((l) => (
+            <article key={l.title} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop">
+              <div className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br opacity-60 blur-3xl transition group-hover:opacity-100 ${l.tint}`} />
+              <div className="relative flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ring-1 ${l.iconClass}`}>
+                  <l.icon className="h-5 w-5" strokeWidth={2.25} />
+                </div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {l.eyebrow}
+                </span>
+              </div>
+              <h3 className="relative mt-4 text-xl font-semibold tracking-tight">{l.title}</h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
+              <ul className="relative mt-4 space-y-1.5">
+                {l.bullets.map((b) => (
+                  <li key={b} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function ValueBar() {
   const items = [
