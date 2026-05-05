@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +17,15 @@ import {
   Activity,
   FileEdit,
   Users,
-  StickyNote,
   Mic,
   FileText,
   DollarSign,
   MoreHorizontal,
+  Move,
 } from "lucide-react";
+import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
+import { useProject, useUpdateProject } from "@/hooks/use-projects";
+import { toast } from "sonner";
 
 interface Props {
   projectId: string;
@@ -32,7 +36,12 @@ interface Props {
 const ICON = "mr-2 h-4 w-4 text-muted-foreground";
 
 export function ProjectActionsMenu({ projectId }: Props) {
+  const [moveOpen, setMoveOpen] = useState(false);
+  const { data: project } = useProject(projectId);
+  const updateProject = useUpdateProject();
+
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
@@ -41,6 +50,10 @@ export function ProjectActionsMenu({ projectId }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem onSelect={() => setMoveOpen(true)}>
+          <Move className={ICON} /> Move to folder…
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuLabel>Plan</DropdownMenuLabel>
         <DropdownMenuItem asChild>
           <Link to="/app/p/$projectId/sprints" params={{ projectId }}>
@@ -95,5 +108,20 @@ export function ProjectActionsMenu({ projectId }: Props) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <MoveToFolderDialog
+      open={moveOpen}
+      onOpenChange={setMoveOpen}
+      title="Move project"
+      current={project ? { division_id: project.division_id ?? "", folder_id: project.folder_id ?? null } : null}
+      onConfirm={async (target) => {
+        await updateProject.mutateAsync({
+          id: projectId,
+          division_id: target.division_id,
+          folder_id: target.folder_id,
+        });
+        toast.success("Project moved");
+      }}
+    />
+    </>
   );
 }

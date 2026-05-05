@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { useProject } from "@/hooks/use-projects";
-import { useDivisions, useFolder } from "@/hooks/use-folders";
-import { ChevronRight } from "lucide-react";
+import { useProject, useUpdateProject } from "@/hooks/use-projects";
+import { useDivisions, useFolders } from "@/hooks/use-folders";
+import { ChevronRight, Move } from "lucide-react";
+import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
 import { useTasks } from "@/hooks/use-tasks";
 import { useViews, useUpdateView, useCreateView } from "@/hooks/use-views";
 import { useCustomFields } from "@/hooks/use-custom-fields";
@@ -41,7 +42,17 @@ function ProjectPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
   const { data: divisions = [] } = useDivisions();
-  const { data: parentFolder } = useFolder(project?.folder_id ?? undefined);
+  const { data: allFolders = [] } = useFolders();
+  const updateProject = useUpdateProject();
+  const folderChain = useMemo(() => {
+    const chain: { id: string; name: string }[] = [];
+    let cur = project?.folder_id ? allFolders.find((f) => f.id === project.folder_id) : undefined;
+    while (cur) {
+      chain.unshift({ id: cur.id, name: cur.name });
+      cur = cur.parent_id ? allFolders.find((f) => f.id === cur!.parent_id) : undefined;
+    }
+    return chain;
+  }, [project?.folder_id, allFolders]);
   const division = divisions.find((d) => d.id === project?.division_id);
   const { data: tasks = [], isLoading } = useTasks(projectId);
   const { data: views = [] } = useViews(projectId);
@@ -58,6 +69,7 @@ function ProjectPage() {
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [magicOpen, setMagicOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
   const isMobile = useIsMobile();
   const isOwner = useIsWorkspaceOwner();
 
@@ -143,7 +155,7 @@ function ProjectPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border px-4 py-3 lg:px-6 lg:py-4">
-        {(division || parentFolder) && (
+        {(division || folderChain.length > 0) && (
           <div className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
             {division && (
               <>
@@ -151,13 +163,21 @@ function ProjectPage() {
                 <ChevronRight className="h-3 w-3" />
               </>
             )}
-            {parentFolder && (
-              <>
-                <Link to="/app/f/$folderId" params={{ folderId: parentFolder.id }} className="hover:text-foreground">{parentFolder.name}</Link>
+            {folderChain.map((c) => (
+              <span key={c.id} className="flex items-center gap-1">
+                <Link to="/app/f/$folderId" params={{ folderId: c.id }} className="hover:text-foreground">{c.name}</Link>
                 <ChevronRight className="h-3 w-3" />
-              </>
-            )}
+              </span>
+            ))}
             <span className="text-foreground">{project.name}</span>
+            <button
+              type="button"
+              onClick={() => setMoveOpen(true)}
+              className="ml-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              title="Move to folder"
+            >
+              <Move className="h-3 w-3" /> Move
+            </button>
           </div>
         )}
         <div className="flex items-center gap-3">
@@ -301,6 +321,23 @@ function ProjectPage() {
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} projectName={project.name} />
       <MagicAddDialog open={magicOpen} onOpenChange={setMagicOpen} projectId={projectId} />
+      <MoveToFolderDialog
+        open={moveOpen}
+        onOpenChange={setMoveOpen}
+        title="Move project"
+        current={{
+          division_id: project.division_id ?? "",
+          folder_id: project.folder_id ?? null,
+        }}
+        onConfirm={async (target) => {
+          await updateProject.mutateAsync({
+            id: project.id,
+            division_id: target.division_id,
+            folder_id: target.folder_id,
+          });
+          toast.success("Project moved");
+        }}
+      />
     </div>
   );
 }
