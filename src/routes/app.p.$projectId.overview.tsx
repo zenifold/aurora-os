@@ -30,7 +30,7 @@ import {
   Loader2,
   Settings,
 } from "lucide-react";
-import { PROJECT_PHASE_META, PROJECT_HEALTH_META } from "@/lib/types";
+import { PROJECT_PHASES, PROJECT_HEALTH } from "@/lib/types";
 
 export const Route = createFileRoute("/app/p/$projectId/overview")({
   component: OverviewPage,
@@ -91,10 +91,11 @@ function OverviewPage() {
   const { data: documents = [] } = useProjectDocuments(projectId);
   const { data: financials } = useProjectFinancials(projectId);
   const { data: timeLogs = [] } = useProjectTimeLogs(projectId);
+  const { data: members = [] } = useTeamMembers();
 
   const summary = useMemo(
-    () => computeSummary(financials ?? null, timeLogs, milestones),
-    [financials, timeLogs, milestones]
+    () => computeSummary(financials ?? null, timeLogs, members, []),
+    [financials, timeLogs, members]
   );
 
   const taskStats = useMemo(() => {
