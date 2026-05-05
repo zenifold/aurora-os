@@ -26,6 +26,7 @@ function AppLayout() {
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const wsLoading = useWorkspaceStore((s) => s.loading);
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
+  useWorkspaceRealtime();
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
