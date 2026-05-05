@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
-import { Loader2, Settings, UserPlus, Wand2, Mic, StickyNote, Target } from "lucide-react";
+import { Loader2, Settings, UserPlus, Wand2, Mic, StickyNote, Target, Flag } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
 import { useIsWorkspaceOwner } from "@/hooks/use-workspace-role";
@@ -167,6 +167,11 @@ function ProjectPage() {
             <Button variant="ghost" size="sm" asChild title="Sprints for this project">
               <Link to="/app/p/$projectId/sprints" params={{ projectId }}>
                 <Target className="mr-1.5 h-4 w-4" /> Sprints
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild title="Milestones for this project">
+              <Link to="/app/p/$projectId/milestones" params={{ projectId }}>
+                <Flag className="mr-1.5 h-4 w-4" /> Milestones
               </Link>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
