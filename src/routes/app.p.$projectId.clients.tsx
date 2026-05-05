@@ -42,6 +42,7 @@ function ClientsPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
   const { data: clients = [] } = useClientAccess(projectId);
+  const { data: deliverables = [] } = useDeliverables(projectId);
   const invite = useInviteClient();
   const revoke = useRevokeClientAccess();
 
