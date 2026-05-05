@@ -51,7 +51,9 @@ import {
   Users,
   Wand2,
   FolderOpen,
+  Download,
 } from "lucide-react";
+import { meetingToMarkdown, downloadMarkdown } from "@/lib/meeting-export";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -144,6 +146,20 @@ function MeetingDetailPage() {
           {dirty && (
             <Button variant="ghost" size="sm" onClick={saveDraft}>
               <Save className="mr-1.5 h-3.5 w-3.5" /> Save
+            </Button>
+          )}
+          {meeting.ai_status === "completed" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const md = meetingToMarkdown(meeting, actionItems);
+                downloadMarkdown(meeting.title, md);
+                toast.success("Markdown downloaded");
+              }}
+              title="Export summary as Markdown"
+            >
+              <Download className="mr-1.5 h-3.5 w-3.5" /> Export
             </Button>
           )}
           <Button
