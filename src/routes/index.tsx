@@ -27,6 +27,12 @@ import {
   CheckCircle2,
   GitBranch,
   MessageSquare,
+  Briefcase,
+  Target,
+  Rocket,
+  LineChart,
+  FileText,
+  Receipt,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
