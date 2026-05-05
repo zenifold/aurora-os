@@ -590,6 +590,69 @@ export type Database = {
         }
         Relationships: []
       }
+      milestones: {
+        Row: {
+          actual_date: string | null
+          completion_criteria: string | null
+          created_at: string
+          created_by: string | null
+          depends_on_ids: string[]
+          description: string | null
+          id: string
+          is_paid: boolean
+          milestone_type: string
+          name: string
+          order_index: number
+          payment_amount: number | null
+          payment_currency: string | null
+          project_id: string
+          status: string
+          target_date: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actual_date?: string | null
+          completion_criteria?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on_ids?: string[]
+          description?: string | null
+          id?: string
+          is_paid?: boolean
+          milestone_type?: string
+          name: string
+          order_index?: number
+          payment_amount?: number | null
+          payment_currency?: string | null
+          project_id: string
+          status?: string
+          target_date: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actual_date?: string | null
+          completion_criteria?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on_ids?: string[]
+          description?: string | null
+          id?: string
+          is_paid?: boolean
+          milestone_type?: string
+          name?: string
+          order_index?: number
+          payment_amount?: number | null
+          payment_currency?: string | null
+          project_id?: string
+          status?: string
+          target_date?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           background_color: string
