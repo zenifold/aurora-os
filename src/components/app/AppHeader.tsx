@@ -46,41 +46,6 @@ export function AppHeader() {
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </button>
-
-      {/* Hub dropdowns */}
-      <nav className="ml-2 hidden items-center gap-0.5 xl:flex">
-        <HubMenu
-          label="Delivery"
-          icon={<Briefcase className="h-3.5 w-3.5" />}
-          items={[
-            { to: "/app/delivery", label: "Command center" },
-            { to: "/app/delivery", label: "Client projects" },
-            { to: "/app/delivery", label: "Deliverables" },
-          ]}
-        />
-        <HubMenu
-          label="Ops"
-          icon={<BarChart3 className="h-3.5 w-3.5" />}
-          items={[
-            { to: "/app/executive", label: "Executive dashboard" },
-            { to: "/app/escalations", label: "Escalations" },
-            { to: "/app/ops", label: "Portfolio" },
-            { to: "/app/resources/capacity", label: "Resources" },
-            { to: "/app/ops", label: "Financials" },
-          ]}
-        />
-        <HubMenu
-          label="Sales"
-          icon={<DollarSign className="h-3.5 w-3.5" />}
-          items={[
-            { to: "/app/crm", label: "Pipeline" },
-            { to: "/app/sales", label: "Proposals" },
-            { to: "/app/sales", label: "SOWs" },
-            { to: "/app/sales", label: "Forecast" },
-          ]}
-        />
-      </nav>
-
       <div className="flex-1" />
 
       <NotificationsBell />
