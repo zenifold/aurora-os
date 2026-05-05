@@ -53,6 +53,7 @@ import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$proj
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
 import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
+import { Route as ApiPublicPortalTokenDeliverablesRouteImport } from './routes/api/public/portal.$token.deliverables'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -276,6 +277,12 @@ const ApiPublicPortalTokenRoute = ApiPublicPortalTokenRouteImport.update({
   path: '/api/public/portal/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPortalTokenDeliverablesRoute =
+  ApiPublicPortalTokenDeliverablesRouteImport.update({
+    id: '/deliverables',
+    path: '/deliverables',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -313,7 +320,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
-  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -357,7 +365,7 @@ export interface FileRoutesByTo {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
-  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -366,6 +374,7 @@ export interface FileRoutesByTo {
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -404,7 +413,7 @@ export interface FileRoutesById {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
-  '/api/public/portal/$token': typeof ApiPublicPortalTokenRoute
+  '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
@@ -413,6 +422,7 @@ export interface FileRoutesById {
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
   id:
     | '__root__'
     | '/'
@@ -551,6 +563,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/api/public/portal/$token/deliverables'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -566,7 +579,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
-  ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRoute
+  ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -879,6 +892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPortalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/portal/$token/deliverables': {
+      id: '/api/public/portal/$token/deliverables'
+      path: '/deliverables'
+      fullPath: '/api/public/portal/$token/deliverables'
+      preLoaderRoute: typeof ApiPublicPortalTokenDeliverablesRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
   }
 }
 
@@ -982,6 +1002,17 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ApiPublicPortalTokenRouteChildren {
+  ApiPublicPortalTokenDeliverablesRoute: typeof ApiPublicPortalTokenDeliverablesRoute
+}
+
+const ApiPublicPortalTokenRouteChildren: ApiPublicPortalTokenRouteChildren = {
+  ApiPublicPortalTokenDeliverablesRoute: ApiPublicPortalTokenDeliverablesRoute,
+}
+
+const ApiPublicPortalTokenRouteWithChildren =
+  ApiPublicPortalTokenRoute._addFileChildren(ApiPublicPortalTokenRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
@@ -995,7 +1026,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
-  ApiPublicPortalTokenRoute: ApiPublicPortalTokenRoute,
+  ApiPublicPortalTokenRoute: ApiPublicPortalTokenRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
