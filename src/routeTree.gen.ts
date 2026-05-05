@@ -41,6 +41,7 @@ import { Route as AppSettingsDataRouteImport } from './routes/app.settings.data'
 import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.danger'
 import { Route as AppSettingsAutomationsRouteImport } from './routes/app.settings.automations'
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
+import { Route as AppResourcesCapacityRouteImport } from './routes/app.resources.capacity'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
@@ -210,6 +211,11 @@ const AppSettingsAiRoute = AppSettingsAiRouteImport.update({
   path: '/ai',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppResourcesCapacityRoute = AppResourcesCapacityRouteImport.update({
+  id: '/resources/capacity',
+  path: '/resources/capacity',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
   id: '/p/$projectId',
   path: '/p/$projectId',
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
+  '/app/resources/capacity': typeof AppResourcesCapacityRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -317,6 +324,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
+  '/app/resources/capacity': typeof AppResourcesCapacityRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
+  '/app/resources/capacity': typeof AppResourcesCapacityRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
+    | '/app/resources/capacity'
     | '/app/settings/ai'
     | '/app/settings/automations'
     | '/app/settings/danger'
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
+    | '/app/resources/capacity'
     | '/app/settings/ai'
     | '/app/settings/automations'
     | '/app/settings/danger'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
+    | '/app/resources/capacity'
     | '/app/settings/ai'
     | '/app/settings/automations'
     | '/app/settings/danger'
@@ -745,6 +757,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsAiRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/resources/capacity': {
+      id: '/app/resources/capacity'
+      path: '/resources/capacity'
+      fullPath: '/app/resources/capacity'
+      preLoaderRoute: typeof AppResourcesCapacityRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/p/$projectId': {
       id: '/app/p/$projectId'
       path: '/p/$projectId'
@@ -878,6 +897,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
+  AppResourcesCapacityRoute: typeof AppResourcesCapacityRoute
   AppResourcesIndexRoute: typeof AppResourcesIndexRoute
 }
 
@@ -893,6 +913,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
+  AppResourcesCapacityRoute: AppResourcesCapacityRoute,
   AppResourcesIndexRoute: AppResourcesIndexRoute,
 }
 
