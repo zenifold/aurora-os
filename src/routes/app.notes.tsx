@@ -170,7 +170,7 @@ function NotesPage() {
             key={f.id}
             onClick={() => setFilter(f.id)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs transition-colors",
+              "shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs transition-colors",
               filter === f.id
                 ? "border-transparent bg-aura-gradient text-primary-foreground"
                 : "border-border bg-background text-muted-foreground hover:text-foreground",
