@@ -83,6 +83,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   }
 
   const status = STATUS_OPTIONS.find((s) => s.value === task.status);
+  const priority = PRIORITY_OPTIONS.find((p) => p.value === task.priority);
 
   return (
     <Sheet open={!!taskId} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -94,11 +95,43 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
             : "flex w-full flex-col overflow-hidden p-0 sm:max-w-2xl"
         }
       >
-        <SheetHeader className="space-y-3 border-b border-border px-6 py-4">
+        <SheetHeader
+          className="space-y-3 border-b border-border px-6 py-4"
+          style={{
+            background: status?.color
+              ? `linear-gradient(180deg, ${status.color}10 0%, transparent 100%)`
+              : undefined,
+          }}
+        >
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-              <span className="text-xs uppercase tracking-wider text-muted-foreground">{status?.label}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                style={{
+                  background: `${status?.color ?? "#888"}22`,
+                  color: status?.color,
+                }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: status?.color }} />
+                {status?.label}
+              </span>
+              {priority && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                  style={{
+                    background: `${priority.color}22`,
+                    color: priority.color,
+                  }}
+                >
+                  <Flag className="h-3 w-3" />
+                  {priority.label}
+                </span>
+              )}
+              {task.task_type && task.task_type !== "task" && (
+                <Badge variant="outline" className="text-[10px] uppercase">
+                  {task.task_type}
+                </Badge>
+              )}
             </div>
             {viewers.length > 0 && (
               <div className="flex items-center gap-2">
