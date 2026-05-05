@@ -40,6 +40,9 @@ export const Route = createFileRoute("/app/p/$projectId")({
 function ProjectPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
+  const { data: divisions = [] } = useDivisions();
+  const { data: parentFolder } = useFolder(project?.folder_id ?? undefined);
+  const division = divisions.find((d) => d.id === project?.division_id);
   const { data: tasks = [], isLoading } = useTasks(projectId);
   const { data: views = [] } = useViews(projectId);
   const { data: fields = [] } = useCustomFields();
