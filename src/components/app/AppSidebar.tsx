@@ -45,6 +45,7 @@ import {
   Pencil,
   StickyNote,
   Mic,
+  Briefcase,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { Project } from "@/lib/types";
@@ -111,6 +112,9 @@ export function AppSidebar() {
             <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
             <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
             <IconNav to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")} label="Meetings" />
+            {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
+              <IconNav to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")} label="CRM" />
+            )}
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
 
@@ -219,6 +223,9 @@ export function AppSidebar() {
         <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
         <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
         <NavItem to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")}>Meetings</NavItem>
+        {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
+          <NavItem to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")}>CRM</NavItem>
+        )}
         <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
       </nav>
 

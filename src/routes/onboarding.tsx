@@ -142,10 +142,10 @@ function Onboarding() {
     (async () => {
       const { data } = await supabase
         .from("workspaces")
-        .select("id, name, slug, owner_id, plan")
+        .select("id, name, slug, owner_id, plan, kind, linked_delivery_workspace_id")
         .limit(1);
       if (data && data.length > 0) {
-        setCurrent(data[0]);
+        setCurrent(data[0] as never);
         navigate({ to: "/app" });
       }
     })();
@@ -225,7 +225,7 @@ function Onboarding() {
         root.classList.add(themeChoice);
       }
 
-      setCurrent(ws);
+      setCurrent(ws as never);
       await fetchWs();
       toast.success("Workspace ready");
       navigate({ to: "/app/p/$projectId", params: { projectId: proj.id } });

@@ -75,10 +75,10 @@ function AcceptInvite() {
       // Load workspace and navigate
       const { data: ws } = await supabase
         .from("workspaces")
-        .select("id, name, slug, owner_id, plan")
+        .select("id, name, slug, owner_id, plan, kind, linked_delivery_workspace_id")
         .eq("id", invite.workspace_id)
         .single();
-      if (ws) setCurrent(ws);
+      if (ws) setCurrent(ws as never);
       await fetchWs();
       toast.success(`Welcome to ${invite.workspace?.name ?? "the workspace"}`);
       navigate({ to: "/app" });
