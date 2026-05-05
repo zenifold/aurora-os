@@ -4,6 +4,7 @@ import { useProject } from "@/hooks/use-projects";
 import { StatusWorkflowBuilder } from "@/components/projects/StatusWorkflowBuilder";
 import { TransitionMatrix } from "@/components/projects/TransitionMatrix";
 import { WorkflowTemplatePicker } from "@/components/projects/WorkflowTemplatePicker";
+import { ClientEngagementSettings } from "@/components/projects/ClientEngagementSettings";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/app/p/$projectId/settings")({
