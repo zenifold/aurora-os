@@ -93,11 +93,6 @@ export function ProjectActionsMenu({ projectId }: Props) {
             <Mic className={ICON} /> Meetings
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/app/meetings">
-            <Mic className={ICON} /> Meetings
-          </Link>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
