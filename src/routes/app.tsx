@@ -86,6 +86,7 @@ function AppLayout() {
       <CommandPalette />
       <MobileDrawer />
       <QuickCaptureSheet />
+      <OpenRouterFirstRun />
     </div>
   );
 }
