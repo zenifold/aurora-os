@@ -206,6 +206,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
           {showStatus && <col style={{ width: widths.status }} />}
           {showPriority && <col style={{ width: widths.priority }} />}
           {showDue && <col style={{ width: widths.due }} />}
+          {showAssignees && <col style={{ width: widths.assignees }} />}
+          {showTags && <col style={{ width: widths.tags }} />}
           {visibleFields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
           <col style={{ width: widths.add }} />
         </colgroup>
@@ -226,6 +228,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
             {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
+            {showAssignees && <ResizableTh colKey="assignees" widths={widths} setWidths={setWidths}>Assignees</ResizableTh>}
+            {showTags && <ResizableTh colKey="tags" widths={widths} setWidths={setWidths}>Tags</ResizableTh>}
             {visibleFields.map((f) => (
               <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
                 {f.name}
