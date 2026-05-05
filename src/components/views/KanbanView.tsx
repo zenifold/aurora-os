@@ -228,12 +228,14 @@ function Card({
   task,
   cardFields,
   accent,
+  slaPct,
   onClick,
   indicator,
 }: {
   task: Task;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
   accent: string | null;
+  slaPct: number | null;
   onClick: () => void;
   indicator?: { blockedBy: number; blocking: number };
 }) {
