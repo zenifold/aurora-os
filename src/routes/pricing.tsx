@@ -15,7 +15,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "Aura — pricing that respects you" },
       {
         property: "og:description",
-        content: "Self-host free. Hosted from $0. AI is BYO OpenRouter — pay providers directly.",
+        content: "Self-host free. Hosted from $5/user. AI is BYO OpenRouter — pay providers directly.",
       },
     ],
   }),
@@ -54,17 +54,17 @@ const TIERS: Tier[] = [
   },
   {
     name: "Hosted Personal",
-    price: "$0",
-    cadence: "/ month",
+    price: "$5",
+    cadence: "/ user / mo",
     desc: "Hassle-free hosted Aura for solo work and small projects.",
     features: [
-      "Up to 3 projects",
+      "Unlimited projects",
       "1 workspace, 1 user",
       "All views & workflows",
       "Bring your OpenRouter key for AI",
       "Email support",
     ],
-    cta: "Start free",
+    cta: "Start free trial",
     ctaTo: "/signup",
     icon: Cloud,
     popular: true,
@@ -72,7 +72,7 @@ const TIERS: Tier[] = [
   {
     name: "Hosted Team",
     price: "$8",
-    cadence: "/ user / mo",
+    cadence: "/ seat / mo",
     desc: "We run it, back it up, and scale it. You focus on work.",
     features: [
       "Unlimited projects & workspaces",
