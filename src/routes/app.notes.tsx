@@ -21,13 +21,14 @@ type FilterType = "all" | NoteType | "pinned";
 export const Route = createFileRoute("/app/notes")({
   validateSearch: (s: Record<string, unknown>) => ({
     archived: s.archived === true || s.archived === "true",
+    project: typeof s.project === "string" ? s.project : undefined,
   }),
   component: NotesPage,
 });
 
 function NotesPage() {
-  const { archived } = Route.useSearch();
-  const { data: notes = [], isLoading } = useNotes({ archived });
+  const { archived, project } = Route.useSearch();
+  const { data: notes = [], isLoading } = useNotes({ archived, projectId: project ?? null });
   const create = useCreateNote();
 
   const [search, setSearch] = useState("");
@@ -51,7 +52,7 @@ function NotesPage() {
   const others = filtered.filter((n) => !n.is_pinned);
 
   const handleCreate = async (note_type: NoteType = "freeform") => {
-    const created = await create.mutateAsync({ note_type });
+    const created = await create.mutateAsync({ note_type, project_id: project ?? null });
     setSelected(created);
     setOpen(true);
   };

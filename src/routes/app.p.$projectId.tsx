@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
-import { Loader2, Settings, UserPlus, Wand2 } from "lucide-react";
+import { Loader2, Settings, UserPlus, Wand2, Mic, StickyNote } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
 import { useIsWorkspaceOwner } from "@/hooks/use-workspace-role";
@@ -153,6 +153,16 @@ function ProjectPage() {
             <PresenceStack users={presenceUsers} />
             <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
               <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
+            </Button>
+            <Button variant="ghost" size="sm" asChild title="Notes for this project">
+              <Link to="/app/notes" search={{ project: projectId, archived: false }}>
+                <StickyNote className="mr-1.5 h-4 w-4" /> Notes
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild title="Meetings for this project">
+              <Link to="/app/meetings" search={{ project: projectId }}>
+                <Mic className="mr-1.5 h-4 w-4" /> Meetings
+              </Link>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
