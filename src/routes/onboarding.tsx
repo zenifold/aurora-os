@@ -356,7 +356,7 @@ function Onboarding() {
               className="mt-6 space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (wsName.trim()) setStep("theme");
+                if (wsName.trim()) setStep("preset");
               }}
             >
               <div>
@@ -384,7 +384,7 @@ function Onboarding() {
         {step === "theme" && (
           <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
             <button
-              onClick={() => setStep("name")}
+              onClick={() => setStep("preset")}
               className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" /> Back
@@ -481,7 +481,7 @@ function Onboarding() {
                 Cancel
               </Button>
               <Button
-                onClick={() => wsName.trim() && finalize(wsName.trim(), selectedTemplate, theme)}
+                onClick={() => wsName.trim() && finalize(wsName.trim(), selectedTemplate, theme, selectedPreset)}
                 disabled={busy || !wsName.trim()}
                 className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
               >
