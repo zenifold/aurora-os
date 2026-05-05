@@ -20,6 +20,8 @@ interface WorkspaceFull {
   name: string;
   slug: string;
   plan: string;
+  kind: WorkspaceKind;
+  linked_delivery_workspace_id: string | null;
   settings: { description?: string; color?: string } | null;
 }
 
