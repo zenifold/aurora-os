@@ -105,6 +105,7 @@ export function QuickCaptureSheet() {
   const [taskType, setTaskType] = useState<TaskType>("task");
   const [parentTaskId, setParentTaskId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Default to "Personal" project, else first project.
