@@ -442,6 +442,221 @@ function ViewsShowcase() {
   );
 }
 
+/* ─── Capabilities showcase ─────────────────────────── */
+
+function CapabilitiesShowcase() {
+  const caps = [
+    {
+      icon: Workflow,
+      eyebrow: "Automations",
+      title: "Task automations that just run",
+      body: "Trigger status changes, route work, post updates, and create follow-ups when fields change — all in a visual rule builder, no Zapier tab required.",
+      iconClass: "bg-violet-500/15 text-violet-500 ring-violet-500/30",
+      visual: <AutomationVisual />,
+    },
+    {
+      icon: Mic,
+      eyebrow: "Meeting AI",
+      title: "Meetings that turn into tasks",
+      body: "Record or paste a transcript. Get a summary, decisions log, and assigned action items wired straight into the project — using your own AI key.",
+      iconClass: "bg-sky-500/15 text-sky-500 ring-sky-500/30",
+      visual: <MeetingVisual />,
+    },
+    {
+      icon: Users,
+      eyebrow: "Collaboration",
+      title: "Real-time, presence, threads",
+      body: "Live cursors, presence avatars, threaded comments on any task or canvas node, and granular roles backed by row-level security.",
+      iconClass: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30",
+      visual: <CollabVisual />,
+    },
+  ];
+  return (
+    <section className="relative border-t border-border/60 bg-muted/20">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <Sparkles className="h-3 w-3" /> Built for teams that ship
+          </span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
+            More than views.{" "}
+            <span className="text-aura-gradient">A full operating system.</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+            Automations, meeting intelligence, and collaboration — first-class, not bolted on.
+          </p>
+        </div>
+
+        <div className="mt-14 space-y-6">
+          {caps.map((c, i) => (
+            <article
+              key={c.title}
+              className={`group grid gap-0 overflow-hidden rounded-2xl border border-border bg-card shadow-elegant transition hover:shadow-pop md:grid-cols-2 ${
+                i % 2 ? "md:[&>div:first-child]:order-2" : ""
+              }`}
+            >
+              <div className="relative flex items-center justify-center border-b border-border/60 bg-gradient-to-br from-muted/40 to-background p-6 md:border-b-0 md:border-r">
+                {c.visual}
+              </div>
+              <div className="relative flex flex-col justify-center p-8">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg ring-1 ${c.iconClass}`}
+                  >
+                    <c.icon className="h-5 w-5" strokeWidth={2.25} />
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    {c.eyebrow}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-2xl font-semibold tracking-tight">{c.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Button asChild variant="outline" className="group">
+            <Link to="/features">
+              Explore every capability
+              <ArrowRight className="ml-1.5 h-4 w-4 transition group-hover:translate-x-0.5" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AutomationVisual() {
+  const steps = [
+    { icon: GitBranch, label: "When status = Done", tone: "text-violet-500 bg-violet-500/10 ring-violet-500/30" },
+    { icon: Bot, label: "Notify owner in thread", tone: "text-sky-500 bg-sky-500/10 ring-sky-500/30" },
+    { icon: CheckCircle2, label: "Create follow-up task", tone: "text-emerald-500 bg-emerald-500/10 ring-emerald-500/30" },
+  ];
+  return (
+    <div className="w-full max-w-sm space-y-2">
+      {steps.map((s, i) => (
+        <div key={s.label} className="relative">
+          <div
+            className={`flex items-center gap-3 rounded-xl border border-border bg-background p-3 shadow-sm ring-1 ${s.tone.replace(/text-\S+ /, "").replace(/bg-\S+\/10 /, "")}`}
+          >
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${s.tone}`}>
+              <s.icon className="h-4 w-4" strokeWidth={2.25} />
+            </div>
+            <span className="text-sm font-medium">{s.label}</span>
+            <span className="ml-auto text-[10px] font-mono text-muted-foreground">
+              0{i + 1}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className="ml-7 h-3 w-px bg-gradient-to-b from-border to-transparent" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MeetingVisual() {
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <div className="rounded-xl border border-border bg-background p-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-sky-500 ring-1 ring-sky-500/30">
+            <Mic className="h-4 w-4" strokeWidth={2.25} />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-medium">Sprint review · 32 min</p>
+            <div className="mt-1 flex h-1 items-center gap-px">
+              {Array.from({ length: 28 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="w-px rounded-full bg-sky-500/60"
+                  style={{ height: `${4 + Math.abs(Math.sin(i * 0.7)) * 10}px` }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="rounded-xl border border-border bg-background p-3 shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Action items
+        </p>
+        <ul className="mt-2 space-y-1.5 text-xs">
+          {[
+            { who: "AB", what: "Ship pricing copy", tone: "bg-violet-500" },
+            { who: "JK", what: "QA onboarding flow", tone: "bg-amber-500" },
+            { who: "MR", what: "Draft Q3 OKRs", tone: "bg-emerald-500" },
+          ].map((a) => (
+            <li key={a.what} className="flex items-center gap-2">
+              <span
+                className={`flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white ${a.tone}`}
+              >
+                {a.who}
+              </span>
+              <span className="flex-1 truncate">{a.what}</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function CollabVisual() {
+  return (
+    <div className="w-full max-w-sm space-y-3">
+      <div className="flex items-center justify-between rounded-xl border border-border bg-background p-3 shadow-sm">
+        <div className="flex -space-x-2">
+          {[
+            { i: "AB", c: "bg-violet-500" },
+            { i: "JK", c: "bg-sky-500" },
+            { i: "MR", c: "bg-emerald-500" },
+            { i: "TL", c: "bg-amber-500" },
+          ].map((u) => (
+            <span
+              key={u.i}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-background text-[10px] font-semibold text-white ${u.c}`}
+            >
+              {u.i}
+            </span>
+          ))}
+        </div>
+        <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-500">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+          4 live now
+        </span>
+      </div>
+      <div className="rounded-xl border border-border bg-background p-3 shadow-sm">
+        <div className="flex items-start gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500 text-[10px] font-semibold text-white">
+            AB
+          </span>
+          <div className="flex-1 rounded-lg bg-muted/50 px-2.5 py-1.5">
+            <p className="text-xs">Moved this to Review — can you take a look?</p>
+          </div>
+        </div>
+        <div className="mt-2 flex items-start gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-500 text-[10px] font-semibold text-white">
+            JK
+          </span>
+          <div className="flex-1 rounded-lg bg-muted/50 px-2.5 py-1.5">
+            <p className="text-xs">On it 👀</p>
+          </div>
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <MessageSquare className="h-3 w-3" />
+          Thread on “Pricing page”
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Manifesto ─────────────────────────────────────── */
 
 function Manifesto() {
