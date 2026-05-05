@@ -33,7 +33,7 @@ function ExecutiveDashboard() {
   const { data: projects = [] } = useProjects();
   const { data: openEscalations = [] } = useEscalations({ status: "open" });
 
-  const stageMap = useMemo(() => new Map(stages.map((s) => [s.id, s])), [stages]);
+  
 
   const sales = useMemo(() => {
     const open = deals.filter((d) => d.status === "open");
