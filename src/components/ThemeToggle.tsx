@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +19,16 @@ export function ThemeToggle({
   const theme = useUIStore((s) => s.theme);
   const resolved = useUIStore((s) => s.resolvedTheme);
   const setTheme = useUIStore((s) => s.setTheme);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant={variant} size={size} aria-label="Toggle theme">
-          {resolved === "dark" ? (
+          {!mounted ? (
+            <Sun className="h-4 w-4" />
+          ) : resolved === "dark" ? (
             <Moon className="h-4 w-4" />
           ) : (
             <Sun className="h-4 w-4" />
