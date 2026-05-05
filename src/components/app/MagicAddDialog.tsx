@@ -67,6 +67,7 @@ export function MagicAddDialog({
     setGenerated(null);
     setSelected(new Set());
     setMeta({ tokens: null, model: null });
+    setAssigneeIds([]);
   };
 
   const close = () => {
