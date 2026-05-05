@@ -999,7 +999,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                   </div>
                   <div className="relative flex-1" style={{ width: totalWidth }}>
                     <div
-                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""} ${r.planned ? "ring-1 ring-primary/40" : ""}`}
+                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""} ${r.planned ? "ring-1 ring-primary/40" : ""} ${conflicts.has(t.id) ? "ring-2 ring-destructive" : ""}`}
                       style={{
                         top: (ROW_H - barH) / 2,
                         height: barH,
