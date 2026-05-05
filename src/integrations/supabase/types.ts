@@ -873,6 +873,114 @@ export type Database = {
           },
         ]
       }
+      escalation_rules: {
+        Row: {
+          actions: Json
+          conditions: Json
+          cooldown_hours: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          tier: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actions?: Json
+          conditions?: Json
+          cooldown_hours?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          tier: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actions?: Json
+          conditions?: Json
+          cooldown_hours?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          tier?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      escalations: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          action_plan: Json
+          created_at: string
+          created_task_id: string | null
+          detail: string | null
+          id: string
+          impact: Json
+          project_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          rule_id: string | null
+          status: string
+          tier: number
+          title: string
+          triggered_by: Json
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_plan?: Json
+          created_at?: string
+          created_task_id?: string | null
+          detail?: string | null
+          id?: string
+          impact?: Json
+          project_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          status?: string
+          tier: number
+          title: string
+          triggered_by?: Json
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_plan?: Json
+          created_at?: string
+          created_task_id?: string | null
+          detail?: string | null
+          id?: string
+          impact?: Json
+          project_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          status?: string
+          tier?: number
+          title?: string
+          triggered_by?: Json
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       meeting_action_items: {
         Row: {
           assigned_agent_id: string | null

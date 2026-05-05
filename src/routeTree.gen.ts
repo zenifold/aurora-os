@@ -32,6 +32,8 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
+import { Route as AppExecutiveRouteImport } from './routes/app.executive'
+import { Route as AppEscalationsRouteImport } from './routes/app.escalations'
 import { Route as AppDeliveryRouteImport } from './routes/app.delivery'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppContactsRouteImport } from './routes/app.contacts'
@@ -48,6 +50,7 @@ import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppResourcesCapacityRouteImport } from './routes/app.resources.capacity'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
+import { Route as AppEscalationsEscalationIdRouteImport } from './routes/app.escalations.$escalationId'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 import { Route as AppPProjectIdOverviewRouteImport } from './routes/app.p.$projectId.overview'
@@ -179,6 +182,16 @@ const AppMeetingsRoute = AppMeetingsRouteImport.update({
   path: '/meetings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppExecutiveRoute = AppExecutiveRouteImport.update({
+  id: '/executive',
+  path: '/executive',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEscalationsRoute = AppEscalationsRouteImport.update({
+  id: '/escalations',
+  path: '/escalations',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDeliveryRoute = AppDeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
@@ -259,6 +272,12 @@ const AppMeetingsMeetingIdRoute = AppMeetingsMeetingIdRouteImport.update({
   path: '/$meetingId',
   getParentRoute: () => AppMeetingsRoute,
 } as any)
+const AppEscalationsEscalationIdRoute =
+  AppEscalationsEscalationIdRouteImport.update({
+    id: '/$escalationId',
+    path: '/$escalationId',
+    getParentRoute: () => AppEscalationsRoute,
+  } as any)
 const AppPProjectIdSprintsRoute = AppPProjectIdSprintsRouteImport.update({
   id: '/sprints',
   path: '/sprints',
@@ -355,6 +374,8 @@ export interface FileRoutesByFullPath {
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
+  '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -368,6 +389,7 @@ export interface FileRoutesByFullPath {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -410,6 +432,8 @@ export interface FileRoutesByTo {
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
+  '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -422,6 +446,7 @@ export interface FileRoutesByTo {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
+  '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -466,6 +491,8 @@ export interface FileRoutesById {
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
+  '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -479,6 +506,7 @@ export interface FileRoutesById {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -524,6 +552,8 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
+    | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -537,6 +567,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
+    | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -579,6 +610,8 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
+    | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -591,6 +624,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app'
+    | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -634,6 +668,8 @@ export interface FileRouteTypes {
     | '/app/contacts'
     | '/app/crm'
     | '/app/delivery'
+    | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -647,6 +683,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
+    | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -857,6 +894,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/executive': {
+      id: '/app/executive'
+      path: '/executive'
+      fullPath: '/app/executive'
+      preLoaderRoute: typeof AppExecutiveRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/escalations': {
+      id: '/app/escalations'
+      path: '/escalations'
+      fullPath: '/app/escalations'
+      preLoaderRoute: typeof AppEscalationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/delivery': {
       id: '/app/delivery'
       path: '/delivery'
@@ -969,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsMeetingIdRouteImport
       parentRoute: typeof AppMeetingsRoute
     }
+    '/app/escalations/$escalationId': {
+      id: '/app/escalations/$escalationId'
+      path: '/$escalationId'
+      fullPath: '/app/escalations/$escalationId'
+      preLoaderRoute: typeof AppEscalationsEscalationIdRouteImport
+      parentRoute: typeof AppEscalationsRoute
+    }
     '/app/p/$projectId/sprints': {
       id: '/app/p/$projectId/sprints'
       path: '/sprints'
@@ -1077,6 +1135,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppEscalationsRouteChildren {
+  AppEscalationsEscalationIdRoute: typeof AppEscalationsEscalationIdRoute
+}
+
+const AppEscalationsRouteChildren: AppEscalationsRouteChildren = {
+  AppEscalationsEscalationIdRoute: AppEscalationsEscalationIdRoute,
+}
+
+const AppEscalationsRouteWithChildren = AppEscalationsRoute._addFileChildren(
+  AppEscalationsRouteChildren,
+)
+
 interface AppMeetingsRouteChildren {
   AppMeetingsMeetingIdRoute: typeof AppMeetingsMeetingIdRoute
 }
@@ -1151,6 +1221,8 @@ interface AppRouteChildren {
   AppContactsRoute: typeof AppContactsRoute
   AppCrmRoute: typeof AppCrmRoute
   AppDeliveryRoute: typeof AppDeliveryRoute
+  AppEscalationsRoute: typeof AppEscalationsRouteWithChildren
+  AppExecutiveRoute: typeof AppExecutiveRoute
   AppMeetingsRoute: typeof AppMeetingsRouteWithChildren
   AppMyTasksRoute: typeof AppMyTasksRoute
   AppNotesRoute: typeof AppNotesRoute
@@ -1170,6 +1242,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppContactsRoute: AppContactsRoute,
   AppCrmRoute: AppCrmRoute,
   AppDeliveryRoute: AppDeliveryRoute,
+  AppEscalationsRoute: AppEscalationsRouteWithChildren,
+  AppExecutiveRoute: AppExecutiveRoute,
   AppMeetingsRoute: AppMeetingsRouteWithChildren,
   AppMyTasksRoute: AppMyTasksRoute,
   AppNotesRoute: AppNotesRoute,
