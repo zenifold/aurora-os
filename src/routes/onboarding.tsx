@@ -154,9 +154,15 @@ function Onboarding() {
     })();
   }, [user, navigate, setCurrent]);
 
-  const finalize = async (wsName: string, tmplKey: TemplateKey, themeChoice: ThemeKey) => {
+  const finalize = async (
+    wsName: string,
+    tmplKey: TemplateKey,
+    themeChoice: ThemeKey,
+    presetKey: string,
+  ) => {
     if (!user) return;
     const tmpl = TEMPLATES.find((t) => t.key === tmplKey)!;
+    const preset = WORKSPACE_PRESETS.find((p) => p.key === presetKey);
     setBusy(true);
     try {
       const baseSlug = slugify(wsName);
@@ -175,6 +181,16 @@ function Onboarding() {
       ]);
       if (roleErr) throw roleErr;
       if (memErr) throw memErr;
+
+      // Apply preset (seeds divisions + folders). Default Delivery/Ops/Sales
+      // already exist from the seed_default_divisions trigger; preset merges in.
+      if (preset && preset.divisions.length > 0) {
+        try {
+          await applyPresetToWorkspace(ws.id, user.id, preset);
+        } catch (e) {
+          console.error("Preset seed failed", e);
+        }
+      }
 
       const { data: proj, error: projErr } = await supabase
         .from("projects")
@@ -249,7 +265,11 @@ function Onboarding() {
   }
 
   const progress =
-    step === "choose" ? 25 : step === "name" ? 50 : step === "theme" ? 75 : 100;
+    step === "choose" ? 20
+    : step === "name" ? 40
+    : step === "preset" ? 60
+    : step === "theme" ? 80
+    : 100;
 
   const THEMES: { key: ThemeKey; label: string; description: string; icon: typeof Sun }[] = [
     { key: "light", label: "Light", description: "Bright and clean.", icon: Sun },
