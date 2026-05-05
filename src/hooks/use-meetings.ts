@@ -139,3 +139,73 @@ export function useUpdateActionItem() {
     },
   });
 }
+
+// ============== Participants ==============
+
+export interface MeetingParticipant {
+  id: string;
+  workspace_id: string;
+  meeting_id: string;
+  user_id: string | null;
+  email: string;
+  name: string | null;
+  role: string | null;
+  speaking_time_seconds: number | null;
+  created_at: string;
+}
+
+export function useMeetingParticipants(meetingId: string | undefined) {
+  return useQuery({
+    queryKey: ["meeting-participants", meetingId],
+    enabled: !!meetingId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meeting_participants")
+        .select("*")
+        .eq("meeting_id", meetingId!)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as unknown as MeetingParticipant[];
+    },
+  });
+}
+
+export function useAddParticipant() {
+  const ws = useWorkspaceStore((s) => s.current);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      meeting_id: string;
+      email: string;
+      name?: string | null;
+      user_id?: string | null;
+      role?: string;
+    }) => {
+      if (!ws) throw new Error("No workspace");
+      const { error } = await supabase.from("meeting_participants").insert({
+        workspace_id: ws.id,
+        meeting_id: input.meeting_id,
+        email: input.email.trim().toLowerCase(),
+        name: input.name ?? null,
+        user_id: input.user_id ?? null,
+        role: input.role ?? "required",
+      });
+      if (error) throw error;
+      return input.meeting_id;
+    },
+    onSuccess: (mid) => qc.invalidateQueries({ queryKey: ["meeting-participants", mid] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useRemoveParticipant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; meeting_id: string }) => {
+      const { error } = await supabase.from("meeting_participants").delete().eq("id", input.id);
+      if (error) throw error;
+      return input;
+    },
+    onSuccess: (i) => qc.invalidateQueries({ queryKey: ["meeting-participants", i.meeting_id] }),
+  });
+}

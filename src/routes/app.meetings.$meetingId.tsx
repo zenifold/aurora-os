@@ -12,6 +12,8 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeMeetingTranscript } from "@/server/meeting-analysis.functions";
+import { useAiAgents } from "@/hooks/use-ai";
+import { ParticipantsPanel } from "@/components/meetings/ParticipantsPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,10 @@ import {
   Tags,
   Plus,
   X,
+  Bot,
+  Users,
+  Wand2,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -131,6 +137,10 @@ function MeetingDetailPage() {
           <StatusPill status={meeting.ai_status} error={meeting.ai_error} />
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <ProjectLinkSelect
+            meetingId={meeting.id}
+            value={meeting.project_id}
+          />
           {dirty && (
             <Button variant="ghost" size="sm" onClick={saveDraft}>
               <Save className="mr-1.5 h-3.5 w-3.5" /> Save
@@ -174,13 +184,14 @@ function MeetingDetailPage() {
         {/* Sidebar */}
         <div className="p-3 sm:p-4 lg:p-6">
           <Tabs defaultValue="summary">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="summary"><FileText className="mr-1.5 h-3.5 w-3.5" />Summary</TabsTrigger>
               <TabsTrigger value="actions">
                 <ListChecks className="mr-1.5 h-3.5 w-3.5" />
                 Actions {actionItems.length > 0 && <Badge variant="secondary" className="ml-1.5 h-4 px-1 text-[10px]">{actionItems.length}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="topics"><Tags className="mr-1.5 h-3.5 w-3.5" />Topics</TabsTrigger>
+              <TabsTrigger value="people"><Users className="mr-1.5 h-3.5 w-3.5" />People</TabsTrigger>
             </TabsList>
 
             <TabsContent value="summary" className="mt-4 space-y-4">
@@ -204,6 +215,10 @@ function MeetingDetailPage() {
               ) : (
                 <EmptyHint text="Run analysis to extract topics." />
               )}
+            </TabsContent>
+
+            <TabsContent value="people" className="mt-4">
+              <ParticipantsPanel meetingId={meeting.id} />
             </TabsContent>
           </Tabs>
 
@@ -289,14 +304,137 @@ function ActionItemsView({
   projectId: string | null;
 }) {
   const update = useUpdateActionItem();
+  const { data: agents = [] } = useAiAgents();
+  const ws = useWorkspaceStore((s) => s.current);
+  const { user } = useAuth();
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   if (!items || items.length === 0) {
     return <EmptyHint text="Run analysis to extract action items from the transcript." />;
   }
 
+  const pending = items.filter(
+    (i) => i.status !== "converted" && i.status !== "dismissed" && i.status !== "completed",
+  );
+
+  const assignToAgent = async (item: { id: string; summary: string | null; original_text: string; context_quote: string | null; priority_guess: string | null; due_guess: string | null }, agentId: string) => {
+    if (!ws || !user || !projectId) {
+      toast.error(projectId ? "Sign in again" : "Link this meeting to a project first");
+      return;
+    }
+    try {
+      const { data: existing } = await supabase
+        .from("tasks")
+        .select("position")
+        .eq("project_id", projectId)
+        .order("position", { ascending: false })
+        .limit(1);
+      const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+
+      const { data: task, error } = await supabase
+        .from("tasks")
+        .insert({
+          workspace_id: ws.id,
+          project_id: projectId,
+          title: item.summary ?? item.original_text,
+          status: "todo",
+          priority: (item.priority_guess as "low" | "medium" | "high" | "urgent" | null) ?? "medium",
+          due_date: item.due_guess,
+          position: nextPos,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      const { error: aErr } = await supabase.from("ai_task_assignments").insert({
+        workspace_id: ws.id,
+        task_id: task.id,
+        agent_id: agentId,
+        status: "queued",
+        instructions: `From meeting action item: ${item.summary ?? item.original_text}${item.context_quote ? `\n\nContext: "${item.context_quote}"` : ""}`,
+        created_by: user.id,
+      });
+      if (aErr) throw aErr;
+
+      await update.mutateAsync({
+        id: item.id,
+        meeting_id: meetingId,
+        patch: { status: "converted", converted_task_id: task.id, assigned_agent_id: agentId } as never,
+      });
+      toast.success("Routed to AI agent");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to assign");
+    }
+  };
+
+  const convertAllToTasks = async () => {
+    if (!projectId) {
+      toast.error("Link this meeting to a project first");
+      return;
+    }
+    if (!ws || !user) return;
+    setBulkBusy(true);
+    try {
+      let created = 0;
+      for (const item of pending) {
+        const { data: existing } = await supabase
+          .from("tasks")
+          .select("position")
+          .eq("project_id", projectId)
+          .order("position", { ascending: false })
+          .limit(1);
+        const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+        const { data: task, error } = await supabase
+          .from("tasks")
+          .insert({
+            workspace_id: ws.id,
+            project_id: projectId,
+            title: item.summary ?? item.original_text,
+            status: "todo",
+            priority: (item.priority_guess as "low" | "medium" | "high" | "urgent" | null) ?? "medium",
+            due_date: item.due_guess,
+            position: nextPos,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+        if (error) continue;
+        await update.mutateAsync({
+          id: item.id,
+          meeting_id: meetingId,
+          patch: { status: "converted", converted_task_id: task.id } as never,
+        });
+        created++;
+      }
+      toast.success(`Created ${created} task${created === 1 ? "" : "s"}`);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
+      {/* Bulk toolbar */}
+      {pending.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 rounded-md border bg-muted/30 px-2 py-1.5 text-xs">
+          <span className="text-muted-foreground">{pending.length} pending</span>
+          <div className="flex-1" />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 text-xs"
+            onClick={convertAllToTasks}
+            disabled={bulkBusy || !projectId}
+            title={projectId ? "Convert all pending to tasks" : "Link a project first"}
+          >
+            {bulkBusy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Wand2 className="mr-1 h-3 w-3" />}
+            Convert all
+          </Button>
+        </div>
+      )}
+
       {items.map((item) => (
         <div
           key={item.id}
@@ -330,6 +468,11 @@ function ActionItemsView({
                     {item.priority_guess}
                   </Badge>
                 )}
+                {item.assigned_agent_id && (
+                  <Badge variant="secondary" className="text-[10px] gap-1">
+                    <Bot className="h-2.5 w-2.5" /> AI
+                  </Badge>
+                )}
                 {item.status === "converted" && item.converted_task_id && (
                   <Badge variant="secondary" className="text-[10px] gap-1">
                     <CheckCircle2 className="h-2.5 w-2.5" /> Task created
@@ -341,16 +484,35 @@ function ActionItemsView({
                   "{item.context_quote}"
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-1">
+              <div className="mt-2 flex flex-wrap items-center gap-1">
                 {item.status !== "converted" && item.status !== "completed" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => setConvertingId(item.id)}
-                  >
-                    <Plus className="mr-1 h-3 w-3" /> Convert to task
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setConvertingId(item.id)}
+                    >
+                      <Plus className="mr-1 h-3 w-3" /> Convert to task
+                    </Button>
+                    {agents.length > 0 && (
+                      <Select
+                        onValueChange={(agentId) => assignToAgent(item, agentId)}
+                      >
+                        <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs hover:bg-muted">
+                          <Bot className="h-3 w-3" />
+                          <span>Route to AI</span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agents.map((a) => (
+                            <SelectItem key={a.id} value={a.id} className="text-xs">
+                              {a.avatar_emoji ?? "🤖"} {a.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </>
                 )}
                 {item.status !== "dismissed" && (
                   <Button
@@ -399,6 +561,7 @@ function ConvertActionItemDialog({
   onClose: () => void;
 }) {
   const { data: projects = [] } = useProjects();
+  const { data: agents = [] } = useAiAgents();
   const ws = useWorkspaceStore((s) => s.current);
   const { user } = useAuth();
   const update = useUpdateActionItem();
@@ -406,6 +569,7 @@ function ConvertActionItemDialog({
   const [projectId, setProjectId] = useState<string>("");
   const [priority, setPriority] = useState<string>("medium");
   const [dueDate, setDueDate] = useState<string>("");
+  const [agentId, setAgentId] = useState<string>("__none__");
   const [submitting, setSubmitting] = useState(false);
 
   // Reset when item changes
@@ -414,6 +578,7 @@ function ConvertActionItemDialog({
     setProjectId(defaultProjectId ?? projects[0]?.id ?? "");
     setPriority(item.priority_guess ?? "medium");
     setDueDate(item.due_guess ?? "");
+    setAgentId("__none__");
   }
 
   const reset = () => {
@@ -421,6 +586,7 @@ function ConvertActionItemDialog({
     setProjectId("");
     setPriority("medium");
     setDueDate("");
+    setAgentId("__none__");
   };
 
   const submit = async () => {
@@ -463,13 +629,28 @@ function ConvertActionItemDialog({
         .single();
       if (error) throw error;
 
+      if (agentId !== "__none__") {
+        await supabase.from("ai_task_assignments").insert({
+          workspace_id: ws.id,
+          task_id: task.id,
+          agent_id: agentId,
+          status: "queued",
+          instructions: `From meeting action item: ${title.trim()}${item.context_quote ? `\n\nContext: "${item.context_quote}"` : ""}`,
+          created_by: user.id,
+        });
+      }
+
       await update.mutateAsync({
         id: item.id,
         meeting_id: meetingId,
-        patch: { status: "converted", converted_task_id: task.id } as never,
+        patch: {
+          status: "converted",
+          converted_task_id: task.id,
+          assigned_agent_id: agentId === "__none__" ? null : agentId,
+        } as never,
       });
 
-      toast.success("Task created");
+      toast.success(agentId === "__none__" ? "Task created" : "Task created & routed to AI");
       reset();
       onClose();
     } catch (e) {
@@ -519,6 +700,24 @@ function ConvertActionItemDialog({
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
+          {agents.length > 0 && (
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                <Bot className="h-3.5 w-3.5" /> Assign to AI agent (optional)
+              </Label>
+              <Select value={agentId} onValueChange={setAgentId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— No agent —</SelectItem>
+                  {agents.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.avatar_emoji ?? "🤖"} {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => { reset(); onClose(); }}>Cancel</Button>
@@ -533,5 +732,46 @@ function ConvertActionItemDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ProjectLinkSelect({
+  meetingId,
+  value,
+}: {
+  meetingId: string;
+  value: string | null;
+}) {
+  const { data: projects = [] } = useProjects();
+  const update = useUpdateMeeting();
+  const current = projects.find((p) => p.id === value);
+
+  return (
+    <Select
+      value={value ?? "__none__"}
+      onValueChange={(v) =>
+        update.mutate({
+          id: meetingId,
+          patch: { project_id: v === "__none__" ? null : v } as never,
+        })
+      }
+    >
+      <SelectTrigger className="h-8 w-auto gap-1.5 border-dashed text-xs">
+        <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+        <SelectValue placeholder="Link project">
+          {current ? current.name : "Link project"}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__" className="text-xs text-muted-foreground">
+          No project
+        </SelectItem>
+        {projects.map((p) => (
+          <SelectItem key={p.id} value={p.id} className="text-xs">
+            {p.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
