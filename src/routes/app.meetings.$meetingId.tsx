@@ -700,6 +700,24 @@ function ConvertActionItemDialog({
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </div>
           </div>
+          {agents.length > 0 && (
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
+                <Bot className="h-3.5 w-3.5" /> Assign to AI agent (optional)
+              </Label>
+              <Select value={agentId} onValueChange={setAgentId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— No agent —</SelectItem>
+                  {agents.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.avatar_emoji ?? "🤖"} {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => { reset(); onClose(); }}>Cancel</Button>
