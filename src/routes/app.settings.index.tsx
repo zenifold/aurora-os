@@ -29,6 +29,7 @@ const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"
 
 function WorkspaceSettings() {
   const ws = useWorkspaceStore((s) => s.current);
+  const allWorkspaces = useWorkspaceStore((s) => s.workspaces);
   const fetchWs = useWorkspaceStore((s) => s.fetch);
   const qc = useQueryClient();
 
@@ -38,7 +39,7 @@ function WorkspaceSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workspaces")
-        .select("id, name, slug, plan, settings")
+        .select("id, name, slug, plan, kind, linked_delivery_workspace_id, settings")
         .eq("id", ws!.id)
         .single();
       if (error) throw error;
@@ -50,6 +51,8 @@ function WorkspaceSettings() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(COLORS[0]);
+  const [kind, setKind] = useState<WorkspaceKind>("hybrid");
+  const [linkedDelivery, setLinkedDelivery] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -58,7 +61,13 @@ function WorkspaceSettings() {
     setSlug(full.slug);
     setDescription(full.settings?.description ?? "");
     setColor(full.settings?.color ?? COLORS[0]);
+    setKind(full.kind ?? "hybrid");
+    setLinkedDelivery(full.linked_delivery_workspace_id ?? "");
   }, [full]);
+
+  const deliveryOptions = allWorkspaces.filter(
+    (w) => w.id !== ws?.id && (w.kind === "delivery" || w.kind === "hybrid"),
+  );
 
   const save = async () => {
     if (!ws) return;
@@ -68,6 +77,8 @@ function WorkspaceSettings() {
       .update({
         name: name.trim(),
         slug: slug.trim() || ws.slug,
+        kind,
+        linked_delivery_workspace_id: linkedDelivery || null,
         settings: { ...(full?.settings ?? {}), description, color },
       })
       .eq("id", ws.id);
