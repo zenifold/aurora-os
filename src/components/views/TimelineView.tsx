@@ -45,7 +45,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUpdateTask } from "@/hooks/use-tasks";
 import { useCustomFields } from "@/hooks/use-custom-fields";
+import { useProjectDependencyEdges, type DependencyEdge } from "@/hooks/use-project-relations";
 import { toast } from "sonner";
+
+function collectDownstream(
+  rootId: string,
+  edgesByFrom: Map<string, DependencyEdge[]>,
+): Set<string> {
+  const out = new Set<string>();
+  const queue = [rootId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    const next = edgesByFrom.get(cur) ?? [];
+    for (const e of next) {
+      if (out.has(e.to)) continue;
+      out.add(e.to);
+      queue.push(e.to);
+    }
+  }
+  return out;
+}
 
 interface Props {
   projectId: string;
@@ -125,6 +144,9 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [preview, setPreview] = useState<Record<string, { start: Date; end: Date }>>({});
   const updateTask = useUpdateTask(projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [cascadeMode, setCascadeMode] = useState(true);
+
+  const { data: edges = [] } = useProjectDependencyEdges(projectId);
 
   const { data: fields = [] } = useCustomFields();
   const effortFields = useMemo(
@@ -228,7 +250,45 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     [tasks, effortFieldId, scenario.enabled],
   );
 
-  // Effort summary
+  const taskMap = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+  const rowIndex = useMemo(
+    () => new Map(visibleTasks.map((t, i) => [t.id, i])),
+    [visibleTasks],
+  );
+  const edgesByFrom = useMemo(() => {
+    const m = new Map<string, DependencyEdge[]>();
+    for (const e of edges) {
+      const arr = m.get(e.from) ?? [];
+      arr.push(e);
+      m.set(e.from, arr);
+    }
+    return m;
+  }, [edges]);
+
+  // Conflicts: successor whose start is before predecessor.end + lag + 1
+  const conflicts = useMemo(() => {
+    const out = new Map<string, string[]>();
+    for (const e of edges) {
+      const fromT = taskMap.get(e.from);
+      const toT = taskMap.get(e.to);
+      if (!fromT || !toT) continue;
+      const fromEnd = fromT.due_date ? parseISO(fromT.due_date) : null;
+      const toStart = toT.start_date
+        ? parseISO(toT.start_date)
+        : toT.due_date
+        ? parseISO(toT.due_date)
+        : null;
+      if (!fromEnd || !toStart) continue;
+      const earliest = addDays(fromEnd, e.lagDays + 1);
+      if (toStart < earliest) {
+        const arr = out.get(e.to) ?? [];
+        arr.push(fromT.title);
+        out.set(e.to, arr);
+      }
+    }
+    return out;
+  }, [edges, taskMap]);
+
   const summary = useMemo(() => {
     if (!effortFieldId) return null;
     let totalDays = 0;
@@ -292,11 +352,44 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
         const startStr = format(p.start, "yyyy-MM-dd");
         const endStr = format(p.end, "yyyy-MM-dd");
         const sameRange = isSameDay(p.start, p.end);
+        const orig = taskMap.get(drag.id);
+        const origEnd = orig?.due_date ? parseISO(orig.due_date) : null;
+        const deltaDays = origEnd ? differenceInCalendarDays(p.end, origEnd) : 0;
         updateTask.mutate({
           id: drag.id,
           start_date: sameRange ? null : startStr,
           due_date: endStr,
         } as Partial<Task> & { id: string });
+
+        // Cascade: shift downstream successors when end-date moved later
+        if (cascadeMode && deltaDays !== 0) {
+          const cascaded = collectDownstream(drag.id, edgesByFrom);
+          let count = 0;
+          for (const id of cascaded) {
+            if (id === drag.id) continue;
+            const t = taskMap.get(id);
+            if (!t) continue;
+            const patch: Partial<Task> & { id: string } = { id };
+            let changed = false;
+            if (t.start_date) {
+              patch.start_date = format(addDays(parseISO(t.start_date), deltaDays), "yyyy-MM-dd");
+              changed = true;
+            }
+            if (t.due_date) {
+              patch.due_date = format(addDays(parseISO(t.due_date), deltaDays), "yyyy-MM-dd");
+              changed = true;
+            }
+            if (changed) {
+              updateTask.mutate(patch);
+              count++;
+            }
+          }
+          if (count > 0) {
+            toast.success(
+              `Shifted ${count} downstream item${count === 1 ? "" : "s"} by ${deltaDays > 0 ? "+" : ""}${deltaDays}d`,
+            );
+          }
+        }
       }
       setDrag(null);
       setTimeout(
@@ -315,7 +408,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [drag, dayPx, preview, updateTask]);
+  }, [drag, dayPx, preview, updateTask, cascadeMode, taskMap, edgesByFrom]);
 
   const totalWidth = days.length * dayPx;
   const todayOffset = differenceInCalendarDays(new Date(), range.start) * dayPx;
@@ -425,6 +518,11 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
               {summary.totalDays.toFixed(1)} d · {summary.count} sized
             </Badge>
           )}
+          {conflicts.size > 0 && (
+            <Badge variant="destructive" className="ml-1 gap-1" title="Tasks starting before their predecessor finishes">
+              ⚠ {conflicts.size} conflict{conflicts.size === 1 ? "" : "s"}
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {effortFields.length > 1 && (
@@ -441,6 +539,15 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
               </SelectContent>
             </Select>
           )}
+          <Button
+            variant={cascadeMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCascadeMode((c) => !c)}
+            className="gap-1.5"
+            title="When ON, dragging a bar shifts all downstream successors by the same amount."
+          >
+            🔗 Cascade {cascadeMode ? "on" : "off"}
+          </Button>
           <Button
             variant={showScenario ? "default" : "outline"}
             size="sm"
@@ -758,7 +865,61 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
             />
           )}
 
-          {/* Rows */}
+          {/* Dependency arrows */}
+          {visibleTasks.length > 0 && (
+            <svg
+              className="pointer-events-none absolute z-[5]"
+              style={{
+                left: LABEL_W,
+                top: 0,
+                width: totalWidth,
+                height: visibleTasks.length * ROW_H + 60,
+                overflow: "visible",
+              }}
+            >
+              <defs>
+                <marker id="dep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--muted-foreground))" />
+                </marker>
+                <marker id="dep-arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(var(--destructive))" />
+                </marker>
+              </defs>
+              {edges.map((e) => {
+                const fromIdx = rowIndex.get(e.from);
+                const toIdx = rowIndex.get(e.to);
+                if (fromIdx === undefined || toIdx === undefined) return null;
+                const fromT = taskMap.get(e.from);
+                const toT = taskMap.get(e.to);
+                if (!fromT || !toT) return null;
+                const fromR = taskRange(fromT);
+                const toR = taskRange(toT);
+                if (!fromR || !toR) return null;
+                // header height ≈ 60 (months + days)
+                const HEADER = 60;
+                const x1 = (differenceInCalendarDays(fromR.end, range.start) + 1) * dayPx;
+                const y1 = HEADER + fromIdx * ROW_H + ROW_H / 2;
+                const x2 = differenceInCalendarDays(toR.start, range.start) * dayPx;
+                const y2 = HEADER + toIdx * ROW_H + ROW_H / 2;
+                const bad = conflicts.has(e.to);
+                const stroke = bad ? "hsl(var(--destructive))" : "color-mix(in oklab, hsl(var(--muted-foreground)) 60%, transparent)";
+                const midX = Math.max(x1 + 8, x2 - 8);
+                const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+                return (
+                  <path
+                    key={e.id}
+                    d={d}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth={bad ? 1.75 : 1.25}
+                    strokeDasharray={bad ? undefined : "4 3"}
+                    markerEnd={bad ? "url(#dep-arrow-bad)" : "url(#dep-arrow)"}
+                  />
+                );
+              })}
+            </svg>
+          )}
+
           {visibleTasks.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
               {effortFieldId
@@ -838,7 +999,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
                   </div>
                   <div className="relative flex-1" style={{ width: totalWidth }}>
                     <div
-                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""} ${r.planned ? "ring-1 ring-primary/40" : ""}`}
+                      className={`group absolute flex cursor-grab items-center text-xs text-white shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing ${done ? "opacity-60" : ""} ${r.planned ? "ring-1 ring-primary/40" : ""} ${conflicts.has(t.id) ? "ring-2 ring-destructive" : ""}`}
                       style={{
                         top: (ROW_H - barH) / 2,
                         height: barH,
