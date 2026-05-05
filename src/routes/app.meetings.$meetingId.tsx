@@ -116,21 +116,21 @@ function MeetingDetailPage() {
   return (
     <div className="flex h-full min-h-screen flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
           <Link to="/app/meetings">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <Input
             value={titleValue}
             onChange={(e) => setTitleDraft(e.target.value)}
-            className="h-9 max-w-md border-none bg-transparent text-base font-semibold focus-visible:ring-1"
+            className="h-9 min-w-0 flex-1 border-none bg-transparent text-sm font-semibold focus-visible:ring-1 sm:max-w-md sm:text-base"
           />
           <StatusPill status={meeting.ai_status} error={meeting.ai_error} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {dirty && (
             <Button variant="ghost" size="sm" onClick={saveDraft}>
               <Save className="mr-1.5 h-3.5 w-3.5" /> Save
@@ -152,11 +152,11 @@ function MeetingDetailPage() {
       </div>
 
       {/* Split pane */}
-      <div className="grid flex-1 gap-0 lg:grid-cols-[3fr_2fr]">
+      <div className="grid flex-1 grid-cols-1 gap-0 lg:grid-cols-[3fr_2fr]">
         {/* Transcript */}
-        <div className="border-r p-4 lg:p-6">
+        <div className="border-b p-3 sm:p-4 lg:border-b-0 lg:border-r lg:p-6">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-sm">
               Transcript
             </h2>
             <span className="text-xs text-muted-foreground">
@@ -167,12 +167,12 @@ function MeetingDetailPage() {
             value={transcript}
             onChange={(e) => setTranscriptDraft(e.target.value)}
             placeholder={`Paste your meeting transcript here.\n\nFormat tip: prefix lines with the speaker name like\n\nSarah: I think we should prioritize the mobile redesign.\nAlex: Agreed, but we need to finish the API refactor first.`}
-            className="min-h-[60vh] resize-none font-mono text-sm leading-relaxed"
+            className="min-h-[40vh] resize-none font-mono text-sm leading-relaxed lg:min-h-[60vh]"
           />
         </div>
 
         {/* Sidebar */}
-        <div className="p-4 lg:p-6">
+        <div className="p-3 sm:p-4 lg:p-6">
           <Tabs defaultValue="summary">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="summary"><FileText className="mr-1.5 h-3.5 w-3.5" />Summary</TabsTrigger>
@@ -481,7 +481,7 @@ function ConvertActionItemDialog({
 
   return (
     <Dialog open={!!item} onOpenChange={(o) => { if (!o) { reset(); onClose(); } }}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Convert to task</DialogTitle>
         </DialogHeader>

@@ -77,15 +77,15 @@ function MeetingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="mx-auto max-w-6xl p-4 sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Meetings</h1>
+          <h1 className="text-xl font-semibold sm:text-2xl">Meetings</h1>
           <p className="text-sm text-muted-foreground">
             Paste a transcript and let AI extract summaries and action items.
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-aura-gradient text-primary-foreground">
+        <Button onClick={() => setOpen(true)} className="w-full bg-aura-gradient text-primary-foreground sm:w-auto">
           <Plus className="mr-2 h-4 w-4" /> New meeting
         </Button>
       </div>
@@ -139,7 +139,7 @@ function MeetingsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute right-2 top-2 h-7 w-7 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                   onClick={async (e) => {
                     e.preventDefault();
                     if (!confirm("Delete this meeting?")) return;
@@ -156,7 +156,7 @@ function MeetingsPage() {
       )}
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>New meeting</DialogTitle>
           </DialogHeader>
