@@ -549,6 +549,8 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
             🔗 Cascade {cascadeMode ? "on" : "off"}
           </Button>
           <Button
+            variant={showScenario ? "default" : "outline"}
+            size="sm"
             onClick={() => {
               setShowScenario((s) => !s);
               if (!scenario.enabled) setScenario((s) => ({ ...s, enabled: true }));
