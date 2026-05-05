@@ -28,6 +28,8 @@ const TABLE_COLUMNS = [
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
   { key: "due", label: "Due" },
+  { key: "assignees", label: "Assignees" },
+  { key: "tags", label: "Tags" },
 ];
 
 const KANBAN_FIELDS: Array<{ key: "priority" | "due_date" | "assignees" | "tags"; label: string }> = [
