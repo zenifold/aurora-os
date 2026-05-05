@@ -125,6 +125,8 @@ function Column({
   tasks,
   indicators,
   cardFields,
+  slaHours,
+  dwellTimes,
   colorFor,
   onAdd,
   onTaskClick,
@@ -137,6 +139,8 @@ function Column({
   tasks: Task[];
   indicators?: Map<string, { blockedBy: number; blocking: number }> | Record<string, { blockedBy: number; blocking: number }>;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
+  slaHours: number | null;
+  dwellTimes?: Map<string, number>;
   colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
   onTaskClick: (id: string) => void;
@@ -175,16 +179,21 @@ function Column({
       </div>
 
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
-        {tasks.map((t) => (
-          <Card
-            key={t.id}
-            task={t}
-            cardFields={cardFields}
-            accent={colorFor(t)}
-            onClick={() => onTaskClick(t.id)}
-            indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
-          />
-        ))}
+        {tasks.map((t) => {
+          const dwell = dwellTimes?.get(t.id);
+          const slaPct = slaHours != null && dwell != null ? dwell / slaHours : null;
+          return (
+            <Card
+              key={t.id}
+              task={t}
+              cardFields={cardFields}
+              accent={colorFor(t)}
+              slaPct={slaPct}
+              onClick={() => onTaskClick(t.id)}
+              indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
+            />
+          );
+        })}
         {adding && (
           <Input
             autoFocus
