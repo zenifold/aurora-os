@@ -247,19 +247,8 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
                 onBlur={(json) => update.mutate({ id: task.id, description: json as never })}
               />
 
-              {fields.length > 0 && (
-                <div>
-                  <Label>Custom fields</Label>
-                  <div className="mt-2 space-y-2">
-                    {fields.map((f) => (
-                      <div key={f.id} className="flex items-center gap-3">
-                        <span className="w-32 text-xs text-muted-foreground">{f.name}</span>
-                        <span className="text-sm">{String(task.custom_values?.[f.id] ?? "—")}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <CustomFieldsSection task={task} fields={fields} />
+
 
               <ApprovalsPanel task={task} />
               <ClientDeliverableSection task={task} />
@@ -306,10 +295,13 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {icon}
+        {label}
+      </Label>
       <div className="mt-1.5">{children}</div>
     </div>
   );
