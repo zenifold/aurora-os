@@ -50,6 +50,7 @@ import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppResourcesCapacityRouteImport } from './routes/app.resources.capacity'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
+import { Route as AppFFolderIdRouteImport } from './routes/app.f.$folderId'
 import { Route as AppEscalationsEscalationIdRouteImport } from './routes/app.escalations.$escalationId'
 import { Route as AppDDivisionSlugRouteImport } from './routes/app.d.$divisionSlug'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
@@ -273,6 +274,11 @@ const AppMeetingsMeetingIdRoute = AppMeetingsMeetingIdRouteImport.update({
   path: '/$meetingId',
   getParentRoute: () => AppMeetingsRoute,
 } as any)
+const AppFFolderIdRoute = AppFFolderIdRouteImport.update({
+  id: '/f/$folderId',
+  path: '/f/$folderId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEscalationsEscalationIdRoute =
   AppEscalationsEscalationIdRouteImport.update({
     id: '/$escalationId',
@@ -397,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
+  '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
+  '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -516,6 +524,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
+  '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
@@ -578,6 +587,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
+    | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -636,6 +646,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
+    | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -696,6 +707,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
+    | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
@@ -1032,6 +1044,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsMeetingIdRouteImport
       parentRoute: typeof AppMeetingsRoute
     }
+    '/app/f/$folderId': {
+      id: '/app/f/$folderId'
+      path: '/f/$folderId'
+      fullPath: '/app/f/$folderId'
+      preLoaderRoute: typeof AppFFolderIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/escalations/$escalationId': {
       id: '/app/escalations/$escalationId'
       path: '/$escalationId'
@@ -1253,6 +1272,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppDDivisionSlugRoute: typeof AppDDivisionSlugRoute
+  AppFFolderIdRoute: typeof AppFFolderIdRoute
   AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
   AppResourcesCapacityRoute: typeof AppResourcesCapacityRoute
   AppResourcesIndexRoute: typeof AppResourcesIndexRoute
@@ -1275,6 +1295,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppDDivisionSlugRoute: AppDDivisionSlugRoute,
+  AppFFolderIdRoute: AppFFolderIdRoute,
   AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
   AppResourcesCapacityRoute: AppResourcesCapacityRoute,
   AppResourcesIndexRoute: AppResourcesIndexRoute,
