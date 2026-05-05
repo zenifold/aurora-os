@@ -273,6 +273,7 @@ export function AppSidebar() {
           <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
           <NavItem to="/app/executive" icon={LineChart} active={path.startsWith("/app/executive")}>Executive</NavItem>
           <NavItem to="/app/escalations" icon={AlertTriangle} active={path.startsWith("/app/escalations")}>Escalations</NavItem>
+          <NavItem to="/app/agent-runs" icon={Sparkles} active={path.startsWith("/app/agent-runs")}>Agent runs</NavItem>
         </nav>
 
         {/* Favorites */}
