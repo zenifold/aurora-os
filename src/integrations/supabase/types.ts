@@ -2730,7 +2730,13 @@ export type Database = {
         | "email"
         | "effort"
       task_priority: "low" | "medium" | "high" | "urgent"
-      view_type: "table" | "kanban" | "canvas" | "calendar" | "timeline"
+      view_type:
+        | "table"
+        | "kanban"
+        | "canvas"
+        | "calendar"
+        | "timeline"
+        | "sprint"
       workspace_role: "owner" | "member"
     }
     CompositeTypes: {
@@ -2872,7 +2878,14 @@ export const Constants = {
         "effort",
       ],
       task_priority: ["low", "medium", "high", "urgent"],
-      view_type: ["table", "kanban", "canvas", "calendar", "timeline"],
+      view_type: [
+        "table",
+        "kanban",
+        "canvas",
+        "calendar",
+        "timeline",
+        "sprint",
+      ],
       workspace_role: ["owner", "member"],
     },
   },
