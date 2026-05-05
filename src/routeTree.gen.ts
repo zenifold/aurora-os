@@ -51,6 +51,7 @@ import { Route as AppResourcesCapacityRouteImport } from './routes/app.resources
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppEscalationsEscalationIdRouteImport } from './routes/app.escalations.$escalationId'
+import { Route as AppDDivisionSlugRouteImport } from './routes/app.d.$divisionSlug'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 import { Route as AppPProjectIdOverviewRouteImport } from './routes/app.p.$projectId.overview'
@@ -278,6 +279,11 @@ const AppEscalationsEscalationIdRoute =
     path: '/$escalationId',
     getParentRoute: () => AppEscalationsRoute,
   } as any)
+const AppDDivisionSlugRoute = AppDDivisionSlugRouteImport.update({
+  id: '/d/$divisionSlug',
+  path: '/d/$divisionSlug',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPProjectIdSprintsRoute = AppPProjectIdSprintsRouteImport.update({
   id: '/sprints',
   path: '/sprints',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
@@ -446,6 +453,7 @@ export interface FileRoutesByTo {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
+  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
@@ -506,6 +514,7 @@ export interface FileRoutesById {
   '/docs/self-host': typeof DocsSelfHostRoute
   '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
+  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
+    | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app'
+    | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
@@ -683,6 +694,7 @@ export interface FileRouteTypes {
     | '/docs/self-host'
     | '/invite/$token'
     | '/app/'
+    | '/app/d/$divisionSlug'
     | '/app/escalations/$escalationId'
     | '/app/meetings/$meetingId'
     | '/app/p/$projectId'
@@ -1027,6 +1039,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEscalationsEscalationIdRouteImport
       parentRoute: typeof AppEscalationsRoute
     }
+    '/app/d/$divisionSlug': {
+      id: '/app/d/$divisionSlug'
+      path: '/d/$divisionSlug'
+      fullPath: '/app/d/$divisionSlug'
+      preLoaderRoute: typeof AppDDivisionSlugRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/p/$projectId/sprints': {
       id: '/app/p/$projectId/sprints'
       path: '/sprints'
@@ -1233,6 +1252,7 @@ interface AppRouteChildren {
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppDDivisionSlugRoute: typeof AppDDivisionSlugRoute
   AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
   AppResourcesCapacityRoute: typeof AppResourcesCapacityRoute
   AppResourcesIndexRoute: typeof AppResourcesIndexRoute
@@ -1254,6 +1274,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppDDivisionSlugRoute: AppDDivisionSlugRoute,
   AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
   AppResourcesCapacityRoute: AppResourcesCapacityRoute,
   AppResourcesIndexRoute: AppResourcesIndexRoute,
