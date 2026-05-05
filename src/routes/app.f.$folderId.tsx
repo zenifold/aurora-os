@@ -45,6 +45,9 @@ import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
 import { toast } from "sonner";
 import type { Folder } from "@/lib/folder-types";
 import { cn } from "@/lib/utils";
+import { PresenceStack } from "@/components/app/PresenceStack";
+import { usePresence } from "@/hooks/use-presence";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/app/f/$folderId")({
   component: FolderPage,
