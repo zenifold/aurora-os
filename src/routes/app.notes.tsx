@@ -21,13 +21,14 @@ type FilterType = "all" | NoteType | "pinned";
 export const Route = createFileRoute("/app/notes")({
   validateSearch: (s: Record<string, unknown>) => ({
     archived: s.archived === true || s.archived === "true",
+    project: typeof s.project === "string" ? s.project : undefined,
   }),
   component: NotesPage,
 });
 
 function NotesPage() {
-  const { archived } = Route.useSearch();
-  const { data: notes = [], isLoading } = useNotes({ archived });
+  const { archived, project } = Route.useSearch();
+  const { data: notes = [], isLoading } = useNotes({ archived, projectId: project ?? null });
   const create = useCreateNote();
 
   const [search, setSearch] = useState("");
