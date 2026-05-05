@@ -75,6 +75,10 @@ function FolderPage() {
   const [moveOpen, setMoveOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
+  const { user } = useAuth();
+  const { users: presenceUsers } = usePresence(`presence:folder:${folderId}`, {
+    display_name: user?.email?.split("@")[0],
+  });
 
   useEffect(() => {
     if (folder) {
