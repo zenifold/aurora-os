@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth-context";
 import { useUIStore } from "@/stores/ui-store";
 import { registerServiceWorker } from "@/lib/pwa";
-import { OfflineIndicator } from "@/components/app/OfflineIndicator";
 
 import appCss from "../styles.css?url";
 
@@ -107,7 +106,6 @@ function RootComponent() {
         <TooltipProvider delayDuration={200}>
           <ThemeBootstrap />
           <Outlet />
-          <OfflineIndicator />
           <Toaster />
         </TooltipProvider>
       </AuthProvider>
