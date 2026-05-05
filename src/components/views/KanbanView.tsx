@@ -25,9 +25,10 @@ import { runTransitionActions } from "@/lib/transition-actions";
 import { findTransition } from "@/lib/workflow-engine";
 import { supabase } from "@/integrations/supabase/client";
 import { colorForTask } from "@/lib/view-config";
-import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle, Tag, Users } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, differenceInCalendarDays } from "date-fns";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
@@ -365,33 +366,40 @@ function Card({
       </div>
 
       {hasFooter && (
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           {showPriority && priority && (
             <span
-              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5"
+              className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
               style={{ background: `${priority.color}22`, color: priority.color }}
             >
               {priority.label}
             </span>
           )}
-          {showDue && task.due_date && (
-            <span className="inline-flex items-center gap-1">
-              <CalendarIcon className="h-3 w-3" />
-              {format(parseISO(task.due_date), "MMM d")}
+          {showDue && task.due_date && (() => {
+            const days = differenceInCalendarDays(parseISO(task.due_date), new Date());
+            const tone = days < 0
+              ? "bg-destructive/15 text-destructive"
+              : days <= 1
+                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                : "bg-muted text-muted-foreground";
+            return (
+              <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] ${tone}`}>
+                <CalendarIcon className="h-3 w-3" />
+                {format(parseISO(task.due_date), "MMM d")}
+              </span>
+            );
+          })()}
+          {showTags && task.tags.slice(0, 3).map((t) => (
+            <span key={t} className="rounded-full bg-accent/60 px-1.5 py-0.5 text-[10px] text-accent-foreground">
+              #{t}
             </span>
+          ))}
+          {showTags && task.tags.length > 3 && (
+            <span className="text-[10px]">+{task.tags.length - 3}</span>
           )}
-          {showAssignees && (
-            <span className="inline-flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {task.assignee_ids.length}
-            </span>
-          )}
-          {showTags && (
-            <span className="inline-flex items-center gap-1">
-              <Tag className="h-3 w-3" />
-              {task.tags.slice(0, 2).join(", ")}{task.tags.length > 2 ? "…" : ""}
-            </span>
-          )}
+          <div className="ml-auto">
+            {showAssignees && <AssigneeAvatars ids={task.assignee_ids} max={3} size={20} />}
+          </div>
         </div>
       )}
     </div>

@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCreateCustomField } from "@/hooks/use-custom-fields";
 import type { FieldType } from "@/lib/types";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
@@ -65,8 +66,18 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const showStatus = isColumnVisible(viewConfig, "status");
   const showPriority = isColumnVisible(viewConfig, "priority");
   const showDue = isColumnVisible(viewConfig, "due");
+  const showAssignees = isColumnVisible(viewConfig, "assignees");
+  const showTags = isColumnVisible(viewConfig, "tags");
   const visibleFields = fields.filter((f) => isColumnVisible(viewConfig, `f:${f.id}`));
-  const visibleColCount = 1 /*title*/ + (showStatus ? 1 : 0) + (showPriority ? 1 : 0) + (showDue ? 1 : 0) + visibleFields.length + 1 /*add*/;
+  const visibleColCount =
+    1 +
+    (showStatus ? 1 : 0) +
+    (showPriority ? 1 : 0) +
+    (showDue ? 1 : 0) +
+    (showAssignees ? 1 : 0) +
+    (showTags ? 1 : 0) +
+    visibleFields.length +
+    1;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -80,6 +91,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     status: 144,
     priority: 128,
     due: 128,
+    assignees: 120,
+    tags: 180,
     add: 40,
   };
   fields.forEach((f) => { defaultWidths[`f:${f.id}`] = 160; });
@@ -194,6 +207,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
           {showStatus && <col style={{ width: widths.status }} />}
           {showPriority && <col style={{ width: widths.priority }} />}
           {showDue && <col style={{ width: widths.due }} />}
+          {showAssignees && <col style={{ width: widths.assignees }} />}
+          {showTags && <col style={{ width: widths.tags }} />}
           {visibleFields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
           <col style={{ width: widths.add }} />
         </colgroup>
@@ -214,6 +229,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
             {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
+            {showAssignees && <ResizableTh colKey="assignees" widths={widths} setWidths={setWidths}>Assignees</ResizableTh>}
+            {showTags && <ResizableTh colKey="tags" widths={widths} setWidths={setWidths}>Tags</ResizableTh>}
             {visibleFields.map((f) => (
               <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
                 {f.name}
@@ -254,6 +271,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showStatus={showStatus}
                   showPriority={showPriority}
                   showDue={showDue}
+                  showAssignees={showAssignees}
+                  showTags={showTags}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   titleStickyLeft={widths.select}
                   depth={node.depth}
@@ -292,6 +311,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                     showStatus={showStatus}
                     showPriority={showPriority}
                     showDue={showDue}
+                    showAssignees={showAssignees}
+                    showTags={showTags}
                     rowColor={colorForTask(t, viewConfig, statusColorMap)}
                     titleStickyLeft={widths.select}
                     onToggleSelect={(c) => toggleOne(t.id, c)}
@@ -419,6 +440,8 @@ function TaskRow({
   showStatus = true,
   showPriority = true,
   showDue = true,
+  showAssignees = false,
+  showTags = false,
   rowColor = null,
   titleStickyLeft = 40,
   depth = 0,
@@ -440,6 +463,8 @@ function TaskRow({
   showStatus?: boolean;
   showPriority?: boolean;
   showDue?: boolean;
+  showAssignees?: boolean;
+  showTags?: boolean;
   rowColor?: string | null;
   titleStickyLeft?: number;
   depth?: number;
@@ -638,6 +663,28 @@ function TaskRow({
               )}
             </PopoverContent>
           </Popover>
+        </td>
+      )}
+      {showAssignees && (
+        <td className="px-3 py-1.5">
+          {task.assignee_ids.length > 0 ? (
+            <AssigneeAvatars ids={task.assignee_ids} max={3} size={22} />
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </td>
+      )}
+      {showTags && (
+        <td className="px-3 py-1.5">
+          <div className="flex flex-wrap gap-1">
+            {task.tags.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+            {task.tags.slice(0, 3).map((t) => (
+              <span key={t} className="rounded-full bg-accent/60 px-1.5 py-0.5 text-[10px] text-accent-foreground">
+                #{t}
+              </span>
+            ))}
+            {task.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>}
+          </div>
         </td>
       )}
       {fields.map((f) => (
