@@ -6,6 +6,7 @@ import { useMilestones } from "@/hooks/use-milestones";
 import { useSprints } from "@/hooks/use-sprints";
 import { useNotes } from "@/hooks/use-notes";
 import { useProjectDocuments } from "@/hooks/use-resources";
+import { useTeamMembers } from "@/hooks/use-team";
 import { useProjectFinancials, useProjectTimeLogs, computeSummary } from "@/hooks/use-project-financials";
 import { formatMoney } from "@/lib/financial-types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
