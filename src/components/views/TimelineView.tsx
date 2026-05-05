@@ -408,7 +408,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [drag, dayPx, preview, updateTask]);
+  }, [drag, dayPx, preview, updateTask, cascadeMode, taskMap, edgesByFrom]);
 
   const totalWidth = days.length * dayPx;
   const todayOffset = differenceInCalendarDays(new Date(), range.start) * dayPx;
