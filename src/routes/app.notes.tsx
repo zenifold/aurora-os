@@ -52,7 +52,7 @@ function NotesPage() {
   const others = filtered.filter((n) => !n.is_pinned);
 
   const handleCreate = async (note_type: NoteType = "freeform") => {
-    const created = await create.mutateAsync({ note_type });
+    const created = await create.mutateAsync({ note_type, project_id: project ?? null });
     setSelected(created);
     setOpen(true);
   };
