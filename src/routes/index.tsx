@@ -660,56 +660,137 @@ function CollabVisual() {
 /* ─── Manifesto ─────────────────────────────────────── */
 
 function Manifesto() {
+  const competitors = [
+    { name: "Notion AI", price: "$20" },
+    { name: "Asana", price: "$25" },
+    { name: "Monday", price: "$24" },
+    { name: "ClickUp", price: "$19" },
+    { name: "Linear", price: "$16" },
+  ];
+  const pillars = [
+    {
+      icon: Sparkles,
+      title: "Open by default",
+      body: "Read the source, fork it, change it, run it. No black boxes around your team's data.",
+      iconClass: "bg-violet-500/15 text-violet-500 ring-violet-500/30",
+      glow: "from-violet-500/20 to-fuchsia-500/5",
+      stat: "MIT",
+      statLabel: "License",
+    },
+    {
+      icon: Zap,
+      title: "AI you control",
+      body: "Drop in your OpenRouter key, pick your model. Pay providers directly — no 3× markup.",
+      iconClass: "bg-sky-500/15 text-sky-500 ring-sky-500/30",
+      glow: "from-sky-500/20 to-cyan-500/5",
+      stat: "0×",
+      statLabel: "Markup on AI",
+    },
+    {
+      icon: Shield,
+      title: "Your data, your rules",
+      body: "Self-host on your Supabase + Cloudflare in 4 commands. RLS and roles wired in from the start.",
+      iconClass: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30",
+      glow: "from-emerald-500/20 to-teal-500/5",
+      stat: "4",
+      statLabel: "Commands to deploy",
+    },
+  ];
+
   return (
-    <section className="border-y border-border/60 bg-muted/20 py-24">
-      <div className="mx-auto max-w-4xl px-6">
+    <section className="relative overflow-hidden border-y border-border/60 bg-muted/20 py-24">
+      <div className="aura-mesh absolute inset-0 -z-10 opacity-30" />
+      <div className="mx-auto max-w-5xl px-6">
         <div className="text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Heart className="h-3 w-3" />
+            <Heart className="h-3 w-3 text-rose-500" />
             Why we built this
           </span>
-          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-4xl">
-            Productivity software is broken.
+          <h2 className="mt-4 text-balance text-4xl font-bold tracking-tight md:text-5xl">
+            Productivity software is{" "}
+            <span className="relative inline-block">
+              <span className="text-aura-gradient">broken</span>
+              <svg
+                className="absolute -bottom-1 left-0 h-2 w-full text-aura-gradient/60"
+                viewBox="0 0 100 8"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  d="M0 6 Q 25 0, 50 4 T 100 3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            .
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Notion, Asana, Monday, ClickUp, Linear — all great products, all charging $10–$25 per
-            user per month, and now stacking AI add-ons on top. For most teams, it's hundreds of
-            dollars a month for software you don't fully use, can't host, and can't extend.
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-muted-foreground">
+            Notion, Asana, Monday, ClickUp, Linear — all great products, all charging{" "}
+            <span className="font-semibold text-foreground">$10–$25 per user per month</span>, then
+            stacking AI add-ons on top. Hundreds of dollars a month for software you don't fully
+            use, can't host, and can't extend.
           </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {competitors.map((c) => (
+              <span
+                key={c.name}
+                className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs backdrop-blur"
+              >
+                <span className="font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
+                  {c.name}
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {c.price}/seat
+                </span>
+              </span>
+            ))}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-aura-gradient px-3 py-1 text-xs font-semibold text-primary-foreground shadow-pop">
+              <Sparkles className="h-3 w-3" /> Aura · open & yours
+            </span>
+          </div>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              icon: Sparkles,
-              title: "Open by default",
-              body: "Read the source, fork it, change it, run it. No black boxes around your team's data.",
-            },
-            {
-              icon: Zap,
-              title: "AI you control",
-              body: "Drop in your OpenRouter key, pick your model. Pay providers directly — no 3× markup.",
-            },
-            {
-              icon: Shield,
-              title: "Your data, your rules",
-              body: "Self-host on your Supabase + Cloudflare in 4 commands. RLS and roles wired in from the start.",
-            },
-          ].map((c) => (
-            <div key={c.title} className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-aura-gradient-subtle">
-                <c.icon className="h-5 w-5 text-aura-gradient" />
+        <div className="mt-14 grid gap-5 md:grid-cols-3">
+          {pillars.map((c) => (
+            <div
+              key={c.title}
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop"
+            >
+              <div
+                className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br opacity-60 blur-3xl transition group-hover:opacity-100 ${c.glow}`}
+              />
+              <div className="relative flex items-start justify-between">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ${c.iconClass}`}
+                >
+                  <c.icon className="h-5 w-5" strokeWidth={2.25} />
+                </div>
+                <div className="text-right">
+                  <div className="font-mono text-2xl font-bold leading-none tracking-tight">
+                    {c.stat}
+                  </div>
+                  <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {c.statLabel}
+                  </div>
+                </div>
               </div>
-              <h3 className="mt-4 text-lg font-semibold">{c.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{c.body}</p>
+              <h3 className="relative mt-5 text-lg font-semibold">{c.title}</h3>
+              <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                {c.body}
+              </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <Button asChild variant="outline">
+        <div className="mt-12 text-center">
+          <Button asChild variant="outline" className="group">
             <Link to="/how-it-works">
-              How it works <ArrowRight className="ml-1.5 h-4 w-4" />
+              How it works
+              <ArrowRight className="ml-1.5 h-4 w-4 transition group-hover:translate-x-0.5" />
             </Link>
           </Button>
         </div>
