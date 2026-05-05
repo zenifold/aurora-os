@@ -18,12 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, ShieldCheck, Lock } from "lucide-react";
+import { Plus, Trash2, ShieldCheck, Lock, Zap } from "lucide-react";
 import type {
   Gate,
   GateType,
   WorkflowStatus,
   WorkflowTransition,
+  WorkflowAction,
   TransitionPermission,
   StatusCategory,
 } from "@/lib/workflow-types";
