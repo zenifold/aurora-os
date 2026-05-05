@@ -129,7 +129,7 @@ export function CommandPalette() {
           <CommandItem value="nav my tasks" onSelect={() => go(() => navigate({ to: "/app/my-tasks" }))}>
             <CheckSquare className="mr-2 h-4 w-4" /> My tasks
           </CommandItem>
-          <CommandItem value="nav notes" onSelect={() => go(() => navigate({ to: "/app/notes", search: { archived: false } }))}>
+          <CommandItem value="nav notes" onSelect={() => go(() => navigate({ to: "/app/notes", search: { archived: false, project: undefined } }))}>
             <StickyNote className="mr-2 h-4 w-4" /> Notes
           </CommandItem>
           <CommandItem value="nav meetings" onSelect={() => go(() => navigate({ to: "/app/meetings" }))}>
@@ -237,7 +237,7 @@ export function CommandPalette() {
                 <CommandItem
                   key={n.id}
                   value={`note ${n.title}`}
-                  onSelect={() => go(() => navigate({ to: "/app/notes", search: { archived: false } }))}
+                  onSelect={() => go(() => navigate({ to: "/app/notes", search: { archived: false, project: undefined } }))}
                 >
                   <StickyNote className="mr-2 h-4 w-4 text-muted-foreground" />
                   {n.title || "Untitled"}
