@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bell, Check, ShieldAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ListSkeleton } from "@/components/ui/loading-scaffolds";
 import { useNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/use-notifications";
 import { useMyPendingApprovals, useDecideApproval } from "@/hooks/use-project-workflow";
 import { format, formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
