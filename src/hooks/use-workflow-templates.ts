@@ -75,8 +75,8 @@ export function useApplyWorkflowTemplate(projectId: string) {
   });
 }
 
-function defaultAllPairs(n: number): { from: number; to: number }[] {
-  const out: { from: number; to: number }[] = [];
+function defaultAllPairs(n: number): import("@/lib/workflow-templates").TemplateTransition[] {
+  const out: import("@/lib/workflow-templates").TemplateTransition[] = [];
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n; j++) {
       if (i !== j) out.push({ from: i, to: j });
