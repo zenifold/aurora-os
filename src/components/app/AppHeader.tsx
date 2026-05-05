@@ -39,7 +39,7 @@ export function AppHeader() {
       </Button>
       <button
         onClick={() => setCommandOpen(true)}
-        className="flex h-8 flex-1 max-w-md items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70"
+        className="flex h-8 w-72 items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:bg-muted/70"
       >
         <Search className="h-3.5 w-3.5" />
         <span className="flex-1 text-left">Search…</span>
@@ -47,6 +47,39 @@ export function AppHeader() {
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </button>
+
+      {/* Hub dropdowns */}
+      <nav className="ml-2 hidden items-center gap-0.5 xl:flex">
+        <HubMenu
+          label="Delivery"
+          icon={<Briefcase className="h-3.5 w-3.5" />}
+          items={[
+            { to: "/app/delivery", label: "Command center" },
+            { to: "/app/delivery", label: "Client projects" },
+            { to: "/app/delivery", label: "Deliverables" },
+          ]}
+        />
+        <HubMenu
+          label="Ops"
+          icon={<BarChart3 className="h-3.5 w-3.5" />}
+          items={[
+            { to: "/app/ops", label: "Portfolio" },
+            { to: "/app/resources/capacity", label: "Resources" },
+            { to: "/app/ops", label: "PMO" },
+            { to: "/app/ops", label: "Financials" },
+          ]}
+        />
+        <HubMenu
+          label="Sales"
+          icon={<DollarSign className="h-3.5 w-3.5" />}
+          items={[
+            { to: "/app/crm", label: "Pipeline" },
+            { to: "/app/sales", label: "Proposals" },
+            { to: "/app/sales", label: "SOWs" },
+            { to: "/app/sales", label: "Forecast" },
+          ]}
+        />
+      </nav>
 
       <div className="flex-1" />
 
