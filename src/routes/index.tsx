@@ -123,30 +123,162 @@ function Hero() {
 function ProductPreview() {
   return (
     <div className="mt-16 grid w-full max-w-5xl gap-4 md:grid-cols-3">
-      {[
-        { icon: TableIcon, title: "Table", body: "Spreadsheet-fast structure." },
-        { icon: Kanban, title: "Board", body: "Drag-and-drop flow." },
-        { icon: Layers, title: "Canvas", body: "Spatial thinking." },
-      ].map((v) => (
-        <div
-          key={v.title}
-          className="rounded-2xl border border-border bg-card/60 p-5 shadow-elegant backdrop-blur transition hover:-translate-y-1 hover:shadow-pop"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient text-primary-foreground shadow-pop">
-            <v.icon className="h-4 w-4" />
+      <PreviewCard
+        icon={TableIcon}
+        title="Table"
+        body="Spreadsheet-fast structure."
+        accent="from-violet-500/20 to-fuchsia-500/10"
+      >
+        <MiniTable />
+      </PreviewCard>
+      <PreviewCard
+        icon={Kanban}
+        title="Board"
+        body="Drag-and-drop flow."
+        accent="from-sky-500/20 to-emerald-500/10"
+      >
+        <MiniBoard />
+      </PreviewCard>
+      <PreviewCard
+        icon={Layers}
+        title="Canvas"
+        body="Spatial thinking."
+        accent="from-amber-500/20 to-rose-500/10"
+      >
+        <MiniCanvas />
+      </PreviewCard>
+    </div>
+  );
+}
+
+function PreviewCard({
+  icon: Icon,
+  title,
+  body,
+  accent,
+  children,
+}: {
+  icon: typeof TableIcon;
+  title: string;
+  body: string;
+  accent: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card/70 p-4 shadow-elegant backdrop-blur transition hover:-translate-y-1 hover:shadow-pop">
+      <div
+        className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-60 transition group-hover:opacity-100 ${accent}`}
+      />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient text-primary-foreground shadow-pop">
+            <Icon className="h-4 w-4" />
           </div>
-          <p className="mt-3 text-sm font-semibold">{v.title} view</p>
-          <p className="mt-1 text-xs text-muted-foreground">{v.body}</p>
-          <div className="mt-3 space-y-1.5">
-            <div className="h-2 w-full rounded bg-muted" />
-            <div className="h-2 w-4/5 rounded bg-muted" />
-            <div className="h-2 w-2/3 rounded bg-muted" />
+          <div>
+            <p className="text-sm font-semibold leading-none">{title} view</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{body}</p>
+          </div>
+        </div>
+        <div className="flex gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-rose-400/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
+        </div>
+      </div>
+      <div className="mt-3 overflow-hidden rounded-lg border border-border/70 bg-background/80">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MiniTable() {
+  const rows = [
+    { name: "Onboarding flow", status: "In progress", c: "bg-amber-400" },
+    { name: "Pricing page", status: "Review", c: "bg-violet-400" },
+    { name: "Auth + RLS", status: "Done", c: "bg-emerald-400" },
+    { name: "AI meeting notes", status: "Todo", c: "bg-sky-400" },
+  ];
+  return (
+    <div className="text-[11px]">
+      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 border-b border-border/60 bg-muted/40 px-2.5 py-1.5 font-medium text-muted-foreground">
+        <span>Task</span>
+        <span>Status</span>
+        <span className="w-8 text-right">Effort</span>
+      </div>
+      {rows.map((r, i) => (
+        <div
+          key={r.name}
+          className={`grid grid-cols-[1fr_auto_auto] items-center gap-2 px-2.5 py-1.5 ${
+            i % 2 ? "bg-muted/20" : ""
+          }`}
+        >
+          <span className="truncate text-foreground/90">{r.name}</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-1.5 py-0.5 text-[10px]">
+            <span className={`h-1.5 w-1.5 rounded-full ${r.c}`} />
+            {r.status}
+          </span>
+          <span className="w-8 text-right text-muted-foreground">{[3, 5, 8, 2][i]}d</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MiniBoard() {
+  const cols = [
+    { title: "Todo", cards: ["Hero copy", "Footer"], tint: "bg-sky-400" },
+    { title: "Doing", cards: ["Pricing", "Auth"], tint: "bg-amber-400" },
+    { title: "Done", cards: ["Schema"], tint: "bg-emerald-400" },
+  ];
+  return (
+    <div className="grid grid-cols-3 gap-1.5 p-2">
+      {cols.map((c) => (
+        <div key={c.title} className="rounded-md bg-muted/40 p-1.5">
+          <div className="flex items-center gap-1 px-0.5 pb-1 text-[10px] font-medium text-muted-foreground">
+            <span className={`h-1.5 w-1.5 rounded-full ${c.tint}`} />
+            {c.title}
+          </div>
+          <div className="space-y-1">
+            {c.cards.map((card) => (
+              <div
+                key={card}
+                className="rounded border border-border/60 bg-background px-1.5 py-1 text-[10px] shadow-sm"
+              >
+                <div className="truncate font-medium">{card}</div>
+                <div className="mt-1 h-1 w-2/3 rounded bg-muted" />
+              </div>
+            ))}
           </div>
         </div>
       ))}
     </div>
   );
 }
+
+function MiniCanvas() {
+  return (
+    <div className="relative h-[124px] w-full overflow-hidden bg-[radial-gradient(circle_at_1px_1px,_color-mix(in_oklab,var(--foreground)_18%,transparent)_1px,_transparent_0)] [background-size:10px_10px]">
+      <svg className="absolute inset-0 h-full w-full" aria-hidden>
+        <line x1="38%" y1="32%" x2="62%" y2="58%" stroke="currentColor" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+        <line x1="62%" y1="58%" x2="32%" y2="78%" stroke="currentColor" strokeOpacity="0.35" strokeWidth="1" strokeDasharray="3 3" />
+      </svg>
+      <div className="absolute left-[18%] top-[18%] rounded-md border border-violet-400/60 bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium backdrop-blur">
+        Idea
+      </div>
+      <div className="absolute left-[52%] top-[44%] rounded-md border border-sky-400/60 bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-medium backdrop-blur">
+        Spec
+      </div>
+      <div className="absolute left-[20%] top-[68%] rounded-md border border-emerald-400/60 bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium backdrop-blur">
+        Ship
+      </div>
+      <div className="absolute right-3 top-2 rounded border border-border/60 bg-background/80 px-1.5 py-0.5 text-[9px] text-muted-foreground">
+        ∞ infinite canvas
+      </div>
+    </div>
+  );
+}
+
 
 /* ─── Value bar ─────────────────────────────────────── */
 
