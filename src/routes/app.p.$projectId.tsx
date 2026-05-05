@@ -199,6 +199,11 @@ function ProjectPage() {
                 <FileText className="mr-1.5 h-4 w-4" /> Documents
               </Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild title="Client portal access">
+              <Link to="/app/p/$projectId/clients" params={{ projectId }}>
+                <Users className="mr-1.5 h-4 w-4" /> Clients
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
             </Button>
