@@ -44,7 +44,7 @@ export function useCreateProject() {
   const { user } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { name: string; parent_id?: string | null; color?: string }) => {
+    mutationFn: async (input: { name: string; parent_id?: string | null; color?: string; division_id?: string | null; folder_id?: string | null }) => {
       if (!ws || !user) throw new Error("No workspace");
       const { data: proj, error } = await supabase
         .from("projects")
@@ -55,6 +55,8 @@ export function useCreateProject() {
           color: input.color ?? "#8b5cf6",
           icon: "folder",
           created_by: user.id,
+          division_id: input.division_id ?? null,
+          folder_id: input.folder_id ?? null,
         })
         .select()
         .single();
