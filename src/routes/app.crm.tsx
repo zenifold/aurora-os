@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/select";
 import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { Plus, Loader2, DollarSign, TrendingUp, Trophy, Trash2, ArrowRightCircle, MessageSquare } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { KanbanSkeleton } from "@/components/ui/loading-scaffolds";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
