@@ -310,6 +310,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                     showStatus={showStatus}
                     showPriority={showPriority}
                     showDue={showDue}
+                    showAssignees={showAssignees}
+                    showTags={showTags}
                     rowColor={colorForTask(t, viewConfig, statusColorMap)}
                     titleStickyLeft={widths.select}
                     onToggleSelect={(c) => toggleOne(t.id, c)}
@@ -458,6 +460,8 @@ function TaskRow({
   showStatus?: boolean;
   showPriority?: boolean;
   showDue?: boolean;
+  showAssignees?: boolean;
+  showTags?: boolean;
   rowColor?: string | null;
   titleStickyLeft?: number;
   depth?: number;
