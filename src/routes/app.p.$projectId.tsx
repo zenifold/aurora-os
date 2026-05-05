@@ -155,56 +155,14 @@ function ProjectPage() {
             <Button variant="outline" size="sm" onClick={() => setMagicOpen(true)}>
               <Wand2 className="mr-2 h-4 w-4 text-primary" /> Magic Add
             </Button>
-            <Button variant="ghost" size="sm" asChild title="Notes for this project">
-              <Link to="/app/notes" search={{ project: projectId, archived: false }}>
-                <StickyNote className="mr-1.5 h-4 w-4" /> Notes
+            <Button variant="ghost" size="sm" asChild title="Project overview">
+              <Link to="/app/p/$projectId/overview" params={{ projectId }}>
+                <LayoutDashboard className="mr-1.5 h-4 w-4" /> Overview
               </Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild title="Meetings for this project">
-              <Link to="/app/meetings" search={{ project: projectId }}>
-                <Mic className="mr-1.5 h-4 w-4" /> Meetings
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Sprints for this project">
-              <Link to="/app/p/$projectId/sprints" params={{ projectId }}>
-                <Target className="mr-1.5 h-4 w-4" /> Sprints
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Milestones for this project">
-              <Link to="/app/p/$projectId/milestones" params={{ projectId }}>
-                <Flag className="mr-1.5 h-4 w-4" /> Milestones
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Financials for this project">
-              <Link to="/app/p/$projectId/financials" params={{ projectId }}>
-                <DollarSign className="mr-1.5 h-4 w-4" /> Financials
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Delivery health">
-              <Link to="/app/p/$projectId/health" params={{ projectId }}>
-                <Activity className="mr-1.5 h-4 w-4" /> Health
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Change orders">
-              <Link to="/app/p/$projectId/change-orders" params={{ projectId }}>
-                <FileEdit className="mr-1.5 h-4 w-4" /> Change orders
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Allocations">
-              <Link to="/app/p/$projectId/allocations" params={{ projectId }}>
-                <UsersRound className="mr-1.5 h-4 w-4" /> Allocations
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Documents">
-              <Link to="/app/p/$projectId/documents" params={{ projectId }}>
-                <FileText className="mr-1.5 h-4 w-4" /> Documents
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild title="Client portal access">
-              <Link to="/app/p/$projectId/clients" params={{ projectId }}>
-                <Users className="mr-1.5 h-4 w-4" /> Clients
-              </Link>
-            </Button>
+            <ProjectActionsMenu projectId={projectId} group="plan" />
+            <ProjectActionsMenu projectId={projectId} group="delivery" />
+            <ProjectActionsMenu projectId={projectId} group="workspace" />
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
             </Button>
