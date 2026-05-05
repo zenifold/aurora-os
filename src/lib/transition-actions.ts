@@ -98,7 +98,7 @@ async function runSetField(action: WorkflowAction, ctx: ActionContext) {
       return;
   }
   if (Object.keys(patch).length === 0) return;
-  await supabase.from("tasks").update(patch).eq("id", ctx.task.id);
+  await supabase.from("tasks").update(patch as never).eq("id", ctx.task.id);
 }
 
 async function runPostComment(action: WorkflowAction, ctx: ActionContext) {
