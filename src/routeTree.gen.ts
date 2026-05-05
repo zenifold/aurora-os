@@ -32,6 +32,7 @@ import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppContactsRouteImport } from './routes/app.contacts'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
+import { Route as AppResourcesIndexRouteImport } from './routes/app.resources.index'
 import { Route as AppSettingsResourcesRouteImport } from './routes/app.settings.resources'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
 import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
@@ -164,6 +165,11 @@ const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppResourcesIndexRoute = AppResourcesIndexRouteImport.update({
+  id: '/resources/',
+  path: '/resources/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsResourcesRoute = AppSettingsResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/app/settings/members': typeof AppSettingsMembersRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
@@ -403,6 +412,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings/resources'
+    | '/app/resources/'
     | '/app/settings/'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
@@ -442,6 +452,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings/resources'
+    | '/app/resources'
     | '/app/settings'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
@@ -483,6 +494,7 @@ export interface FileRouteTypes {
     | '/app/settings/members'
     | '/app/settings/profile'
     | '/app/settings/resources'
+    | '/app/resources/'
     | '/app/settings/'
     | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
@@ -669,6 +681,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/settings/'
       preLoaderRoute: typeof AppSettingsIndexRouteImport
       parentRoute: typeof AppSettingsRoute
+    }
+    '/app/resources/': {
+      id: '/app/resources/'
+      path: '/resources'
+      fullPath: '/app/resources/'
+      preLoaderRoute: typeof AppResourcesIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/settings/resources': {
       id: '/app/settings/resources'
@@ -859,6 +878,7 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
+  AppResourcesIndexRoute: typeof AppResourcesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -873,6 +893,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
+  AppResourcesIndexRoute: AppResourcesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
