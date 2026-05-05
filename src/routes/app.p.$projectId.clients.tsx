@@ -5,8 +5,10 @@ import {
   useClientAccess,
   useInviteClient,
   useRevokeClientAccess,
+  useDeliverables,
   buildPortalUrl,
 } from "@/hooks/use-client-portal";
+import { DELIVERABLE_TYPE_LABELS, REVIEW_STATUS_LABELS } from "@/lib/client-portal-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
