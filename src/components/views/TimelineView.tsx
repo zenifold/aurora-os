@@ -48,6 +48,24 @@ import { useCustomFields } from "@/hooks/use-custom-fields";
 import { useProjectDependencyEdges, type DependencyEdge } from "@/hooks/use-project-relations";
 import { toast } from "sonner";
 
+function collectDownstream(
+  rootId: string,
+  edgesByFrom: Map<string, DependencyEdge[]>,
+): Set<string> {
+  const out = new Set<string>();
+  const queue = [rootId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    const next = edgesByFrom.get(cur) ?? [];
+    for (const e of next) {
+      if (out.has(e.to)) continue;
+      out.add(e.to);
+      queue.push(e.to);
+    }
+  }
+  return out;
+}
+
 interface Props {
   projectId: string;
   tasks: Task[];
