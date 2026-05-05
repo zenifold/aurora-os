@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { useWorkspaceStore } from "@/stores/workspace-store";
+import { useWorkspaceStore, type WorkspaceKind } from "@/stores/workspace-store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -19,6 +20,8 @@ interface WorkspaceFull {
   name: string;
   slug: string;
   plan: string;
+  kind: WorkspaceKind;
+  linked_delivery_workspace_id: string | null;
   settings: { description?: string; color?: string } | null;
 }
 
@@ -26,6 +29,7 @@ const COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"
 
 function WorkspaceSettings() {
   const ws = useWorkspaceStore((s) => s.current);
+  const allWorkspaces = useWorkspaceStore((s) => s.workspaces);
   const fetchWs = useWorkspaceStore((s) => s.fetch);
   const qc = useQueryClient();
 
@@ -35,7 +39,7 @@ function WorkspaceSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workspaces")
-        .select("id, name, slug, plan, settings")
+        .select("id, name, slug, plan, kind, linked_delivery_workspace_id, settings")
         .eq("id", ws!.id)
         .single();
       if (error) throw error;
@@ -47,6 +51,8 @@ function WorkspaceSettings() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState(COLORS[0]);
+  const [kind, setKind] = useState<WorkspaceKind>("hybrid");
+  const [linkedDelivery, setLinkedDelivery] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -55,7 +61,13 @@ function WorkspaceSettings() {
     setSlug(full.slug);
     setDescription(full.settings?.description ?? "");
     setColor(full.settings?.color ?? COLORS[0]);
+    setKind(full.kind ?? "hybrid");
+    setLinkedDelivery(full.linked_delivery_workspace_id ?? "");
   }, [full]);
+
+  const deliveryOptions = allWorkspaces.filter(
+    (w) => w.id !== ws?.id && (w.kind === "delivery" || w.kind === "hybrid"),
+  );
 
   const save = async () => {
     if (!ws) return;
@@ -65,6 +77,8 @@ function WorkspaceSettings() {
       .update({
         name: name.trim(),
         slug: slug.trim() || ws.slug,
+        kind,
+        linked_delivery_workspace_id: linkedDelivery || null,
         settings: { ...(full?.settings ?? {}), description, color },
       })
       .eq("id", ws.id);
@@ -158,6 +172,45 @@ function WorkspaceSettings() {
             Save changes
           </Button>
         </div>
+      </section>
+
+      <section className="max-w-xl space-y-5 rounded-xl border border-border bg-card p-6">
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Workspace type</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Defines what this workspace is used for. Sales workspaces show the CRM. Delivery workspaces hold projects. Hybrid shows both.
+          </p>
+        </div>
+
+        <div>
+          <Label>Type</Label>
+          <Select value={kind} onValueChange={(v) => setKind(v as WorkspaceKind)}>
+            <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hybrid">Hybrid — sales + delivery</SelectItem>
+              <SelectItem value="sales">Sales — CRM pipeline only</SelectItem>
+              <SelectItem value="delivery">Delivery — projects only</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {(kind === "sales" || kind === "hybrid") && (
+          <div>
+            <Label>Linked delivery workspace</Label>
+            <Select value={linkedDelivery || "none"} onValueChange={(v) => setLinkedDelivery(v === "none" ? "" : v)}>
+              <SelectTrigger className="mt-1.5"><SelectValue placeholder="None" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {deliveryOptions.map((w) => (
+                  <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              When deals are won, projects are auto-created in this workspace.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="max-w-xl rounded-xl border border-border bg-card p-6">
