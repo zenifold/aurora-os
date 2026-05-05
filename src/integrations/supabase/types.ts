@@ -286,6 +286,78 @@ export type Database = {
           },
         ]
       }
+      change_orders: {
+        Row: {
+          applied_at: string | null
+          client_approved_at: string | null
+          client_approved_by: string | null
+          cost_impact: number
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          internal_approved_at: string | null
+          internal_approved_by: string | null
+          number: number
+          project_id: string
+          reason: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          requested_by: string | null
+          status: string
+          timeline_impact_days: number
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          client_approved_at?: string | null
+          client_approved_by?: string | null
+          cost_impact?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          internal_approved_at?: string | null
+          internal_approved_by?: string | null
+          number?: number
+          project_id: string
+          reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string
+          timeline_impact_days?: number
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          client_approved_at?: string | null
+          client_approved_by?: string | null
+          cost_impact?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          internal_approved_at?: string | null
+          internal_approved_by?: string | null
+          number?: number
+          project_id?: string
+          reason?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requested_by?: string | null
+          status?: string
+          timeline_impact_days?: number
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
