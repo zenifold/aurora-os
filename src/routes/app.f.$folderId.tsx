@@ -252,6 +252,7 @@ function FolderPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <PresenceStack users={presenceUsers} />
               {editing ? (
                 <>
                   <Button variant="ghost" size="sm" onClick={cancelEdit}>
