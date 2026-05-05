@@ -42,6 +42,7 @@ import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
+import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -208,6 +209,11 @@ const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdMilestonesRoute = AppPProjectIdMilestonesRouteImport.update({
+  id: '/milestones',
+  path: '/milestones',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
@@ -310,6 +318,7 @@ export interface FileRoutesById {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
@@ -347,6 +356,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings/'
+    | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
   fileRoutesByTo: FileRoutesByTo
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings'
+    | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
   id:
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings/'
+    | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
   fileRoutesById: FileRoutesById
@@ -667,6 +679,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdSettingsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/milestones': {
+      id: '/app/p/$projectId/milestones'
+      path: '/milestones'
+      fullPath: '/app/p/$projectId/milestones'
+      preLoaderRoute: typeof AppPProjectIdMilestonesRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
   }
 }
 
@@ -711,11 +730,13 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 )
 
 interface AppPProjectIdRouteChildren {
+  AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
   AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
   AppPProjectIdSprintsRoute: typeof AppPProjectIdSprintsRoute
 }
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
+  AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
   AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
   AppPProjectIdSprintsRoute: AppPProjectIdSprintsRoute,
 }

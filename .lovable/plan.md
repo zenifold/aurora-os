@@ -17,8 +17,8 @@
 1. ✅ **Sprints v1** — schema + planning mode + capacity stats
 2. ✅ **Resources v1** — team_members + time_logs schema, capacity grid in Settings → Resources
 3. Resources v2 — per-task estimates feeding allocation, smart auto-assign by skill
-3. Milestones & phases (Gantt-style + payment milestones)
-4. Financial tracking & margins (project_financials, time_log_rates, dashboard)
+4. ✅ **Milestones v1** — schema + timeline view with delivery/payment/gate/review types
+5. Milestones v2 — Gantt-style chart, dependencies, auto status from sprint/task progress
 5. Delivery health score (weighted, radar chart)
 6. (deferred) Client portal
 
