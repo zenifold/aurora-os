@@ -195,9 +195,7 @@ function MeetingsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex h-40 items-center justify-center text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
+        <CardGridSkeleton count={6} />
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
           <Mic className="mb-3 h-10 w-10 text-muted-foreground" />
