@@ -20,6 +20,13 @@ import {
   Zap,
   Shield,
   DollarSign,
+  Workflow,
+  Mic,
+  Users,
+  Bot,
+  CheckCircle2,
+  GitBranch,
+  MessageSquare,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
