@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sparkles, ArrowRight, Github, Twitter, Heart, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
-export const GITHUB_URL = "https://github.com/aura-os/aura";
+export const GITHUB_URL = "https://github.com/zenifold/auraz";
 
 export function MarketingHeader() {
   const { user } = useAuth();
@@ -154,8 +154,15 @@ export function MarketingFooter() {
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground md:flex-row">
           <p>© {new Date().getFullYear()} Aura. All rights reserved.</p>
           <p className="inline-flex items-center gap-1.5">
-            Built with <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> for people, not
-            pricing pages.
+            Built with <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> by{" "}
+            <a
+              href="https://m2mx.co"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-foreground transition hover:text-primary"
+            >
+              Max
+            </a>
           </p>
         </div>
       </div>
