@@ -14,7 +14,7 @@
 - New pricing model: Free self-hosted • Hosted Cloud • Team support
 
 ## Next up
-1. **Self-host docs route** (`/docs/self-host`) — clone repo, env, deploy steps
+1. ✅ ~~Self-host docs route~~ (`/docs/self-host` shipped)
 2. ✅ ~~OpenRouter key onboarding — first-run modal~~ (shipped)
 3. ✅ ~~GitHub repo link + star CTA in nav and footer~~ (shipped)
 4. **Comparison page** ("Aura vs Notion / Asana / Monday")
