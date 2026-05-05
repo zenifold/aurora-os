@@ -283,6 +283,49 @@ export function TransitionEditorDialog({
               </div>
             )}
           </div>
+
+          {/* Auto actions */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-1.5 text-xs">
+                <Zap className="h-3 w-3" /> Auto-actions ({actions.length})
+              </Label>
+              <Select onValueChange={(v) => addAction(v as WorkflowAction["type"] | "post_comment")}>
+                <SelectTrigger className="h-7 w-44 text-xs">
+                  <SelectValue placeholder="+ Add action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="notify" className="text-xs">Notify users</SelectItem>
+                  <SelectItem value="set_field" className="text-xs">Set field</SelectItem>
+                  <SelectItem value="post_comment" className="text-xs">Post comment</SelectItem>
+                  <SelectItem value="create_subtask" className="text-xs">Create subtask</SelectItem>
+                  <SelectItem value="webhook" className="text-xs">Call webhook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {actions.length === 0 ? (
+              <p className="rounded-md border border-dashed border-border p-3 text-center text-xs text-muted-foreground">
+                Run automatically after this transition succeeds.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {actions.map((a) => (
+                  <ActionRow
+                    key={a.id}
+                    action={a}
+                    onChange={(patch) => updateAction(a.id, patch)}
+                    onRemove={() => removeAction(a.id)}
+                  />
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-muted-foreground">
+              Templates: <code className="rounded bg-muted px-1">{"{task.title}"}</code>{" "}
+              <code className="rounded bg-muted px-1">{"{from}"}</code>{" "}
+              <code className="rounded bg-muted px-1">{"{to}"}</code>
+            </p>
+          </div>
         </div>
 
         <DialogFooter className="flex-row items-center justify-between sm:justify-between">
