@@ -561,6 +561,7 @@ function ConvertActionItemDialog({
   onClose: () => void;
 }) {
   const { data: projects = [] } = useProjects();
+  const { data: agents = [] } = useAiAgents();
   const ws = useWorkspaceStore((s) => s.current);
   const { user } = useAuth();
   const update = useUpdateActionItem();
@@ -568,6 +569,7 @@ function ConvertActionItemDialog({
   const [projectId, setProjectId] = useState<string>("");
   const [priority, setPriority] = useState<string>("medium");
   const [dueDate, setDueDate] = useState<string>("");
+  const [agentId, setAgentId] = useState<string>("__none__");
   const [submitting, setSubmitting] = useState(false);
 
   // Reset when item changes
@@ -576,6 +578,7 @@ function ConvertActionItemDialog({
     setProjectId(defaultProjectId ?? projects[0]?.id ?? "");
     setPriority(item.priority_guess ?? "medium");
     setDueDate(item.due_guess ?? "");
+    setAgentId("__none__");
   }
 
   const reset = () => {
@@ -583,6 +586,7 @@ function ConvertActionItemDialog({
     setProjectId("");
     setPriority("medium");
     setDueDate("");
+    setAgentId("__none__");
   };
 
   const submit = async () => {
