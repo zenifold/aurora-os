@@ -1,36 +1,108 @@
-# Aura — Roadmap
+# What's Left — Aura Roadmap
 
-## Just shipped
-- Workflow builder phase 2 (transitions, templates, status history)
-- Meetings v1 (transcript, AI analysis, action items, project linking, markdown export, filters)
-- Project notes wiki integration
-- Timeline scenario planning + named snapshots + per-task overrides
-- Custom field type: Level of Effort (drives timeline scenarios)
+The folder architecture vertical slice, sidebar tree, skeletons, and assignee picker (humans + AI agents) are in. Here's a prioritized plan for what still needs work.
 
-## Open-source pivot (this iteration)
-- Reframe landing: positioning, OSS, BYO OpenRouter key, escape from expensive SaaS
-- Dedicated marketing routes: `/features`, `/how-it-works`, `/pricing`
-- Shared marketing chrome (Navbar / Footer) extracted from index
-- New pricing model: Free self-hosted • Hosted Cloud • Team support
+---
 
-## Agency delivery layer (in progress)
-1. ✅ **Sprints v1** — schema + planning mode + capacity stats
-2. ✅ **Resources v1** — team_members + time_logs schema, capacity grid in Settings → Resources
-3. Resources v2 — per-task estimates feeding allocation, smart auto-assign by skill
-4. ✅ **Milestones v1** — schema + timeline view with delivery/payment/gate/review types
-5. Milestones v2 — Gantt-style chart, dependencies, auto status from sprint/task progress
-6. ✅ **Financials v1** — project_financials table, margin/burn/payment dashboard at /financials
-7. ✅ **Delivery health v1** — weighted 5-dimension score with radar chart, flags & suggested actions at /health
-8. (deferred) Client portal
+## 1. Folder Architecture — Finish the Loop
 
-## Other
-4. **Comparison page** ("Aura vs Notion / Asana / Monday")
-5. **Meetings**: speaker attribution + decision log dedicated tab
-6. **Timeline**: dependency lines (use task_relations) + critical path highlight
-7. **Mobile**: dedicated quick-capture for meetings
-8. **Templates marketplace** for Workflow templates
+**1a. Folder detail page polish (`/app/f/$folderId`)**
+- Tabbed view: Overview · Projects · Tasks · Notes · Files · Activity
+- Inline rename, color/icon picker, description editor
+- Move folder (change parent) via dialog or drag
+- Archive / delete with confirm + cascade preview
 
-## Tech debt
-- Consolidate hero `<a href="#...">` anchors → `<Link to="/...">` everywhere
-- Shared `<MarketingHeader />` / `<MarketingFooter />` components
-- Add OG images per marketing route once design lands
+**1b. Division landing pages (`/app/d/$divisionSlug`)**
+- KPI strip (open projects, overdue tasks, this-week activity)
+- Folder grid + recently-touched
+- Division settings: rename, icon, color, sort order
+
+**1c. Project ↔ Folder linking**
+- Move project between folders (single + bulk)
+- Show folder path on project header
+- "Unfiled" bucket for orphaned projects
+
+**1d. Workspace presets**
+- Onboarding picker (Agency / Shop / Software / Consulting / Custom)
+- Seed divisions, sample folders, default workflows
+- Stored as `workspace_presets` for re-application
+
+---
+
+## 2. Tasks — Catch up to the new model
+
+- **Folder/Project assignment** on task create (currently flat)
+- **Multi-assignee**: humans + agents on the same task with role chips
+- **Subtasks** (parent_task_id already exists?) — verify schema and surface in UI
+- **Task templates** per folder / division
+- **Bulk actions**: status, assignee, due date, move folder
+- **Saved views / filters** (My open, Overdue, By folder)
+
+---
+
+## 3. AI Agents — Productionize
+
+- **Agent runs panel** on task: live log, retry, cancel, cost
+- **Approval gates** for destructive actions
+- **Agent library**: pre-built agents (Researcher, Drafter, Reviewer, Triage)
+- **Per-folder default agents** (auto-assign on task create)
+- **Usage dashboard**: tokens, runs, cost per workspace/division
+
+---
+
+## 4. Navigation & Header
+
+- **Command palette** (⌘K): jump to folder/project/task, run actions
+- **Global search** across folders, projects, tasks, notes
+- **Breadcrumbs** consistent on every detail page
+- **Recents** + **Pinned** in sidebar
+
+---
+
+## 5. Realtime & Collaboration
+
+- Realtime updates on folder tree, task lists, kanban
+- Presence indicators (who's viewing this folder/project)
+- Comments + @mentions on tasks and notes
+- Notification preferences per division/folder
+
+---
+
+## 6. Permissions
+
+- Workspace roles already in place — extend to **folder-level roles** (viewer/editor/owner)
+- Hide folders user can't see in the sidebar tree
+- RLS policies on `folders`, `folder_favorites`, `folder_tree_state`
+
+---
+
+## 7. Polish & UX
+
+- Empty states for every page (folder, division, tasks, CRM)
+- Error boundaries on all routes (currently inconsistent)
+- Mobile responsive pass on sidebar tree + folder pages
+- Keyboard shortcuts (j/k navigate, e edit, # tag, etc.)
+- Toast → action-redo pattern on destructive ops
+
+---
+
+## 8. Data & Ops
+
+- Migration: assign existing projects/tasks to default folders (currently all under Delivery)
+- Seed script for demo workspace
+- Audit log table for folder/project/task changes
+- Soft delete + restore for folders and projects
+
+---
+
+## Suggested order
+
+Pick one of these chunks to tackle next — I'd recommend in this order for highest leverage:
+
+1. **Folder detail page polish (1a)** — folders feel half-built without it
+2. **Project ↔ Folder linking (1c)** — unblocks real usage
+3. **Command palette + global search (4)** — multiplies everything
+4. **Workspace presets (1d)** — onboarding story
+5. **Agent runs panel (3)** — makes AI assignment visible
+
+Tell me which chunk(s) to do next and I'll implement.
