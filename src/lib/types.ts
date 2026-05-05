@@ -9,7 +9,30 @@ export type FieldType =
   | "user"
   | "checkbox"
   | "url"
-  | "email";
+  | "email"
+  | "effort";
+
+export type EffortUnit = "hours" | "days" | "points";
+
+/** Stored shape for an "effort" custom field value. */
+export interface EffortValue {
+  amount: number;
+  unit: EffortUnit;
+}
+
+/** Convert an effort value to working days (used by the Timeline). */
+export function effortToDays(value: EffortValue | null | undefined, hoursPerDay = 8): number {
+  if (!value || !Number.isFinite(value.amount) || value.amount <= 0) return 0;
+  switch (value.unit) {
+    case "days":
+      return value.amount;
+    case "hours":
+      return value.amount / hoursPerDay;
+    case "points":
+      // Treat 1 point ~ 0.5 day by default; tweak via scenario
+      return value.amount * 0.5;
+  }
+}
 
 export interface SelectOption {
   id: string;

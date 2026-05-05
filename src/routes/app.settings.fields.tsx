@@ -19,7 +19,7 @@ export const Route = createFileRoute("/app/settings/fields")({
   component: FieldsPage,
 });
 
-const FIELD_TYPES: { value: FieldType; label: string }[] = [
+const FIELD_TYPES: { value: FieldType; label: string; hint?: string }[] = [
   { value: "text", label: "Text" },
   { value: "number", label: "Number" },
   { value: "date", label: "Date" },
@@ -28,6 +28,7 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "checkbox", label: "Checkbox" },
   { value: "url", label: "URL" },
   { value: "email", label: "Email" },
+  { value: "effort", label: "Level of Effort", hint: "Hours / days / points — drives Timeline scenarios" },
 ];
 
 function FieldsPage() {
