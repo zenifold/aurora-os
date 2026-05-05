@@ -373,6 +373,7 @@ function DealDetailDialog({
   const update = useUpdateDeal();
   const remove = useDeleteDeal();
   const { data: activities = [] } = useDealActivities(dealId);
+  const { data: contacts = [] } = useContacts();
   const addActivity = useAddDealActivity(dealId);
   const [note, setNote] = useState("");
   const [handingOff, setHandingOff] = useState(false);
@@ -505,6 +506,24 @@ function DealDetailDialog({
                 }}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Contact</Label>
+            <Select
+              value={deal.contact_id ?? "none"}
+              onValueChange={(v) => update.mutate({ id: deal.id, contact_id: v === "none" ? null : v })}
+            >
+              <SelectTrigger><SelectValue placeholder="No contact" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No contact</SelectItem>
+                {contacts.map((c: Contact) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}{c.company ? ` · ${c.company}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {deal.description && (
