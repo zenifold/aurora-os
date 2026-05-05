@@ -108,5 +108,20 @@ export function ProjectActionsMenu({ projectId }: Props) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <MoveToFolderDialog
+      open={moveOpen}
+      onOpenChange={setMoveOpen}
+      title="Move project"
+      current={project ? { division_id: project.division_id ?? "", folder_id: project.folder_id ?? null } : null}
+      onConfirm={async (target) => {
+        await updateProject.mutateAsync({
+          id: projectId,
+          division_id: target.division_id,
+          folder_id: target.folder_id,
+        });
+        toast.success("Project moved");
+      }}
+    />
+    </>
   );
 }
