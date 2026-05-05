@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/
+    about: Please use GitHub Discussions for questions and ideas.
+  - name: Security vulnerability
+    url: https://github.com/
+    about: Do not file public issues for security. See SECURITY.md.
