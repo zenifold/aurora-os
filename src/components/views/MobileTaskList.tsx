@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Check, Trash2, Inbox, Calendar as CalendarIcon } from "lucide-react";
 import { format, isPast, isToday, isTomorrow, parseISO, addDays, isBefore } from "date-fns";
 import { haptic } from "@/lib/haptics";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
@@ -168,6 +169,14 @@ function TaskRow({
                 <CalendarIcon className="h-3 w-3" />
                 {format(parseISO(task.due_date), "MMM d")}
               </span>
+            )}
+            {task.tags.slice(0, 2).map((tg) => (
+              <span key={tg} className="rounded-full bg-accent/60 px-1.5 py-0.5 text-[10px] text-accent-foreground">
+                #{tg}
+              </span>
+            ))}
+            {task.assignee_ids.length > 0 && (
+              <AssigneeAvatars ids={task.assignee_ids} max={3} size={16} className="ml-auto" />
             )}
           </div>
         </div>
