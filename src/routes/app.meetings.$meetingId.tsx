@@ -697,3 +697,44 @@ function ConvertActionItemDialog({
     </Dialog>
   );
 }
+
+function ProjectLinkSelect({
+  meetingId,
+  value,
+}: {
+  meetingId: string;
+  value: string | null;
+}) {
+  const { data: projects = [] } = useProjects();
+  const update = useUpdateMeeting();
+  const current = projects.find((p) => p.id === value);
+
+  return (
+    <Select
+      value={value ?? "__none__"}
+      onValueChange={(v) =>
+        update.mutate({
+          id: meetingId,
+          patch: { project_id: v === "__none__" ? null : v } as never,
+        })
+      }
+    >
+      <SelectTrigger className="h-8 w-auto gap-1.5 border-dashed text-xs">
+        <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" />
+        <SelectValue placeholder="Link project">
+          {current ? current.name : "Link project"}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__" className="text-xs text-muted-foreground">
+          No project
+        </SelectItem>
+        {projects.map((p) => (
+          <SelectItem key={p.id} value={p.id} className="text-xs">
+            {p.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
