@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
