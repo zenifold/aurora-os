@@ -67,6 +67,7 @@ function Landing() {
         <Hero />
         <ValueBar />
         <ViewsShowcase />
+        <CapabilitiesShowcase />
         <Manifesto />
         <PricingTeaser />
         <FinalCTA />
