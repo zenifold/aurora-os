@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Sparkles, ArrowRight, Github } from "lucide-react";
+import { Sparkles, ArrowRight, Github, Twitter, Heart, Mail } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export const GITHUB_URL = "https://github.com/aura-os/aura";
