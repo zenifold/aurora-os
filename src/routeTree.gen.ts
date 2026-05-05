@@ -49,7 +49,9 @@ import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$proje
 import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
+import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$projectId.documents'
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
+import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -251,10 +253,21 @@ const AppPProjectIdFinancialsRoute = AppPProjectIdFinancialsRouteImport.update({
   path: '/financials',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdDocumentsRoute = AppPProjectIdDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdChangeOrdersRoute =
   AppPProjectIdChangeOrdersRouteImport.update({
     id: '/change-orders',
     path: '/change-orders',
+    getParentRoute: () => AppPProjectIdRoute,
+  } as any)
+const AppPProjectIdAllocationsRoute =
+  AppPProjectIdAllocationsRouteImport.update({
+    id: '/allocations',
+    path: '/allocations',
     getParentRoute: () => AppPProjectIdRoute,
   } as any)
 
@@ -294,7 +307,9 @@ export interface FileRoutesByFullPath {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -335,7 +350,9 @@ export interface FileRoutesByTo {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -379,7 +396,9 @@ export interface FileRoutesById {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -424,7 +443,9 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -465,7 +486,9 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources'
     | '/app/settings'
+    | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -508,7 +531,9 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/resources/'
     | '/app/settings/'
+    | '/app/p/$projectId/allocations'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/documents'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -813,11 +838,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdFinancialsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/documents': {
+      id: '/app/p/$projectId/documents'
+      path: '/documents'
+      fullPath: '/app/p/$projectId/documents'
+      preLoaderRoute: typeof AppPProjectIdDocumentsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/change-orders': {
       id: '/app/p/$projectId/change-orders'
       path: '/change-orders'
       fullPath: '/app/p/$projectId/change-orders'
       preLoaderRoute: typeof AppPProjectIdChangeOrdersRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/allocations': {
+      id: '/app/p/$projectId/allocations'
+      path: '/allocations'
+      fullPath: '/app/p/$projectId/allocations'
+      preLoaderRoute: typeof AppPProjectIdAllocationsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
   }
@@ -864,7 +903,9 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 )
 
 interface AppPProjectIdRouteChildren {
+  AppPProjectIdAllocationsRoute: typeof AppPProjectIdAllocationsRoute
   AppPProjectIdChangeOrdersRoute: typeof AppPProjectIdChangeOrdersRoute
+  AppPProjectIdDocumentsRoute: typeof AppPProjectIdDocumentsRoute
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
   AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
@@ -873,7 +914,9 @@ interface AppPProjectIdRouteChildren {
 }
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
+  AppPProjectIdAllocationsRoute: AppPProjectIdAllocationsRoute,
   AppPProjectIdChangeOrdersRoute: AppPProjectIdChangeOrdersRoute,
+  AppPProjectIdDocumentsRoute: AppPProjectIdDocumentsRoute,
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
   AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
