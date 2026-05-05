@@ -31,6 +31,7 @@ import { SubtasksList } from "./SubtasksList";
 import { ActivityFeed } from "./ActivityFeed";
 import { TaskAiPanel } from "./TaskAiPanel";
 import { TaskRelationsSection } from "./TaskRelationsSection";
+import { ApprovalsPanel } from "./ApprovalsPanel";
 import { Sparkles } from "lucide-react";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
@@ -203,6 +204,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
                 </div>
               )}
 
+              <ApprovalsPanel task={task} />
               <TaskRelationsSection task={task} />
             </TabsContent>
 
