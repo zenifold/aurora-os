@@ -1985,6 +1985,44 @@ export type Database = {
         }
         Relationships: []
       }
+      sidebar_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          sort_order: number
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          sort_order?: number
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          sort_order?: number
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sidebar_favorites_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sprint_burndown: {
         Row: {
           completed_tasks: number | null
