@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Bell, Check, ShieldAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ListSkeleton } from "@/components/ui/loading-scaffolds";
 import { useNotifications, useMarkAllNotificationsRead, useMarkNotificationRead } from "@/hooks/use-notifications";
 import { useMyPendingApprovals, useDecideApproval } from "@/hooks/use-project-workflow";
 import { format, formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
@@ -38,7 +39,7 @@ function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read_at).length;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="animate-page-in flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div>
           <h1 className="text-xl font-semibold">Notifications</h1>
@@ -104,11 +105,7 @@ function NotificationsPage() {
           )}
 
           {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
-              ))}
-            </div>
+            <ListSkeleton rows={5} />
           ) : notifications.length === 0 && myApprovals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <Bell className="mb-4 h-12 w-12 text-muted-foreground/30" />

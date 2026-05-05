@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useNotes, useCreateNote } from "@/hooks/use-notes";
 import { NoteCard } from "@/components/notes/NoteCard";
 import { NoteEditorDialog } from "@/components/notes/NoteEditorDialog";
+import { CardGridSkeleton } from "@/components/ui/loading-scaffolds";
 import { docPreview } from "@/components/notes/NoteEditor";
 import type { Note, NoteType } from "@/lib/types";
 
@@ -63,7 +64,7 @@ function NotesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-6">
+    <div className="animate-page-in mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-6">
       {/* Header */}
       <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
         <div className="flex items-center justify-between gap-2 sm:block">
@@ -182,7 +183,7 @@ function NotesPage() {
         ))}
       </div>
 
-      {isLoading && <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>}
+      {isLoading && <CardGridSkeleton count={6} />}
 
       {!isLoading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 py-16 text-center">
