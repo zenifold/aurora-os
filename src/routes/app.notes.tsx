@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useNotes, useCreateNote } from "@/hooks/use-notes";
 import { NoteCard } from "@/components/notes/NoteCard";
 import { NoteEditorDialog } from "@/components/notes/NoteEditorDialog";
+import { CardGridSkeleton } from "@/components/ui/loading-scaffolds";
 import { docPreview } from "@/components/notes/NoteEditor";
 import type { Note, NoteType } from "@/lib/types";
 
