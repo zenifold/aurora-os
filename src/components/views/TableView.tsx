@@ -207,17 +207,29 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
         </colgroup>
         <thead className="sticky top-0 z-10 bg-background">
           <tr className="border-b border-border">
-            <th className="sticky-col px-3 py-2">
-              <Checkbox
-                checked={tasks.length > 0 && selected.size === tasks.length}
-                onCheckedChange={(c) => toggleAll(!!c)}
-              />
-            </th>
             <th
               className="sticky-col border-r border-border/60 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-              style={{ left: widths.select }}
+              style={{ left: 0 }}
             >
-              <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleAll(!allSelected)}
+                  aria-label={allSelected ? "Deselect all" : "Select all"}
+                  aria-pressed={allSelected}
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
+                    allSelected
+                      ? "border-primary bg-primary"
+                      : selected.size > 0
+                      ? "border-primary bg-primary/30"
+                      : "border-border opacity-40 hover:opacity-100 hover:border-primary"
+                  }`}
+                >
+                  {allSelected && <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+                  {!allSelected && selected.size > 0 && <span className="h-0.5 w-2 rounded-full bg-primary-foreground" />}
+                </button>
+                <ResizableThInner colKey="title" widths={widths} setWidths={setWidths}>Title</ResizableThInner>
+              </div>
             </th>
             {showStatus && <ResizableTh colKey="status" widths={widths} setWidths={setWidths}>Status</ResizableTh>}
             {showPriority && <ResizableTh colKey="priority" widths={widths} setWidths={setWidths}>Priority</ResizableTh>}
