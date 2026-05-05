@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCreateCustomField } from "@/hooks/use-custom-fields";
 import type { FieldType } from "@/lib/types";
+import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
 
 interface Props {
   projectId: string;
