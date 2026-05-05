@@ -56,6 +56,7 @@ export function MagicAddDialog({
   const [generated, setGenerated] = useState<Generated[] | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [inserting, setInserting] = useState(false);
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [meta, setMeta] = useState<{ tokens: number | null; model: string | null }>({
     tokens: null,
     model: null,
