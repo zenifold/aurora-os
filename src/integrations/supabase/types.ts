@@ -791,6 +791,170 @@ export type Database = {
           },
         ]
       }
+      sprint_burndown: {
+        Row: {
+          completed_tasks: number | null
+          created_at: string
+          id: string
+          ideal_remaining: number | null
+          remaining_hours: number | null
+          remaining_points: number | null
+          snapshot_date: string
+          sprint_id: string
+          total_tasks: number | null
+          workspace_id: string
+        }
+        Insert: {
+          completed_tasks?: number | null
+          created_at?: string
+          id?: string
+          ideal_remaining?: number | null
+          remaining_hours?: number | null
+          remaining_points?: number | null
+          snapshot_date: string
+          sprint_id: string
+          total_tasks?: number | null
+          workspace_id: string
+        }
+        Update: {
+          completed_tasks?: number | null
+          created_at?: string
+          id?: string
+          ideal_remaining?: number | null
+          remaining_hours?: number | null
+          remaining_points?: number | null
+          snapshot_date?: string
+          sprint_id?: string
+          total_tasks?: number | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sprint_burndown_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "sprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sprint_tasks: {
+        Row: {
+          added_at: string
+          added_by: string | null
+          is_committed: boolean
+          original_estimate: number | null
+          sprint_id: string
+          task_id: string
+          workspace_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by?: string | null
+          is_committed?: boolean
+          original_estimate?: number | null
+          sprint_id: string
+          task_id: string
+          workspace_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string | null
+          is_committed?: boolean
+          original_estimate?: number | null
+          sprint_id?: string
+          task_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sprint_tasks_sprint_id_fkey"
+            columns: ["sprint_id"]
+            isOneToOne: false
+            referencedRelation: "sprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sprint_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sprints: {
+        Row: {
+          budget_allocated: number | null
+          budget_spent: number
+          capacity_hours: number | null
+          capacity_points: number | null
+          completed_points: number
+          created_at: string
+          created_by: string | null
+          end_date: string
+          goal: string | null
+          health_score: number | null
+          id: string
+          logged_hours: number
+          name: string
+          planned_hours: number
+          planned_points: number
+          project_id: string
+          risk_flags: string[]
+          start_date: string
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          budget_allocated?: number | null
+          budget_spent?: number
+          capacity_hours?: number | null
+          capacity_points?: number | null
+          completed_points?: number
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          goal?: string | null
+          health_score?: number | null
+          id?: string
+          logged_hours?: number
+          name: string
+          planned_hours?: number
+          planned_points?: number
+          project_id: string
+          risk_flags?: string[]
+          start_date: string
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          budget_allocated?: number | null
+          budget_spent?: number
+          capacity_hours?: number | null
+          capacity_points?: number | null
+          completed_points?: number
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          goal?: string | null
+          health_score?: number | null
+          id?: string
+          logged_hours?: number
+          name?: string
+          planned_hours?: number
+          planned_points?: number
+          project_id?: string
+          risk_flags?: string[]
+          start_date?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       task_relations: {
         Row: {
           created_at: string
