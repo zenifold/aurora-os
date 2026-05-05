@@ -35,6 +35,7 @@ import {
 import { useCreateCustomField } from "@/hooks/use-custom-fields";
 import type { FieldType } from "@/lib/types";
 import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
+import { BulkActionBar } from "@/components/views/BulkActionBar";
 
 interface Props {
   projectId: string;
@@ -153,11 +154,31 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const toggleAll = (checked: boolean) => {
     setSelected(checked ? new Set(tasks.map((t) => t.id)) : new Set());
   };
-  const toggleOne = (id: string, checked: boolean) => {
-    const next = new Set(selected);
-    if (checked) next.add(id);
-    else next.delete(id);
-    setSelected(next);
+  const lastSelectedRef = useRef<string | null>(null);
+  const toggleOne = (id: string, opts?: { range?: boolean; additive?: boolean }) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (opts?.range && lastSelectedRef.current) {
+        const flatIds = (useTree ? flat.map((n) => n.task.id) : tasks.map((t) => t.id));
+        const a = flatIds.indexOf(lastSelectedRef.current);
+        const b = flatIds.indexOf(id);
+        if (a >= 0 && b >= 0) {
+          const [lo, hi] = a < b ? [a, b] : [b, a];
+          for (let i = lo; i <= hi; i++) next.add(flatIds[i]);
+          return next;
+        }
+      }
+      if (!opts?.additive && !opts?.range) {
+        // single-toggle
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+      } else {
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+      }
+      lastSelectedRef.current = id;
+      return next;
+    });
   };
 
   const addField = async (type: FieldType) => {
