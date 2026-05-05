@@ -15,7 +15,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "Aura — pricing that respects you" },
       {
         property: "og:description",
-        content: "Self-host free. Hosted from $0. AI is BYO OpenRouter — pay providers directly.",
+        content: "Self-host free. Hosted from $5/user. AI is BYO OpenRouter — pay providers directly.",
       },
     ],
   }),
