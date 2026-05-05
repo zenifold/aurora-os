@@ -147,9 +147,10 @@ function NotificationsPage() {
                   })}
                 </div>
               </section>
-            ))}
-          </div>
-        )}
+              ))}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
