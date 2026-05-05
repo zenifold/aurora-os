@@ -63,9 +63,10 @@ export function AppHeader() {
           label="Ops"
           icon={<BarChart3 className="h-3.5 w-3.5" />}
           items={[
+            { to: "/app/executive", label: "Executive dashboard" },
+            { to: "/app/escalations", label: "Escalations" },
             { to: "/app/ops", label: "Portfolio" },
             { to: "/app/resources/capacity", label: "Resources" },
-            { to: "/app/ops", label: "PMO" },
             { to: "/app/ops", label: "Financials" },
           ]}
         />
