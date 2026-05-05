@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,13 +10,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DEFAULT_WORKFLOW,
+  useProjectWorkflow,
+  useCreateWorkflowStatus,
+  useUpdateWorkflowStatus,
+  useDeleteWorkflowStatus,
+  useReorderWorkflowStatuses,
+} from "@/hooks/use-project-workflow";
+import {
+  CATEGORY_LABEL,
+  STATUS_PRESET_COLORS,
   type StatusCategory,
   type WorkflowStatus,
-  useProjectWorkflow,
-  useUpdateProjectWorkflow,
-} from "@/hooks/use-project-workflow";
-import { GripVertical, Plus, RotateCcw, Trash2 } from "lucide-react";
+} from "@/lib/workflow-types";
+import { GripVertical, Plus, Trash2, Flag, CheckCircle2 } from "lucide-react";
 import {
   DndContext,
   type DragEndEvent,
@@ -33,76 +39,26 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const CATEGORY_LABEL: Record<StatusCategory, string> = {
-  todo: "Todo",
-  in_progress: "In Progress",
-  done: "Done",
-  cancelled: "Cancelled",
-};
-
-const PRESET_COLORS = [
-  "oklch(0.7 0.02 270)",
-  "oklch(0.6 0.18 240)",
-  "oklch(0.75 0.15 80)",
-  "oklch(0.65 0.18 150)",
-  "oklch(0.6 0.18 25)",
-  "oklch(0.6 0.25 310)",
-  "oklch(0.7 0.22 350)",
-];
-
 export function StatusWorkflowBuilder({ projectId }: { projectId: string }) {
-  const { data: serverWorkflow, isLoading } = useProjectWorkflow(projectId);
-  const update = useUpdateProjectWorkflow(projectId);
-  const [workflow, setWorkflow] = useState<WorkflowStatus[]>([]);
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => {
-    if (serverWorkflow) {
-      setWorkflow(serverWorkflow);
-      setDirty(false);
-    }
-  }, [serverWorkflow]);
+  const { data: statuses = [], isLoading } = useProjectWorkflow(projectId);
+  const createStatus = useCreateWorkflowStatus(projectId);
+  const updateStatus = useUpdateWorkflowStatus(projectId);
+  const deleteStatus = useDeleteWorkflowStatus(projectId);
+  const reorder = useReorderWorkflowStatuses(projectId);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const from = workflow.findIndex((s) => s.id === active.id);
-    const to = workflow.findIndex((s) => s.id === over.id);
+    const from = statuses.findIndex((s) => s.id === active.id);
+    const to = statuses.findIndex((s) => s.id === over.id);
     if (from === -1 || to === -1) return;
-    setWorkflow(arrayMove(workflow, from, to));
-    setDirty(true);
+    const next = arrayMove(statuses, from, to);
+    reorder.mutate(next.map((s) => s.id));
   };
 
-  const updateStatus = (id: string, patch: Partial<WorkflowStatus>) => {
-    setWorkflow((w) => w.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-    setDirty(true);
-  };
-
-  const removeStatus = (id: string) => {
-    if (workflow.length <= 2) return;
-    if (!confirm("Delete this status? Tasks using it will keep the value but it won't appear in pickers.")) return;
-    setWorkflow((w) => w.filter((s) => s.id !== id));
-    setDirty(true);
-  };
-
-  const addStatus = () => {
-    const id = `s_${Date.now().toString(36)}`;
-    setWorkflow((w) => [
-      ...w,
-      { id, name: "New status", color: PRESET_COLORS[w.length % PRESET_COLORS.length], category: "in_progress", wip_limit: null },
-    ]);
-    setDirty(true);
-  };
-
-  const resetToDefault = () => {
-    if (!confirm("Reset to the default workflow?")) return;
-    setWorkflow(DEFAULT_WORKFLOW);
-    setDirty(true);
-  };
-
-  if (isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (isLoading) return <div className="text-sm text-muted-foreground">Loading workflow…</div>;
 
   return (
     <div className="space-y-4">
@@ -110,48 +66,54 @@ export function StatusWorkflowBuilder({ projectId }: { projectId: string }) {
         <div>
           <h3 className="text-base font-medium">Status pipeline</h3>
           <p className="text-sm text-muted-foreground">
-            Drag to reorder. Each status maps to a Kanban column and analytics category.
+            Drag to reorder. Each status appears as a Kanban column. WIP limits and SLA hours
+            are enforced across views.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={resetToDefault}>
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => update.mutate(workflow, { onSuccess: () => setDirty(false) })}
-            disabled={!dirty || update.isPending}
-            className="bg-aura-gradient text-primary-foreground hover:opacity-90"
-          >
-            {update.isPending ? "Saving…" : "Save workflow"}
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          onClick={() =>
+            createStatus.mutate({
+              name: `Status ${statuses.length + 1}`,
+              category: "in_progress",
+              color: STATUS_PRESET_COLORS[statuses.length % STATUS_PRESET_COLORS.length],
+            })
+          }
+          disabled={createStatus.isPending}
+          className="bg-aura-gradient text-primary-foreground hover:opacity-90"
+        >
+          <Plus className="mr-1.5 h-3.5 w-3.5" /> Add status
+        </Button>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={workflow.map((s) => s.id)} strategy={horizontalListSortingStrategy}>
+        <SortableContext items={statuses.map((s) => s.id)} strategy={horizontalListSortingStrategy}>
           <div className="flex flex-wrap gap-3">
-            {workflow.map((s) => (
+            {statuses.map((s) => (
               <SortableStatusCard
                 key={s.id}
                 status={s}
-                onChange={(patch) => updateStatus(s.id, patch)}
-                onRemove={() => removeStatus(s.id)}
-                canRemove={workflow.length > 2}
+                onChange={(patch) => updateStatus.mutate({ id: s.id, ...patch })}
+                onRemove={() => {
+                  if (statuses.length <= 2) return;
+                  if (
+                    !confirm(
+                      "Delete this status? Tasks using it will keep the value but it won't appear in pickers.",
+                    )
+                  )
+                    return;
+                  deleteStatus.mutate(s.id);
+                }}
+                canRemove={statuses.length > 2}
               />
             ))}
-            <button
-              onClick={addStatus}
-              className="flex w-44 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border p-4 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
-            >
-              <Plus className="h-4 w-4" /> Add status
-            </button>
           </div>
         </SortableContext>
       </DndContext>
 
       <p className="text-xs text-muted-foreground">
-        Categories drive analytics: <strong>Done</strong> counts toward velocity, <strong>Cancelled</strong> is excluded.
+        Categories drive analytics: <strong>Done</strong> counts toward velocity,{" "}
+        <strong>Cancelled</strong> is excluded.
       </p>
     </div>
   );
@@ -168,7 +130,10 @@ function SortableStatusCard({
   onRemove: () => void;
   canRemove: boolean;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: status.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: status.id,
+  });
+  const [name, setName] = useState(status.name);
 
   return (
     <div
@@ -178,20 +143,35 @@ function SortableStatusCard({
         transition,
         opacity: isDragging ? 0.4 : 1,
       }}
-      className="w-64 rounded-lg border border-border bg-card p-3 shadow-elegant"
+      className="w-64 rounded-lg border border-border bg-card p-3 shadow-sm"
     >
       <div className="mb-2 flex items-center gap-2">
-        <button {...attributes} {...listeners} className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+        >
           <GripVertical className="h-4 w-4" />
         </button>
         <span className="h-3 w-3 rounded-full" style={{ background: status.color }} />
         <Input
-          value={status.name}
-          onChange={(e) => onChange({ name: e.target.value })}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => {
+            if (name.trim() && name !== status.name) onChange({ name: name.trim() });
+            else setName(status.name);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          }}
           className="h-7 flex-1 border-0 bg-transparent px-1 font-medium focus-visible:ring-1"
         />
         {canRemove && (
-          <button onClick={onRemove} className="text-muted-foreground hover:text-destructive">
+          <button
+            onClick={onRemove}
+            className="text-muted-foreground hover:text-destructive"
+            aria-label="Delete status"
+          >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
         )}
@@ -201,38 +181,95 @@ function SortableStatusCard({
         <div>
           <Label className="text-xs text-muted-foreground">Color</Label>
           <div className="mt-1 flex flex-wrap gap-1">
-            {PRESET_COLORS.map((c) => (
+            {STATUS_PRESET_COLORS.map((c) => (
               <button
                 key={c}
                 onClick={() => onChange({ color: c })}
-                className={`h-5 w-5 rounded-full border-2 transition ${status.color === c ? "border-foreground" : "border-transparent"}`}
+                className={`h-5 w-5 rounded-full border-2 transition ${
+                  status.color.toLowerCase() === c.toLowerCase()
+                    ? "border-foreground"
+                    : "border-transparent"
+                }`}
                 style={{ background: c }}
                 aria-label={`Color ${c}`}
               />
             ))}
           </div>
         </div>
+
         <div>
           <Label className="text-xs text-muted-foreground">Category</Label>
-          <Select value={status.category} onValueChange={(v) => onChange({ category: v as StatusCategory })}>
-            <SelectTrigger className="mt-1 h-7"><SelectValue /></SelectTrigger>
+          <Select
+            value={status.category}
+            onValueChange={(v) => onChange({ category: v as StatusCategory })}
+          >
+            <SelectTrigger className="mt-1 h-7">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {(Object.keys(CATEGORY_LABEL) as StatusCategory[]).map((c) => (
-                <SelectItem key={c} value={c}>{CATEGORY_LABEL[c]}</SelectItem>
+                <SelectItem key={c} value={c}>
+                  {CATEGORY_LABEL[c]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label className="text-xs text-muted-foreground">WIP limit</Label>
-          <Input
-            type="number"
-            min={0}
-            value={status.wip_limit ?? ""}
-            placeholder="No limit"
-            onChange={(e) => onChange({ wip_limit: e.target.value === "" ? null : Math.max(0, Number(e.target.value)) })}
-            className="mt-1 h-7"
-          />
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs text-muted-foreground">WIP limit</Label>
+            <Input
+              type="number"
+              min={0}
+              value={status.wip_limit ?? ""}
+              placeholder="—"
+              onChange={(e) =>
+                onChange({
+                  wip_limit: e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
+                })
+              }
+              className="mt-1 h-7"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">SLA (hrs)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={status.sla_hours ?? ""}
+              placeholder="—"
+              onChange={(e) =>
+                onChange({
+                  sla_hours: e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
+                })
+              }
+              className="mt-1 h-7"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1 pt-1">
+          <button
+            onClick={() => onChange({ is_start: !status.is_start })}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition ${
+              status.is_start
+                ? "border-transparent bg-primary text-primary-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Flag className="h-3 w-3" /> Start
+          </button>
+          <button
+            onClick={() => onChange({ is_terminal: !status.is_terminal })}
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] transition ${
+              status.is_terminal
+                ? "border-transparent bg-emerald-600 text-white"
+                : "border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <CheckCircle2 className="h-3 w-3" /> Terminal
+          </button>
         </div>
       </div>
     </div>
