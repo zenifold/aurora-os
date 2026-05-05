@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMeetings, useCreateMeeting, useDeleteMeeting } from "@/hooks/use-meetings";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
@@ -29,28 +29,72 @@ import {
   AlertCircle,
   FileText,
   Trash2,
+  Search,
+  X,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
+type SearchParams = { project?: string; status?: string; q?: string };
+
 export const Route = createFileRoute("/app/meetings")({
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    project: typeof s.project === "string" ? s.project : undefined,
+    status: typeof s.status === "string" ? s.status : undefined,
+    q: typeof s.q === "string" ? s.q : undefined,
+  }),
   component: MeetingsPage,
 });
 
 function MeetingsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { data: meetings = [], isLoading } = useMeetings();
   const { data: projects = [] } = useProjects();
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState<string>("none");
+  const [projectId, setProjectId] = useState<string>(search.project ?? "none");
   const [transcript, setTranscript] = useState("");
   const [participants, setParticipants] = useState("");
 
+  const q = search.q ?? "";
+  const projectFilter = search.project ?? "all";
+  const statusFilter = search.status ?? "all";
+
+  const setSearchParam = (patch: Partial<SearchParams>) => {
+    navigate({
+      search: (prev) => {
+        const next: SearchParams = { ...prev, ...patch };
+        // strip empties
+        if (!next.q) delete next.q;
+        if (!next.project || next.project === "all") delete next.project;
+        if (!next.status || next.status === "all") delete next.status;
+        return next;
+      },
+    });
+  };
+
+  const filtered = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    return meetings.filter((m) => {
+      if (projectFilter !== "all") {
+        if (projectFilter === "none" && m.project_id) return false;
+        if (projectFilter !== "none" && m.project_id !== projectFilter) return false;
+      }
+      if (statusFilter !== "all" && m.ai_status !== statusFilter) return false;
+      if (ql) {
+        const hay = `${m.title} ${m.description ?? ""} ${m.transcript_raw_text ?? ""}`.toLowerCase();
+        if (!hay.includes(ql)) return false;
+      }
+      return true;
+    });
+  }, [meetings, q, projectFilter, statusFilter]);
+
   const reset = () => {
     setTitle("");
-    setProjectId("none");
+    setProjectId(search.project ?? "none");
     setTranscript("");
     setParticipants("");
   };
@@ -72,9 +116,11 @@ function MeetingsPage() {
     toast.success("Meeting created");
     setOpen(false);
     reset();
-    // Navigate to detail
     window.location.href = `/app/meetings/${m.id}`;
   };
+
+  const activeProject = projects.find((p) => p.id === search.project);
+  const hasActiveFilters = q || projectFilter !== "all" || statusFilter !== "all";
 
   return (
     <div className="mx-auto max-w-6xl p-4 sm:p-6">
@@ -82,7 +128,9 @@ function MeetingsPage() {
         <div>
           <h1 className="text-xl font-semibold sm:text-2xl">Meetings</h1>
           <p className="text-sm text-muted-foreground">
-            Paste a transcript and let AI extract summaries and action items.
+            {activeProject
+              ? <>Meetings linked to <span className="font-medium">{activeProject.name}</span></>
+              : "Paste a transcript and let AI extract summaries and action items."}
           </p>
         </div>
         <Button onClick={() => setOpen(true)} className="w-full bg-aura-gradient text-primary-foreground sm:w-auto">
@@ -90,24 +138,86 @@ function MeetingsPage() {
         </Button>
       </div>
 
+      {/* Filters */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] flex-1 sm:flex-none">
+          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setSearchParam({ q: e.target.value })}
+            placeholder="Search title or transcript"
+            className="h-9 pl-7 text-sm sm:w-64"
+          />
+          {q && (
+            <button
+              onClick={() => setSearchParam({ q: "" })}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-muted"
+              aria-label="Clear search"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+        <Select value={projectFilter} onValueChange={(v) => setSearchParam({ project: v })}>
+          <SelectTrigger className="h-9 w-auto min-w-[140px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All projects</SelectItem>
+            <SelectItem value="none">No project</SelectItem>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={(v) => setSearchParam({ status: v })}>
+          <SelectTrigger className="h-9 w-auto min-w-[120px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Any status</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="completed">Analyzed</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
+          </SelectContent>
+        </Select>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 text-xs"
+            onClick={() => navigate({ search: {} as SearchParams })}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="flex h-40 items-center justify-center text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
         </div>
-      ) : meetings.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
           <Mic className="mb-3 h-10 w-10 text-muted-foreground" />
-          <p className="font-medium">No meetings yet</p>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Create your first meeting and paste a transcript to get started.
+          <p className="font-medium">
+            {meetings.length === 0 ? "No meetings yet" : "No meetings match your filters"}
           </p>
-          <Button onClick={() => setOpen(true)} variant="outline">
-            <Plus className="mr-2 h-4 w-4" /> New meeting
-          </Button>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {meetings.length === 0
+              ? "Create your first meeting and paste a transcript to get started."
+              : "Try adjusting search or filters."}
+          </p>
+          {meetings.length === 0 && (
+            <Button onClick={() => setOpen(true)} variant="outline">
+              <Plus className="mr-2 h-4 w-4" /> New meeting
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {meetings.map((m) => {
+          {filtered.map((m) => {
             const project = projects.find((p) => p.id === m.project_id);
             return (
               <div key={m.id} className="group relative rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
