@@ -11,6 +11,7 @@ import { MobileTopBar } from "@/components/app/MobileTopBar";
 import { MobileBottomNav } from "@/components/app/MobileBottomNav";
 import { MobileDrawer } from "@/components/app/MobileDrawer";
 import { QuickCaptureSheet } from "@/components/app/QuickCaptureSheet";
+import { OpenRouterFirstRun } from "@/components/app/OpenRouterFirstRun";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
