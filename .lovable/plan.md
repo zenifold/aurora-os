@@ -14,8 +14,9 @@
 - New pricing model: Free self-hosted • Hosted Cloud • Team support
 
 ## Agency delivery layer (in progress)
-1. ✅ **Sprints v1** — schema + planning mode + capacity stats (this turn)
-2. Resource & capacity management (team_members, utilization grid, smart auto-assign)
+1. ✅ **Sprints v1** — schema + planning mode + capacity stats
+2. ✅ **Resources v1** — team_members + time_logs schema, capacity grid in Settings → Resources
+3. Resources v2 — per-task estimates feeding allocation, smart auto-assign by skill
 3. Milestones & phases (Gantt-style + payment milestones)
 4. Financial tracking & margins (project_financials, time_log_rates, dashboard)
 5. Delivery health score (weighted, radar chart)
