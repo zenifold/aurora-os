@@ -629,13 +629,28 @@ function ConvertActionItemDialog({
         .single();
       if (error) throw error;
 
+      if (agentId !== "__none__") {
+        await supabase.from("ai_task_assignments").insert({
+          workspace_id: ws.id,
+          task_id: task.id,
+          agent_id: agentId,
+          status: "queued",
+          instructions: `From meeting action item: ${title.trim()}${item.context_quote ? `\n\nContext: "${item.context_quote}"` : ""}`,
+          created_by: user.id,
+        });
+      }
+
       await update.mutateAsync({
         id: item.id,
         meeting_id: meetingId,
-        patch: { status: "converted", converted_task_id: task.id } as never,
+        patch: {
+          status: "converted",
+          converted_task_id: task.id,
+          assigned_agent_id: agentId === "__none__" ? null : agentId,
+        } as never,
       });
 
-      toast.success("Task created");
+      toast.success(agentId === "__none__" ? "Task created" : "Task created & routed to AI");
       reset();
       onClose();
     } catch (e) {
