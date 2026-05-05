@@ -98,17 +98,17 @@ function Hero() {
           rel="noreferrer"
           className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur transition hover:text-foreground"
         >
-          <Github className="h-3 w-3" />
-          Now open source — star us on GitHub
+          <Sparkles className="h-3 w-3" />
+          The company OS for agencies & delivery teams
           <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
         </a>
         <h1 className="mt-6 max-w-4xl text-balance text-5xl font-bold tracking-tight md:text-7xl">
-          Quit your <span className="text-aura-gradient">$20/seat</span> productivity tax.
+          From <span className="text-aura-gradient">first pitch</span> to final invoice.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-          Aura is the open-source project OS. Tables, boards, canvases, timelines, meetings AI —
-          all in one place. Self-host it, or use ours. Bring your own OpenRouter key and pay only
-          for the AI you actually use.
+          Aura is the open-source operating system for agencies and software delivery teams.
+          Pipeline, projects, sprints, meetings AI, financials, and client portals — one
+          platform replacing Jira, Notion, Linear, HubSpot, and Fathom.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button
@@ -127,10 +127,8 @@ function Hero() {
           </Button>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
-          MIT licensed · No credit card · Free forever for solo & self-host
+          MIT licensed · No credit card · Sales → Delivery → Ops in one workspace
         </p>
-
-        
       </div>
     </section>
   );
