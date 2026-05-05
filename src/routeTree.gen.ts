@@ -47,6 +47,7 @@ import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$proje
 import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
+import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -238,6 +239,12 @@ const AppPProjectIdFinancialsRoute = AppPProjectIdFinancialsRouteImport.update({
   path: '/financials',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdChangeOrdersRoute =
+  AppPProjectIdChangeOrdersRouteImport.update({
+    id: '/change-orders',
+    path: '/change-orders',
+    getParentRoute: () => AppPProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -311,6 +319,7 @@ export interface FileRoutesByTo {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -352,6 +361,7 @@ export interface FileRoutesById {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings/'
+    | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings'
+    | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -472,6 +484,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/resources'
     | '/app/settings/'
+    | '/app/p/$projectId/change-orders'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
@@ -762,6 +775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdFinancialsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/change-orders': {
+      id: '/app/p/$projectId/change-orders'
+      path: '/change-orders'
+      fullPath: '/app/p/$projectId/change-orders'
+      preLoaderRoute: typeof AppPProjectIdChangeOrdersRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
   }
 }
 
@@ -806,6 +826,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 )
 
 interface AppPProjectIdRouteChildren {
+  AppPProjectIdChangeOrdersRoute: typeof AppPProjectIdChangeOrdersRoute
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
   AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
@@ -814,6 +835,7 @@ interface AppPProjectIdRouteChildren {
 }
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
+  AppPProjectIdChangeOrdersRoute: AppPProjectIdChangeOrdersRoute,
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
   AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
