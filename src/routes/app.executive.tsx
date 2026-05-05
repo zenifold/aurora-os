@@ -7,7 +7,6 @@ import { useProjects } from "@/hooks/use-projects";
 import { Badge } from "@/components/ui/badge";
 import { TIER_COLORS, TIER_LABELS } from "@/lib/escalation-types";
 import {
-  ArrowDownRight,
   ArrowUpRight,
   Briefcase,
   AlertTriangle,
@@ -402,5 +401,3 @@ function HealthDot({ health }: { health?: string }) {
     />
   );
 }
-// trigger ArrowDownRight import retention
-void ArrowDownRight;

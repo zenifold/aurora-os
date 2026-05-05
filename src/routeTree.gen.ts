@@ -32,6 +32,7 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
+import { Route as AppExecutiveRouteImport } from './routes/app.executive'
 import { Route as AppEscalationsRouteImport } from './routes/app.escalations'
 import { Route as AppDeliveryRouteImport } from './routes/app.delivery'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
@@ -179,6 +180,11 @@ const AppMyTasksRoute = AppMyTasksRouteImport.update({
 const AppMeetingsRoute = AppMeetingsRouteImport.update({
   id: '/meetings',
   path: '/meetings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExecutiveRoute = AppExecutiveRouteImport.update({
+  id: '/executive',
+  path: '/executive',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEscalationsRoute = AppEscalationsRouteImport.update({
@@ -369,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -426,6 +433,7 @@ export interface FileRoutesByTo {
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -484,6 +492,7 @@ export interface FileRoutesById {
   '/app/crm': typeof AppCrmRoute
   '/app/delivery': typeof AppDeliveryRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
+  '/app/executive': typeof AppExecutiveRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
@@ -544,6 +553,7 @@ export interface FileRouteTypes {
     | '/app/crm'
     | '/app/delivery'
     | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -601,6 +611,7 @@ export interface FileRouteTypes {
     | '/app/crm'
     | '/app/delivery'
     | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/app/crm'
     | '/app/delivery'
     | '/app/escalations'
+    | '/app/executive'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
@@ -880,6 +892,13 @@ declare module '@tanstack/react-router' {
       path: '/meetings'
       fullPath: '/app/meetings'
       preLoaderRoute: typeof AppMeetingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/executive': {
+      id: '/app/executive'
+      path: '/executive'
+      fullPath: '/app/executive'
+      preLoaderRoute: typeof AppExecutiveRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/escalations': {
@@ -1203,6 +1222,7 @@ interface AppRouteChildren {
   AppCrmRoute: typeof AppCrmRoute
   AppDeliveryRoute: typeof AppDeliveryRoute
   AppEscalationsRoute: typeof AppEscalationsRouteWithChildren
+  AppExecutiveRoute: typeof AppExecutiveRoute
   AppMeetingsRoute: typeof AppMeetingsRouteWithChildren
   AppMyTasksRoute: typeof AppMyTasksRoute
   AppNotesRoute: typeof AppNotesRoute
@@ -1223,6 +1243,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCrmRoute: AppCrmRoute,
   AppDeliveryRoute: AppDeliveryRoute,
   AppEscalationsRoute: AppEscalationsRouteWithChildren,
+  AppExecutiveRoute: AppExecutiveRoute,
   AppMeetingsRoute: AppMeetingsRouteWithChildren,
   AppMyTasksRoute: AppMyTasksRoute,
   AppNotesRoute: AppNotesRoute,
