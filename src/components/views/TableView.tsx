@@ -298,7 +298,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
               <>
                 {groupBy && (
                   <tr key={`g-${key}`}>
-                    <td colSpan={1 + visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <td colSpan={visibleColCount} className="bg-muted/30 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       {groupBy === "status"
                         ? STATUS_OPTIONS.find((s) => s.value === key)?.label ?? key
                         : key === "__none__" ? "Empty" : key} · {list.length}
