@@ -155,7 +155,7 @@ function ProjectPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border px-4 py-3 lg:px-6 lg:py-4">
-        {(division || parentFolder) && (
+        {(division || folderChain.length > 0) && (
           <div className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
             {division && (
               <>
@@ -163,13 +163,21 @@ function ProjectPage() {
                 <ChevronRight className="h-3 w-3" />
               </>
             )}
-            {parentFolder && (
-              <>
-                <Link to="/app/f/$folderId" params={{ folderId: parentFolder.id }} className="hover:text-foreground">{parentFolder.name}</Link>
+            {folderChain.map((c) => (
+              <span key={c.id} className="flex items-center gap-1">
+                <Link to="/app/f/$folderId" params={{ folderId: c.id }} className="hover:text-foreground">{c.name}</Link>
                 <ChevronRight className="h-3 w-3" />
-              </>
-            )}
+              </span>
+            ))}
             <span className="text-foreground">{project.name}</span>
+            <button
+              type="button"
+              onClick={() => setMoveOpen(true)}
+              className="ml-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              title="Move to folder"
+            >
+              <Move className="h-3 w-3" /> Move
+            </button>
           </div>
         )}
         <div className="flex items-center gap-3">
