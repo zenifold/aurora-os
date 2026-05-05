@@ -165,7 +165,7 @@ export function MarketingFooter() {
 
 type FooterLink = {
   label: string;
-  to: "/features" | "/how-it-works" | "/pricing" | "/login" | "/signup" | "/privacy" | "/terms";
+  to: "/features" | "/how-it-works" | "/pricing" | "/login" | "/signup" | "/privacy" | "/terms" | "/docs/self-host";
 };
 type ExternalLink = { label: string; href: string };
 
