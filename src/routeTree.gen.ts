@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -40,6 +43,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -48,6 +56,16 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -164,8 +182,11 @@ const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -190,8 +211,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -217,8 +241,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/features': typeof FeaturesRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/signup': typeof SignupRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
@@ -246,8 +273,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/features'
+    | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/pricing'
     | '/signup'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -272,8 +302,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/features'
+    | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/pricing'
     | '/signup'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -298,8 +331,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/features'
+    | '/how-it-works'
     | '/login'
     | '/onboarding'
+    | '/pricing'
     | '/signup'
     | '/app/meetings'
     | '/app/my-tasks'
@@ -326,8 +362,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  FeaturesRoute: typeof FeaturesRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PricingRoute: typeof PricingRoute
   SignupRoute: typeof SignupRoute
   InviteTokenRoute: typeof InviteTokenRoute
 }
@@ -339,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -353,6 +399,20 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -591,8 +651,11 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  FeaturesRoute: FeaturesRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PricingRoute: PricingRoute,
   SignupRoute: SignupRoute,
   InviteTokenRoute: InviteTokenRoute,
 }
