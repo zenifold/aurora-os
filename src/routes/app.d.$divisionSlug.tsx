@@ -54,7 +54,7 @@ function DeliveryOverview({ division }: { division: Division }) {
   const divisionProjects = projects.filter((p) => p.division_id === division.id);
   const rootFolders = folders.filter((f) => !f.parent_id);
   const clientFolders = rootFolders.filter((f) => f.folder_type === "client" || f.folder_type === "portfolio");
-  const atRisk = divisionProjects.filter((p) => p.health === "at_risk" || p.health === "off_track");
+  const atRisk = divisionProjects.filter((p) => p.health === "at_risk" || p.health === "critical");
 
   return (
     <div className="flex h-full flex-col overflow-y-auto">
