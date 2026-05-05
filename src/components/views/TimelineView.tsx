@@ -84,12 +84,37 @@ function readEffort(task: Task, effortFieldId: string | null): EffortValue | nul
   return { amount: v.amount, unit };
 }
 
+interface ScenarioSnapshot {
+  id: string;
+  name: string;
+  state: ScenarioState;
+  savedAt: string;
+}
+
+function snapshotsKey(projectId: string) {
+  return `aura.scenarios.${projectId}`;
+}
+
+function loadSnapshots(projectId: string): ScenarioSnapshot[] {
+  try {
+    const raw = localStorage.getItem(snapshotsKey(projectId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [zoom, setZoom] = useState<Zoom>("week");
   const [colorBy, setColorBy] = useState<ColorBy>("priority");
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
   const [scenario, setScenario] = useState<ScenarioState>(DEFAULT_SCENARIO);
   const [showScenario, setShowScenario] = useState(false);
+  const [snapshots, setSnapshots] = useState<ScenarioSnapshot[]>(() => loadSnapshots(projectId));
+  const [activeSnapshotId, setActiveSnapshotId] = useState<string | null>(null);
+  const [newSnapshotName, setNewSnapshotName] = useState("");
   const [drag, setDrag] = useState<{
     id: string;
     mode: "move" | "resize-start" | "resize-end";
