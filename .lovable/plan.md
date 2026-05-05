@@ -19,8 +19,9 @@
 3. Resources v2 — per-task estimates feeding allocation, smart auto-assign by skill
 4. ✅ **Milestones v1** — schema + timeline view with delivery/payment/gate/review types
 5. Milestones v2 — Gantt-style chart, dependencies, auto status from sprint/task progress
-5. Delivery health score (weighted, radar chart)
-6. (deferred) Client portal
+6. Financial tracking & margins (project_financials dashboard, time-logs → revenue)
+7. Delivery health score (weighted, radar chart)
+8. (deferred) Client portal
 
 ## Other
 4. **Comparison page** ("Aura vs Notion / Asana / Monday")
