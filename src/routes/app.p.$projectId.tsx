@@ -23,7 +23,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { applyFiltersAndSorts } from "@/lib/filtering";
 import type { Filter, Sort, View, ViewConfig } from "@/lib/types";
-import { Loader2, Settings, UserPlus, Wand2, Mic, StickyNote, Target, Flag, DollarSign, Activity, FileEdit } from "lucide-react";
+import { Loader2, Settings, UserPlus, Wand2, Mic, StickyNote, Target, Flag, DollarSign, Activity, FileEdit, UsersRound, FileText } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useIsMobile } from "@/hooks/use-mobile-breakpoint";
 import { useIsWorkspaceOwner } from "@/hooks/use-workspace-role";
