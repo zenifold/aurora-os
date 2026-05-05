@@ -143,11 +143,21 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
               dwellTimes={dwellTimes}
               colorFor={(t) => colorForTask(t, viewConfig, statusColorMap)}
               onAdd={(title) => create.mutate({ title, status: s.id })}
-              onTaskClick={onTaskClick}
+              onTaskClick={(id, e) => {
+                if (e && (e.metaKey || e.ctrlKey || e.shiftKey)) {
+                  toggleSelect(id, "additive");
+                } else if (selected.size > 0) {
+                  toggleSelect(id, "additive");
+                } else {
+                  onTaskClick(id);
+                }
+              }}
+              selected={selected}
             />
           );
         })}
       </div>
+      <BulkActionBar projectId={projectId} selected={selected} onClear={() => setSelected(new Set())} />
     </DndContext>
   );
 }
