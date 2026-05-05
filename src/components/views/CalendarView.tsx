@@ -167,10 +167,13 @@ export function CalendarView({ projectId, tasks, onTaskClick }: Props) {
                       onDragEnd={() => setDraggingId(null)}
                       onClick={() => onTaskClick(t.id)}
                       title={t.title}
-                      className="flex w-full cursor-pointer items-center gap-1 truncate rounded bg-card px-1.5 py-0.5 text-left text-xs shadow-sm hover:bg-accent"
+                      className="flex w-full cursor-pointer items-center gap-1.5 rounded bg-card px-1.5 py-0.5 text-left text-xs shadow-sm hover:bg-accent"
                       style={{ borderLeft: `3px solid ${color}` }}
                     >
-                      <span className="truncate">{t.title}</span>
+                      <span className="flex-1 truncate">{t.title}</span>
+                      {t.assignee_ids.length > 0 && (
+                        <AssigneeAvatars ids={t.assignee_ids} max={2} size={14} />
+                      )}
                     </div>
                   );
                 })}
