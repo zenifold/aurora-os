@@ -126,6 +126,9 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [preview, setPreview] = useState<Record<string, { start: Date; end: Date }>>({});
   const updateTask = useUpdateTask(projectId);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [cascadeMode, setCascadeMode] = useState(true);
+
+  const { data: edges = [] } = useProjectDependencyEdges(projectId);
 
   const { data: fields = [] } = useCustomFields();
   const effortFields = useMemo(
