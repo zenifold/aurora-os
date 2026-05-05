@@ -161,9 +161,7 @@ function ProjectPage() {
                 <LayoutDashboard className="mr-1.5 h-4 w-4" /> Overview
               </Link>
             </Button>
-            <ProjectActionsMenu projectId={projectId} group="plan" />
-            <ProjectActionsMenu projectId={projectId} group="delivery" />
-            <ProjectActionsMenu projectId={projectId} group="workspace" />
+            <ProjectActionsMenu projectId={projectId} />
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
             </Button>
