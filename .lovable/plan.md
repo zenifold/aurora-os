@@ -20,7 +20,7 @@
 4. ✅ **Milestones v1** — schema + timeline view with delivery/payment/gate/review types
 5. Milestones v2 — Gantt-style chart, dependencies, auto status from sprint/task progress
 6. ✅ **Financials v1** — project_financials table, margin/burn/payment dashboard at /financials
-7. Delivery health score (weighted, radar chart)
+7. ✅ **Delivery health v1** — weighted 5-dimension score with radar chart, flags & suggested actions at /health
 8. (deferred) Client portal
 
 ## Other
