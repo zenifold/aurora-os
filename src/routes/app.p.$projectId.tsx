@@ -69,6 +69,7 @@ function ProjectPage() {
   const [activeViewId, setActiveViewId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [magicOpen, setMagicOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
   const isMobile = useIsMobile();
   const isOwner = useIsWorkspaceOwner();
 
