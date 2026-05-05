@@ -90,6 +90,7 @@ export function TransitionEditorDialog({
   const [buttonLabel, setButtonLabel] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [gates, setGates] = useState<Gate[]>([]);
+  const [actions, setActions] = useState<WorkflowAction[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -97,6 +98,7 @@ export function TransitionEditorDialog({
       setButtonLabel(transition?.button_label ?? "");
       setConfirmation(transition?.confirmation_message ?? "");
       setGates(transition?.gates ?? []);
+      setActions(transition?.actions ?? []);
     }
   }, [open, transition]);
 
