@@ -593,7 +593,7 @@ function Lane({
                     <span className="truncate">#{t.tags[0]}</span>
                   )}
                 </div>
-                <AssigneeAvatars ids={t.assignee_ids ?? []} max={2} size="xs" />
+                <AssigneeAvatars ids={t.assignee_ids ?? []} max={2} size={18} />
               </div>
               {actions && (
                 <div
