@@ -791,6 +791,42 @@ export type Database = {
         }
         Relationships: []
       }
+      project_financials: {
+        Row: {
+          contract_value: number | null
+          created_at: string
+          currency: string
+          default_bill_rate: number | null
+          default_cost_rate: number | null
+          notes: string | null
+          project_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          contract_value?: number | null
+          created_at?: string
+          currency?: string
+          default_bill_rate?: number | null
+          default_cost_rate?: number | null
+          notes?: string | null
+          project_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          contract_value?: number | null
+          created_at?: string
+          currency?: string
+          default_bill_rate?: number | null
+          default_cost_rate?: number | null
+          notes?: string | null
+          project_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           color: string
