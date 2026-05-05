@@ -540,8 +540,15 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
             </Select>
           )}
           <Button
-            variant={showScenario ? "default" : "outline"}
+            variant={cascadeMode ? "default" : "outline"}
             size="sm"
+            onClick={() => setCascadeMode((c) => !c)}
+            className="gap-1.5"
+            title="When ON, dragging a bar shifts all downstream successors by the same amount."
+          >
+            🔗 Cascade {cascadeMode ? "on" : "off"}
+          </Button>
+          <Button
             onClick={() => {
               setShowScenario((s) => !s);
               if (!scenario.enabled) setScenario((s) => ({ ...s, enabled: true }));
