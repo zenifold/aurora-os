@@ -48,6 +48,19 @@ export function KanbanView({ projectId, tasks, viewConfig = {}, onTaskClick }: P
   const guard = useTransitionGuard();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const cardFields = viewConfig.cardFields ?? ["priority", "due_date"];
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const toggleSelect = (id: string, mode: "single" | "additive") => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (mode === "additive") {
+        if (next.has(id)) next.delete(id); else next.add(id);
+      } else {
+        if (next.size === 1 && next.has(id)) next.clear();
+        else { next.clear(); next.add(id); }
+      }
+      return next;
+    });
+  };
   const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
   // Resolve task.status (which may be a name or id) to a workflow status row
   const findStatusForTask = (t: Task) =>
