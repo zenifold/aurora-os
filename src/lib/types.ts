@@ -165,6 +165,27 @@ export interface ViewConfig {
   locked?: boolean;
   /** Canvas view: persisted x/y positions per task id */
   canvasPositions?: Record<string, { x: number; y: number }>;
+  /** Canvas view: sticky notes */
+  canvasNotes?: CanvasNote[];
+  /** Canvas view: links between tasks/notes */
+  canvasLinks?: CanvasLink[];
+}
+
+export interface CanvasNote {
+  id: string;
+  x: number;
+  y: number;
+  w?: number;
+  h?: number;
+  text: string;
+  color?: "yellow" | "pink" | "blue" | "green" | "purple";
+}
+
+export interface CanvasLink {
+  id: string;
+  from: string; // task id or note:<id>
+  to: string;
+  label?: string;
 }
 
 export interface Filter {
