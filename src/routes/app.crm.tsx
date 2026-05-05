@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useDeals, useDealStages, useUpdateDeal, useCreateDeal, useDeleteDeal, useAddDealActivity, useDealActivities } from "@/hooks/use-crm";
-import { formatDealValue, type Deal, type DealStage } from "@/lib/crm-types";
+import { useDeals, useDealStages, useUpdateDeal, useCreateDeal, useDeleteDeal, useAddDealActivity, useDealActivities, useContacts } from "@/hooks/use-crm";
+import { formatDealValue, type Deal, type DealStage, type Contact } from "@/lib/crm-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -245,6 +245,7 @@ function CreateDealDialog({
   trigger?: React.ReactNode;
 }) {
   const create = useCreateDeal();
+  const { data: contacts = [] } = useContacts();
   const firstOpen = stages.find((s) => s.stage_type === "open");
   const [form, setForm] = useState({
     title: "",
@@ -252,6 +253,7 @@ function CreateDealDialog({
     value: "",
     expected_close_date: "",
     description: "",
+    contact_id: "",
   });
 
   const submit = async () => {
@@ -263,9 +265,10 @@ function CreateDealDialog({
       value: form.value ? Number(form.value) : null,
       expected_close_date: form.expected_close_date || null,
       description: form.description.trim() || null,
+      contact_id: form.contact_id || null,
       probability: stage?.default_probability ?? 25,
     });
-    setForm({ title: "", stage_id: firstOpen?.id ?? "", value: "", expected_close_date: "", description: "" });
+    setForm({ title: "", stage_id: firstOpen?.id ?? "", value: "", expected_close_date: "", description: "", contact_id: "" });
     onOpenChange(false);
   };
 
@@ -319,6 +322,20 @@ function CreateDealDialog({
             />
           </div>
           <div className="space-y-2">
+            <Label>Contact</Label>
+            <Select value={form.contact_id || "none"} onValueChange={(v) => setForm({ ...form, contact_id: v === "none" ? "" : v })}>
+              <SelectTrigger><SelectValue placeholder="No contact" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No contact</SelectItem>
+                {contacts.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}{c.company ? ` · ${c.company}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
             <Label>Notes</Label>
             <Textarea
               rows={2}
@@ -356,6 +373,7 @@ function DealDetailDialog({
   const update = useUpdateDeal();
   const remove = useDeleteDeal();
   const { data: activities = [] } = useDealActivities(dealId);
+  const { data: contacts = [] } = useContacts();
   const addActivity = useAddDealActivity(dealId);
   const [note, setNote] = useState("");
   const [handingOff, setHandingOff] = useState(false);
@@ -488,6 +506,24 @@ function DealDetailDialog({
                 }}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Contact</Label>
+            <Select
+              value={deal.contact_id ?? "none"}
+              onValueChange={(v) => update.mutate({ id: deal.id, contact_id: v === "none" ? null : v })}
+            >
+              <SelectTrigger><SelectValue placeholder="No contact" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No contact</SelectItem>
+                {contacts.map((c: Contact) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}{c.company ? ` · ${c.company}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {deal.description && (

@@ -171,7 +171,42 @@ export function useCreateContact() {
       if (error) throw error;
       return data as unknown as Contact;
     },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["contacts", ws?.id] });
+      toast.success("Contact created");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateContact() {
+  const ws = useWorkspaceStore((s) => s.current);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Partial<Contact> & { id: string }) => {
+      const { error } = await supabase
+        .from("contacts" as never)
+        .update(patch as never)
+        .eq("id", id);
+      if (error) throw error;
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["contacts", ws?.id] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteContact() {
+  const ws = useWorkspaceStore((s) => s.current);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("contacts" as never).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["contacts", ws?.id] });
+      toast.success("Contact deleted");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 }
