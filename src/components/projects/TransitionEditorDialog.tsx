@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, ShieldCheck, Lock, Zap } from "lucide-react";
+import { Trash2, ShieldCheck, Lock, Zap } from "lucide-react";
 import type {
   Gate,
   GateType,
