@@ -304,14 +304,137 @@ function ActionItemsView({
   projectId: string | null;
 }) {
   const update = useUpdateActionItem();
+  const { data: agents = [] } = useAiAgents();
+  const ws = useWorkspaceStore((s) => s.current);
+  const { user } = useAuth();
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   if (!items || items.length === 0) {
     return <EmptyHint text="Run analysis to extract action items from the transcript." />;
   }
 
+  const pending = items.filter(
+    (i) => i.status !== "converted" && i.status !== "dismissed" && i.status !== "completed",
+  );
+
+  const assignToAgent = async (item: { id: string; summary: string | null; original_text: string; context_quote: string | null; priority_guess: string | null; due_guess: string | null }, agentId: string) => {
+    if (!ws || !user || !projectId) {
+      toast.error(projectId ? "Sign in again" : "Link this meeting to a project first");
+      return;
+    }
+    try {
+      const { data: existing } = await supabase
+        .from("tasks")
+        .select("position")
+        .eq("project_id", projectId)
+        .order("position", { ascending: false })
+        .limit(1);
+      const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+
+      const { data: task, error } = await supabase
+        .from("tasks")
+        .insert({
+          workspace_id: ws.id,
+          project_id: projectId,
+          title: item.summary ?? item.original_text,
+          status: "todo",
+          priority: (item.priority_guess as "low" | "medium" | "high" | "urgent" | null) ?? "medium",
+          due_date: item.due_guess,
+          position: nextPos,
+          created_by: user.id,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      const { error: aErr } = await supabase.from("ai_task_assignments").insert({
+        workspace_id: ws.id,
+        task_id: task.id,
+        agent_id: agentId,
+        status: "queued",
+        instructions: `From meeting action item: ${item.summary ?? item.original_text}${item.context_quote ? `\n\nContext: "${item.context_quote}"` : ""}`,
+        created_by: user.id,
+      });
+      if (aErr) throw aErr;
+
+      await update.mutateAsync({
+        id: item.id,
+        meeting_id: meetingId,
+        patch: { status: "converted", converted_task_id: task.id, assigned_agent_id: agentId } as never,
+      });
+      toast.success("Routed to AI agent");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to assign");
+    }
+  };
+
+  const convertAllToTasks = async () => {
+    if (!projectId) {
+      toast.error("Link this meeting to a project first");
+      return;
+    }
+    if (!ws || !user) return;
+    setBulkBusy(true);
+    try {
+      let created = 0;
+      for (const item of pending) {
+        const { data: existing } = await supabase
+          .from("tasks")
+          .select("position")
+          .eq("project_id", projectId)
+          .order("position", { ascending: false })
+          .limit(1);
+        const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+        const { data: task, error } = await supabase
+          .from("tasks")
+          .insert({
+            workspace_id: ws.id,
+            project_id: projectId,
+            title: item.summary ?? item.original_text,
+            status: "todo",
+            priority: (item.priority_guess as "low" | "medium" | "high" | "urgent" | null) ?? "medium",
+            due_date: item.due_guess,
+            position: nextPos,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+        if (error) continue;
+        await update.mutateAsync({
+          id: item.id,
+          meeting_id: meetingId,
+          patch: { status: "converted", converted_task_id: task.id } as never,
+        });
+        created++;
+      }
+      toast.success(`Created ${created} task${created === 1 ? "" : "s"}`);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
+      {/* Bulk toolbar */}
+      {pending.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 rounded-md border bg-muted/30 px-2 py-1.5 text-xs">
+          <span className="text-muted-foreground">{pending.length} pending</span>
+          <div className="flex-1" />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 text-xs"
+            onClick={convertAllToTasks}
+            disabled={bulkBusy || !projectId}
+            title={projectId ? "Convert all pending to tasks" : "Link a project first"}
+          >
+            {bulkBusy ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Wand2 className="mr-1 h-3 w-3" />}
+            Convert all
+          </Button>
+        </div>
+      )}
+
       {items.map((item) => (
         <div
           key={item.id}
@@ -345,6 +468,11 @@ function ActionItemsView({
                     {item.priority_guess}
                   </Badge>
                 )}
+                {item.assigned_agent_id && (
+                  <Badge variant="secondary" className="text-[10px] gap-1">
+                    <Bot className="h-2.5 w-2.5" /> AI
+                  </Badge>
+                )}
                 {item.status === "converted" && item.converted_task_id && (
                   <Badge variant="secondary" className="text-[10px] gap-1">
                     <CheckCircle2 className="h-2.5 w-2.5" /> Task created
@@ -356,16 +484,35 @@ function ActionItemsView({
                   "{item.context_quote}"
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-1">
+              <div className="mt-2 flex flex-wrap items-center gap-1">
                 {item.status !== "converted" && item.status !== "completed" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => setConvertingId(item.id)}
-                  >
-                    <Plus className="mr-1 h-3 w-3" /> Convert to task
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setConvertingId(item.id)}
+                    >
+                      <Plus className="mr-1 h-3 w-3" /> Convert to task
+                    </Button>
+                    {agents.length > 0 && (
+                      <Select
+                        onValueChange={(agentId) => assignToAgent(item, agentId)}
+                      >
+                        <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs hover:bg-muted">
+                          <Bot className="h-3 w-3" />
+                          <span>Route to AI</span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agents.map((a) => (
+                            <SelectItem key={a.id} value={a.id} className="text-xs">
+                              {a.avatar_emoji ?? "🤖"} {a.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </>
                 )}
                 {item.status !== "dismissed" && (
                   <Button
