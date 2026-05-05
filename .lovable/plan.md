@@ -15,8 +15,8 @@
 
 ## Next up
 1. **Self-host docs route** (`/docs/self-host`) — clone repo, env, deploy steps
-2. **OpenRouter key onboarding** — first-run modal in app pointing user to add their key in Settings → AI
-3. **GitHub repo link + star CTA** in nav and footer
+2. ✅ ~~OpenRouter key onboarding — first-run modal~~ (shipped)
+3. ✅ ~~GitHub repo link + star CTA in nav and footer~~ (shipped)
 4. **Comparison page** ("Aura vs Notion / Asana / Monday")
 5. **Meetings**: speaker attribution + decision log dedicated tab
 6. **Timeline**: dependency lines (use task_relations) + critical path highlight
