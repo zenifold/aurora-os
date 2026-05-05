@@ -118,8 +118,6 @@ export function CommandPalette() {
           <CommandItem value="action new task quick capture" onSelect={() => go(() => setQuickCaptureOpen(true))}>
             <Plus className="mr-2 h-4 w-4" /> Quick capture
           </CommandItem>
-          
-          </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
