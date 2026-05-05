@@ -56,7 +56,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     if (typeof (indicators as { get?: unknown }).get === "function") {
       return (indicators as Map<string, { blockedBy: number; blocking: number }>).get(id);
     }
-    return (indicators as Record<string, { blockedBy: number; blocking: number }>)[id];
+    return (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[id];
   };
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
