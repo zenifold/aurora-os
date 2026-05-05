@@ -43,6 +43,7 @@ import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
+import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
 
 const TermsRoute = TermsRouteImport.update({
@@ -215,6 +216,11 @@ const AppPProjectIdMilestonesRoute = AppPProjectIdMilestonesRouteImport.update({
   path: '/milestones',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdHealthRoute = AppPProjectIdHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdFinancialsRoute = AppPProjectIdFinancialsRouteImport.update({
   id: '/financials',
   path: '/financials',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
+  '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -289,6 +296,7 @@ export interface FileRoutesByTo {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings': typeof AppSettingsIndexRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
+  '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/app/settings/resources': typeof AppSettingsResourcesRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
+  '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/settings/'
     | '/app/p/$projectId/financials'
+    | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/settings'
     | '/app/p/$projectId/financials'
+    | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/app/settings/resources'
     | '/app/settings/'
     | '/app/p/$projectId/financials'
+    | '/app/p/$projectId/health'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
@@ -698,6 +710,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdMilestonesRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/health': {
+      id: '/app/p/$projectId/health'
+      path: '/health'
+      fullPath: '/app/p/$projectId/health'
+      preLoaderRoute: typeof AppPProjectIdHealthRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/financials': {
       id: '/app/p/$projectId/financials'
       path: '/financials'
@@ -750,6 +769,7 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 
 interface AppPProjectIdRouteChildren {
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
+  AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
   AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
   AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
   AppPProjectIdSprintsRoute: typeof AppPProjectIdSprintsRoute
@@ -757,6 +777,7 @@ interface AppPProjectIdRouteChildren {
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
+  AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
   AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
   AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
   AppPProjectIdSprintsRoute: AppPProjectIdSprintsRoute,
