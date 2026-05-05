@@ -55,6 +55,7 @@ import { Route as AppPProjectIdClientsRouteImport } from './routes/app.p.$projec
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
 import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
+import { Route as ApiPublicPortalTokenUploadRouteImport } from './routes/api/public/portal.$token.upload'
 import { Route as ApiPublicPortalTokenSubmitRouteImport } from './routes/api/public/portal.$token.submit'
 import { Route as ApiPublicPortalTokenDeliverablesRouteImport } from './routes/api/public/portal.$token.deliverables'
 
@@ -290,6 +291,12 @@ const ApiPublicPortalTokenRoute = ApiPublicPortalTokenRouteImport.update({
   path: '/api/public/portal/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPortalTokenUploadRoute =
+  ApiPublicPortalTokenUploadRouteImport.update({
+    id: '/upload',
+    path: '/upload',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
 const ApiPublicPortalTokenSubmitRoute =
   ApiPublicPortalTokenSubmitRouteImport.update({
     id: '/submit',
@@ -352,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
+  '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -400,6 +408,7 @@ export interface FileRoutesByTo {
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
+  '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -451,6 +460,7 @@ export interface FileRoutesById {
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
+  '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -503,6 +513,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
     | '/api/public/portal/$token/submit'
+    | '/api/public/portal/$token/upload'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -551,6 +562,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
     | '/api/public/portal/$token/submit'
+    | '/api/public/portal/$token/upload'
   id:
     | '__root__'
     | '/'
@@ -601,6 +613,7 @@ export interface FileRouteTypes {
     | '/app/p/$projectId/sprints'
     | '/api/public/portal/$token/deliverables'
     | '/api/public/portal/$token/submit'
+    | '/api/public/portal/$token/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -944,6 +957,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPortalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/portal/$token/upload': {
+      id: '/api/public/portal/$token/upload'
+      path: '/upload'
+      fullPath: '/api/public/portal/$token/upload'
+      preLoaderRoute: typeof ApiPublicPortalTokenUploadRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
     '/api/public/portal/$token/submit': {
       id: '/api/public/portal/$token/submit'
       path: '/submit'
@@ -1066,11 +1086,13 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 interface ApiPublicPortalTokenRouteChildren {
   ApiPublicPortalTokenDeliverablesRoute: typeof ApiPublicPortalTokenDeliverablesRoute
   ApiPublicPortalTokenSubmitRoute: typeof ApiPublicPortalTokenSubmitRoute
+  ApiPublicPortalTokenUploadRoute: typeof ApiPublicPortalTokenUploadRoute
 }
 
 const ApiPublicPortalTokenRouteChildren: ApiPublicPortalTokenRouteChildren = {
   ApiPublicPortalTokenDeliverablesRoute: ApiPublicPortalTokenDeliverablesRoute,
   ApiPublicPortalTokenSubmitRoute: ApiPublicPortalTokenSubmitRoute,
+  ApiPublicPortalTokenUploadRoute: ApiPublicPortalTokenUploadRoute,
 }
 
 const ApiPublicPortalTokenRouteWithChildren =
