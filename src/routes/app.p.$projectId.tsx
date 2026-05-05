@@ -10,6 +10,7 @@ import { KanbanView } from "@/components/views/KanbanView";
 import { CanvasView } from "@/components/views/CanvasView";
 import { CalendarView } from "@/components/views/CalendarView";
 import { TimelineView } from "@/components/views/TimelineView";
+import { SprintView } from "@/components/views/SprintView";
 import { MobileTaskList } from "@/components/views/MobileTaskList";
 import { ViewTabs } from "@/components/views/ViewTabs";
 import { ViewOptions } from "@/components/views/ViewOptions";
