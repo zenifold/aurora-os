@@ -332,8 +332,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
 
           {/* Add row */}
           <tr className="border-b border-border">
-            <td className="sticky-col px-3 py-1.5" />
-            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: widths.select }}>
+            <td className="sticky-col border-r border-border/60 px-3 py-1.5" style={{ left: 0 }}>
               {adding ? (
                 <Input
                   autoFocus
