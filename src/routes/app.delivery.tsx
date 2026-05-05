@@ -19,7 +19,9 @@ export const Route = createFileRoute("/app/delivery")({
   component: DeliveryPage,
 });
 
-const PHASE_ORDER = PROJECT_PHASES.map((p) => p.value).filter((p) => p !== "on_hold");
+const PHASE_ORDER: ProjectPhase[] = PROJECT_PHASES.map((p) => p.value).filter(
+  (p) => p !== "on_hold",
+);
 
 function fmt$(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
