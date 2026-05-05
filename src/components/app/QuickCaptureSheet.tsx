@@ -298,6 +298,12 @@ export function QuickCaptureSheet() {
             </div>
           )}
 
+          {/* Assignees */}
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Assignees</p>
+            <AssigneePicker value={assigneeIds} onChange={setAssigneeIds} />
+          </div>
+
           {/* Parsed chips */}
           {(effectiveDate || parsed.tags.length > 0 || parsed.projectName) && (
             <div className="flex flex-wrap gap-1.5">
