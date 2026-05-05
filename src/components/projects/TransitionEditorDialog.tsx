@@ -150,9 +150,41 @@ export function TransitionEditorDialog({
       button_label: buttonLabel.trim() || null,
       confirmation_message: confirmation.trim() || null,
       gates,
+      actions,
     });
     onClose();
   };
+
+  const addAction = (type: WorkflowAction["type"] | "post_comment") => {
+    const id = crypto.randomUUID();
+    let cfg: Record<string, unknown> = {};
+    switch (type) {
+      case "notify":
+        cfg = { assignees: true, title: "Status changed: {task.title}", body: "Moved {from} → {to}" };
+        break;
+      case "set_field":
+        cfg = { field: "priority", value: "high", mode: "set" };
+        break;
+      case "create_subtask":
+        cfg = { title: "Follow-up for {task.title}" };
+        break;
+      case "webhook":
+        cfg = { url: "" };
+        break;
+      case "post_comment":
+        cfg = { body: "Auto: moved {from} → {to}" };
+        break;
+    }
+    setActions((p) => [...p, { id, type: type as WorkflowAction["type"], config: cfg }]);
+  };
+
+  const updateAction = (id: string, patch: Partial<WorkflowAction["config"]>) => {
+    setActions((p) =>
+      p.map((a) => (a.id === id ? { ...a, config: { ...a.config, ...patch } } : a)),
+    );
+  };
+
+  const removeAction = (id: string) => setActions((p) => p.filter((a) => a.id !== id));
 
   const onDelete = async () => {
     if (!transition) return;
