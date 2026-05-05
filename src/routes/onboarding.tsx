@@ -381,6 +381,60 @@ function Onboarding() {
           </div>
         )}
 
+        {step === "preset" && (
+          <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
+            <button
+              onClick={() => setStep("name")}
+              className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <h1 className="text-2xl font-semibold">Pick a workspace preset</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              We'll seed divisions and folders to match how your team works. You can change everything later.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {WORKSPACE_PRESETS.map((p) => {
+                const Icon = p.icon;
+                const active = selectedPreset === p.key;
+                return (
+                  <button
+                    key={p.key}
+                    onClick={() => setSelectedPreset(p.key)}
+                    className={`group relative rounded-xl border bg-background p-4 text-left transition-all hover:shadow-pop ${
+                      active
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <div
+                      className="flex h-9 w-9 items-center justify-center rounded-lg"
+                      style={{ backgroundColor: `${p.accentColor}22`, color: p.accentColor }}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <h3 className="mt-3 text-sm font-semibold">{p.name}</h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{p.tagline}</p>
+                    <p className="mt-2 text-[11px] leading-snug text-muted-foreground/80">
+                      {p.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={() => setStep("theme")}
+                className="bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
+              >
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {step === "theme" && (
           <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
             <button
