@@ -31,7 +31,6 @@ export function CommandPalette() {
   const open = useUIStore((s) => s.commandOpen);
   const setOpen = useUIStore((s) => s.setCommandOpen);
   const setSelectedTaskId = useUIStore((s) => s.setSelectedTaskId);
-  const setMagicAddOpen = useUIStore((s) => s.setMagicAddOpen);
   const setQuickCaptureOpen = useUIStore((s) => s.setQuickCaptureOpen);
   const ws = useWorkspaceStore((s) => s.current);
   const navigate = useNavigate();
