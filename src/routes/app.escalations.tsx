@@ -3,6 +3,7 @@ import { useEscalations } from "@/hooks/use-escalations";
 import { useProjects } from "@/hooks/use-projects";
 import { TIER_COLORS, TIER_LABELS } from "@/lib/escalation-types";
 import { Badge } from "@/components/ui/badge";
+import { ListSkeleton } from "@/components/ui/loading-scaffolds";
 import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/app/escalations")({
