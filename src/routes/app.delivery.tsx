@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useDeliverySnapshot, type DeliveryProjectStats } from "@/hooks/use-delivery";
-import { PROJECT_HEALTH, CONTRACT_TYPES, PROJECT_PHASES } from "@/lib/types";
+import { PROJECT_HEALTH, CONTRACT_TYPES, PROJECT_PHASES, type ProjectPhase } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,9 @@ export const Route = createFileRoute("/app/delivery")({
   component: DeliveryPage,
 });
 
-const PHASE_ORDER = PROJECT_PHASES.map((p) => p.value).filter((p) => p !== "on_hold");
+const PHASE_ORDER: ProjectPhase[] = PROJECT_PHASES.map((p) => p.value).filter(
+  (p) => p !== "on_hold",
+);
 
 function fmt$(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;

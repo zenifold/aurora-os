@@ -4,6 +4,7 @@ import { useProject } from "@/hooks/use-projects";
 import { StatusWorkflowBuilder } from "@/components/projects/StatusWorkflowBuilder";
 import { TransitionMatrix } from "@/components/projects/TransitionMatrix";
 import { WorkflowTemplatePicker } from "@/components/projects/WorkflowTemplatePicker";
+import { ClientEngagementSettings } from "@/components/projects/ClientEngagementSettings";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/app/p/$projectId/settings")({
@@ -31,11 +32,22 @@ function ProjectSettingsPage() {
         <WorkflowTemplatePicker projectId={projectId} />
       </div>
 
-      <Tabs defaultValue="statuses" className="mt-6">
+      <Tabs defaultValue="engagement" className="mt-6">
         <TabsList>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
           <TabsTrigger value="statuses">Statuses</TabsTrigger>
           <TabsTrigger value="transitions">Transitions</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="engagement" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
+            {project ? (
+              <ClientEngagementSettings project={project} />
+            ) : (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            )}
+          </div>
+        </TabsContent>
 
         <TabsContent value="statuses" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 sm:p-6">

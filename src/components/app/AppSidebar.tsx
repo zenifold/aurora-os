@@ -229,6 +229,7 @@ export function AppSidebar() {
       <nav className="space-y-0.5 px-2 py-3">
         <NavItem to="/app" icon={Folder} active={path === "/app"}>Dashboard</NavItem>
         <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
+        <NavItem to="/app/delivery" icon={Briefcase} active={path.startsWith("/app/delivery")}>Delivery</NavItem>
         <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
         <NavItem to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")}>Meetings</NavItem>
         {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
