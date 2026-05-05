@@ -176,6 +176,7 @@ function Column({
   colorFor,
   onAdd,
   onTaskClick,
+  selected,
 }: {
   id: string;
   title: string;
@@ -189,7 +190,8 @@ function Column({
   dwellTimes?: Map<string, number>;
   colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
-  onTaskClick: (id: string) => void;
+  onTaskClick: (id: string, e?: React.MouseEvent) => void;
+  selected: Set<string>;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const [adding, setAdding] = useState(false);
