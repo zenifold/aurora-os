@@ -33,6 +33,7 @@ import { TaskAiPanel } from "./TaskAiPanel";
 import { TaskRelationsSection } from "./TaskRelationsSection";
 import { ApprovalsPanel } from "./ApprovalsPanel";
 import { StatusHistoryTimeline } from "./StatusHistoryTimeline";
+import { ClientDeliverableSection } from "./ClientDeliverableSection";
 import { Sparkles } from "lucide-react";
 import { PresenceStack } from "@/components/app/PresenceStack";
 import { usePresence } from "@/hooks/use-presence";
