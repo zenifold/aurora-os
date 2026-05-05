@@ -35,20 +35,12 @@ export function useProjectDependencyEdges(projectId: string | undefined) {
         .or(`source_task_id.in.(${ids.join(",")}),target_task_id.in.(${ids.join(",")})`);
       if (rErr) throw rErr;
 
-      const edges: DependencyEdge[] = (rels ?? []).map(
-        (r: {
-          id: string;
-          source_task_id: string;
-          target_task_id: string;
-          relation_type: RelationType;
-          lag_days: number | null;
-        }) => {
-          // Normalize "blocked_by" so from = predecessor
-          const from = r.relation_type === "blocks" ? r.source_task_id : r.target_task_id;
-          const to = r.relation_type === "blocks" ? r.target_task_id : r.source_task_id;
-          return { id: r.id, from, to, lagDays: r.lag_days ?? 0 };
-        },
-      );
+      const edges: DependencyEdge[] = (rels ?? []).map((r) => {
+        const rt = r.relation_type as RelationType;
+        const from = rt === "blocks" ? r.source_task_id : r.target_task_id;
+        const to = rt === "blocks" ? r.target_task_id : r.source_task_id;
+        return { id: r.id, from, to, lagDays: r.lag_days ?? 0 };
+      });
       // Dedupe identical from->to
       const seen = new Map<string, DependencyEdge>();
       for (const e of edges) {
