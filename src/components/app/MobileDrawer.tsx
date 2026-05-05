@@ -24,6 +24,7 @@ import {
   CalendarDays,
   Star,
   Sparkles,
+  StickyNote,
 } from "lucide-react";
 
 export function MobileDrawer() {
@@ -91,6 +92,7 @@ export function MobileDrawer() {
         <nav className="space-y-0.5 px-2 py-3">
           <DrawerNav onNavigate={close} to="/app" icon={CalendarDays} label="Today" />
           <DrawerNav onNavigate={close} to="/app/my-tasks" icon={Inbox} label="My tasks" />
+          <DrawerNav onNavigate={close} to="/app/notes" icon={StickyNote} label="Notes" />
           <DrawerNav onNavigate={close} to="/app/notifications" icon={Star} label="Notifications" />
         </nav>
 
@@ -169,7 +171,7 @@ function DrawerNav({
   label,
   onNavigate,
 }: {
-  to: "/app" | "/app/my-tasks" | "/app/notifications";
+  to: "/app" | "/app/my-tasks" | "/app/notifications" | "/app/notes";
   icon: typeof Folder;
   label: string;
   onNavigate: () => void;
