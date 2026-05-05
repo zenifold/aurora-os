@@ -71,7 +71,9 @@ function Landing() {
       <MarketingHeader />
       <main>
         <Hero />
-        <ValueBar />
+        <LifecycleStrip />
+        <ReplacesBar />
+        <LifecycleShowcase />
         <ViewsShowcase />
         <CapabilitiesShowcase />
         <Manifesto />
