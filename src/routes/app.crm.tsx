@@ -389,24 +389,46 @@ function DealDetailDialog({
     }
     setHandingOff(true);
     try {
-      // Create project in delivery workspace
+      const targetWs = ws.linked_delivery_workspace_id;
+      // Look up linked contact for client name
+      let clientName: string | null = null;
+      if (deal.contact_id) {
+        const { data: contact } = await supabase
+          .from("contacts" as never)
+          .select("company,name")
+          .eq("id", deal.contact_id)
+          .maybeSingle();
+        const c = contact as { company?: string | null; name?: string | null } | null;
+        clientName = c?.company || c?.name || null;
+      }
+      const startDate = new Date().toISOString().slice(0, 10);
+      const targetEnd = deal.expected_close_date;
+
+      // 1. Create project (client project, seeded from proposal)
       const { data: proj, error: pErr } = await supabase
         .from("projects")
         .insert({
-          workspace_id: ws.linked_delivery_workspace_id,
+          workspace_id: targetWs,
           name: deal.title,
           color: "#10b981",
           icon: "rocket",
           created_by: user.id,
-          description: deal.description ?? `Handed off from CRM deal • ${formatDealValue(deal.value, deal.currency)}`,
+          description: deal.description ?? `Auto-created from sales proposal • ${formatDealValue(deal.value, deal.currency)}`,
+          is_client_project: !!clientName,
+          client_name: clientName,
+          phase: "discovery",
+          health: "on_track",
+          contract_type: "tm",
+          start_date: startDate,
+          target_end_date: targetEnd,
         })
         .select()
         .single();
       if (pErr) throw pErr;
 
-      // Default view + financials seed
+      // 2. Default view
       await supabase.from("views").insert({
-        workspace_id: ws.linked_delivery_workspace_id,
+        workspace_id: targetWs,
         project_id: proj.id,
         name: "All tasks",
         view_type: "table",
@@ -417,16 +439,52 @@ function DealDetailDialog({
         created_by: user.id,
       });
 
+      // 3. Financials seed
       if (deal.value) {
         await supabase.from("project_financials" as never).insert({
           project_id: proj.id,
-          workspace_id: ws.linked_delivery_workspace_id,
+          workspace_id: targetWs,
           contract_value: deal.value,
           currency: deal.currency,
         } as never);
       }
 
-      // Mark deal handed off
+      // 4. Auto-create kickoff milestone + tasks
+      if (targetEnd) {
+        await supabase.from("milestones" as never).insert({
+          workspace_id: targetWs,
+          project_id: proj.id,
+          name: "Kickoff complete",
+          milestone_type: "delivery",
+          status: "upcoming",
+          target_date: startDate,
+          order_index: 0,
+          created_by: user.id,
+        } as never);
+      }
+      const kickoffTasks = [
+        "Internal kickoff meeting",
+        "Client kickoff meeting",
+        "Set up project tools / access",
+        "Confirm resource allocations",
+        "Baseline plan in timeline",
+      ];
+      for (let i = 0; i < kickoffTasks.length; i++) {
+        await supabase.from("tasks").insert({
+          workspace_id: targetWs,
+          project_id: proj.id,
+          title: kickoffTasks[i],
+          status: "todo",
+          priority: "high",
+          assignee_ids: [],
+          custom_values: {},
+          tags: ["kickoff"],
+          position: i,
+          created_by: user.id,
+        });
+      }
+
+      // 5. Mark deal handed off
       await update.mutateAsync({
         id: deal.id,
         handed_off_project_id: proj.id,
@@ -435,11 +493,11 @@ function DealDetailDialog({
 
       await addActivity.mutateAsync({
         activity_type: "system",
-        content: `Handed off to delivery — project created`,
-        metadata: { project_id: proj.id },
+        content: `Auto-converted to delivery project — ${kickoffTasks.length} kickoff tasks created`,
+        metadata: { project_id: proj.id, client: clientName },
       });
 
-      toast.success("Project created in delivery workspace");
+      toast.success("Project created with kickoff plan");
       onOpenChange(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Handoff failed");
