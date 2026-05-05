@@ -1108,6 +1108,84 @@ export type Database = {
         }
         Relationships: []
       }
+      project_documents: {
+        Row: {
+          contract_value: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          document_type: string
+          effective_date: string | null
+          expiration_date: string | null
+          file_path: string
+          file_size_bytes: number | null
+          id: string
+          mime_type: string | null
+          name: string
+          previous_version_id: string | null
+          project_id: string | null
+          requires_nda: boolean
+          signature_status: string
+          signed_at: string | null
+          signed_by: string | null
+          updated_at: string
+          uploaded_by: string | null
+          version: number
+          visibility: string
+          workspace_id: string
+        }
+        Insert: {
+          contract_value?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          document_type?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          file_path: string
+          file_size_bytes?: number | null
+          id?: string
+          mime_type?: string | null
+          name: string
+          previous_version_id?: string | null
+          project_id?: string | null
+          requires_nda?: boolean
+          signature_status?: string
+          signed_at?: string | null
+          signed_by?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+          visibility?: string
+          workspace_id: string
+        }
+        Update: {
+          contract_value?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          document_type?: string
+          effective_date?: string | null
+          expiration_date?: string | null
+          file_path?: string
+          file_size_bytes?: number | null
+          id?: string
+          mime_type?: string | null
+          name?: string
+          previous_version_id?: string | null
+          project_id?: string | null
+          requires_nda?: boolean
+          signature_status?: string
+          signed_at?: string | null
+          signed_by?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          version?: number
+          visibility?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       project_financials: {
         Row: {
           contract_value: number | null
@@ -1206,6 +1284,213 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      resource_allocations: {
+        Row: {
+          actual_hours_logged: number
+          allocation_type: string
+          bill_rate_override: number | null
+          billable: boolean
+          cost_rate_override: number | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          fixed_hours: number | null
+          id: string
+          notes: string | null
+          percentage: number | null
+          project_id: string
+          resource_id: string | null
+          scheduled_hours: Json | null
+          start_date: string
+          status: string
+          team_member_user_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actual_hours_logged?: number
+          allocation_type?: string
+          bill_rate_override?: number | null
+          billable?: boolean
+          cost_rate_override?: number | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fixed_hours?: number | null
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          project_id: string
+          resource_id?: string | null
+          scheduled_hours?: Json | null
+          start_date: string
+          status?: string
+          team_member_user_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actual_hours_logged?: number
+          allocation_type?: string
+          bill_rate_override?: number | null
+          billable?: boolean
+          cost_rate_override?: number | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fixed_hours?: number | null
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          project_id?: string
+          resource_id?: string | null
+          scheduled_hours?: Json | null
+          start_date?: string
+          status?: string
+          team_member_user_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      resource_unavailability: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          end_date: string
+          hours_per_day: number
+          id: string
+          notes: string | null
+          resource_id: string | null
+          start_date: string
+          team_member_user_id: string | null
+          type: string
+          workspace_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          end_date: string
+          hours_per_day?: number
+          id?: string
+          notes?: string | null
+          resource_id?: string | null
+          start_date: string
+          team_member_user_id?: string | null
+          type?: string
+          workspace_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          end_date?: string
+          hours_per_day?: number
+          id?: string
+          notes?: string | null
+          resource_id?: string | null
+          start_date?: string
+          team_member_user_id?: string | null
+          type?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          avatar_url: string | null
+          bill_rate_amount: number | null
+          bill_rate_currency: string
+          bill_rate_period: string | null
+          billable: boolean
+          cost_rate_amount: number | null
+          cost_rate_currency: string
+          cost_rate_period: string | null
+          created_at: string
+          created_by: string | null
+          daily_capacity_hours: number
+          department: string | null
+          email: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          role: string | null
+          skills: string[]
+          start_date: string | null
+          tags: string[]
+          timezone: string | null
+          type: string
+          updated_at: string
+          user_id: string | null
+          weekly_capacity_hours: number
+          work_schedule: Json
+          workspace_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bill_rate_amount?: number | null
+          bill_rate_currency?: string
+          bill_rate_period?: string | null
+          billable?: boolean
+          cost_rate_amount?: number | null
+          cost_rate_currency?: string
+          cost_rate_period?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_capacity_hours?: number
+          department?: string | null
+          email?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          role?: string | null
+          skills?: string[]
+          start_date?: string | null
+          tags?: string[]
+          timezone?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+          weekly_capacity_hours?: number
+          work_schedule?: Json
+          workspace_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bill_rate_amount?: number | null
+          bill_rate_currency?: string
+          bill_rate_period?: string | null
+          billable?: boolean
+          cost_rate_amount?: number | null
+          cost_rate_currency?: string
+          cost_rate_period?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_capacity_hours?: number
+          department?: string | null
+          email?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          role?: string | null
+          skills?: string[]
+          start_date?: string | null
+          tags?: string[]
+          timezone?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+          weekly_capacity_hours?: number
+          work_schedule?: Json
+          workspace_id?: string
+        }
+        Relationships: []
       }
       sprint_burndown: {
         Row: {
