@@ -873,6 +873,59 @@ export type Database = {
           },
         ]
       }
+      divisions: {
+        Row: {
+          color: string
+          created_at: string
+          created_by: string | null
+          division_type: string
+          icon: string
+          id: string
+          is_default: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          division_type?: string
+          icon?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          created_by?: string | null
+          division_type?: string
+          icon?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "divisions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escalation_rules: {
         Row: {
           actions: Json
@@ -980,6 +1033,97 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: []
+      }
+      folders: {
+        Row: {
+          archived_at: string | null
+          client_company: string | null
+          client_email: string | null
+          color: string | null
+          cover_image: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          division_id: string
+          folder_type: string
+          icon: string | null
+          id: string
+          is_archived: boolean
+          name: string
+          parent_id: string | null
+          portal_enabled: boolean
+          sort_order: number
+          tags: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          client_company?: string | null
+          client_email?: string | null
+          color?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          division_id: string
+          folder_type?: string
+          icon?: string | null
+          id?: string
+          is_archived?: boolean
+          name: string
+          parent_id?: string | null
+          portal_enabled?: boolean
+          sort_order?: number
+          tags?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          client_company?: string | null
+          client_email?: string | null
+          color?: string | null
+          cover_image?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          division_id?: string
+          folder_type?: string
+          icon?: string | null
+          id?: string
+          is_archived?: boolean
+          name?: string
+          parent_id?: string | null
+          portal_enabled?: boolean
+          sort_order?: number
+          tags?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meeting_action_items: {
         Row: {
@@ -1535,6 +1679,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          division_id: string | null
+          folder_id: string | null
           health: string
           icon: string
           id: string
@@ -1558,6 +1704,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          division_id?: string | null
+          folder_id?: string | null
           health?: string
           icon?: string
           id?: string
@@ -1581,6 +1729,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          division_id?: string | null
+          folder_id?: string | null
           health?: string
           icon?: string
           id?: string
@@ -1598,6 +1748,20 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_parent_id_fkey"
             columns: ["parent_id"]

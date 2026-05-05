@@ -1,20 +1,11 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  useDraggable,
-  useDroppable,
-  DragOverlay,
-  type DragEndEvent,
-} from "@dnd-kit/core";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
-import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "@/hooks/use-projects";
+import { useProjects, useCreateProject } from "@/hooks/use-projects";
+import { useDivisions, useFolders, useCreateFolder } from "@/hooks/use-folders";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,32 +17,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  Sparkles,
-  Plus,
-  Folder,
-  Settings,
-  Inbox,
-  ChevronsUpDown,
-  Check,
-  MoreHorizontal,
-  ChevronRight,
-  Trash2,
-  Pencil,
-  StickyNote,
-  Mic,
-  Briefcase,
-  Users,
-  UsersRound,
-  CalendarRange,
+  Sparkles, Plus, Folder, Settings, Inbox, ChevronsUpDown, Check, ChevronRight, ChevronDown,
+  StickyNote, Mic, Briefcase, Users, UsersRound, CalendarRange, FolderOpen,
+  TrendingUp, Settings2, LineChart, AlertTriangle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import type { Division, Folder as FolderRow } from "@/lib/folder-types";
 import type { Project } from "@/lib/types";
+
+const divisionIcon = (slug: string) => {
+  if (slug === "delivery") return Briefcase;
+  if (slug === "ops") return Settings2;
+  if (slug === "sales") return TrendingUp;
+  return Folder;
+};
 
 export function AppSidebar() {
   const ws = useWorkspaceStore((s) => s.current);
@@ -62,22 +41,9 @@ export function AppSidebar() {
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { data: divisions = [] } = useDivisions();
+  const { data: folders = [] } = useFolders();
   const { data: projects = [] } = useProjects();
-  const createProject = useCreateProject();
-
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState("");
-
-  const submitNew = async () => {
-    if (!newName.trim()) {
-      setCreating(false);
-      return;
-    }
-    const p = await createProject.mutateAsync({ name: newName.trim() });
-    setCreating(false);
-    setNewName("");
-    navigate({ to: "/app/p/$projectId", params: { projectId: p.id } });
-  };
 
   const initials = (ws?.name ?? "A").slice(0, 2).toUpperCase();
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "You";
@@ -87,103 +53,49 @@ export function AppSidebar() {
     return (
       <TooltipProvider delayDuration={100}>
         <aside className="flex h-full w-14 shrink-0 flex-col items-center border-r border-sidebar-border bg-sidebar py-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground hover:opacity-90" title={ws?.name}>
-                {initials}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-60">
-              {workspaces.map((w) => (
-                <DropdownMenuItem key={w.id} onClick={() => setCurrent(w)}>
-                  <span className="ml-1 flex-1 truncate">{w.name}</span>
-                  {w.id === ws?.id && <Check className="h-4 w-4" />}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate({ to: "/app/profile" })}>
-                <Settings className="mr-2 h-4 w-4" /> Profile & preferences
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/onboarding" })}>
-                <Plus className="mr-2 h-4 w-4" /> New workspace
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
+          <button
+            onClick={() => navigate({ to: "/app" })}
+            className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground"
+            title={ws?.name}
+          >
+            {initials}
+          </button>
           <nav className="flex flex-col items-center gap-1">
             <IconNav to="/app" icon={Folder} active={path === "/app"} label="Dashboard" />
             <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
+            {divisions.map((d) => {
+              const Icon = divisionIcon(d.slug);
+              return (
+                <Tooltip key={d.id}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/app/d/$divisionSlug"
+                      params={{ divisionSlug: d.slug }}
+                      className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+                        path.startsWith(`/app/d/${d.slug}`) ? "bg-aura-gradient-subtle" : "hover:bg-sidebar-accent/50"
+                      }`}
+                      style={{ color: d.color }}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">{d.name}</TooltipContent>
+                </Tooltip>
+              );
+            })}
             <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
             <IconNav to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")} label="Meetings" />
-            {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
-              <>
-                <IconNav to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")} label="CRM" />
-                <IconNav to="/app/contacts" icon={Users} active={path.startsWith("/app/contacts")} label="Contacts" />
-              </>
-            )}
-            <IconNav to="/app/resources" icon={UsersRound} active={path === "/app/resources"} label="Resources" />
-            <IconNav to="/app/resources/capacity" icon={CalendarRange} active={path.startsWith("/app/resources/capacity")} label="Capacity" />
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
-
-          <div className="mt-2 h-px w-8 bg-sidebar-border" />
-
-          <div className="mt-2 flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto">
-            {projects.filter((p) => !p.parent_id).map((p) => (
-              <Tooltip key={p.id}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/app/p/$projectId"
-                    params={{ projectId: p.id }}
-                    className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
-                      path === `/app/p/${p.id}` ? "bg-aura-gradient-subtle" : "hover:bg-sidebar-accent/50"
-                    }`}
-                  >
-                    <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: p.color }} />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{p.name}</TooltipContent>
-              </Tooltip>
-            ))}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setCreating(true)}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">New project</TooltipContent>
-            </Tooltip>
-            {creating && (
-              <Input
-                autoFocus
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onBlur={submitNew}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submitNew();
-                  if (e.key === "Escape") { setCreating(false); setNewName(""); }
-                }}
-                placeholder="Name"
-                className="h-7 w-12 px-1 text-xs"
-              />
-            )}
-          </div>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => navigate({ to: "/app/profile" })}
-                className="mt-auto flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent/50"
-                aria-label="Profile"
-              >
-                <Avatar className="h-7 w-7">
-                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
-                  <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
-                </Avatar>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">{displayName}</TooltipContent>
-          </Tooltip>
+          <button
+            onClick={() => navigate({ to: "/app/profile" })}
+            className="mt-auto flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent/50"
+          >
+            <Avatar className="h-7 w-7">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
+              <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
+            </Avatar>
+          </button>
         </aside>
       </TooltipProvider>
     );
@@ -225,11 +137,29 @@ export function AppSidebar() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Nav */}
-      <nav className="space-y-0.5 px-2 py-3">
+      {/* Top nav */}
+      <nav className="space-y-0.5 px-2 py-2">
         <NavItem to="/app" icon={Folder} active={path === "/app"}>Dashboard</NavItem>
         <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
-        <NavItem to="/app/delivery" icon={Briefcase} active={path.startsWith("/app/delivery")}>Delivery</NavItem>
+        <NavItem to="/app/executive" icon={LineChart} active={path.startsWith("/app/executive")}>Executive</NavItem>
+        <NavItem to="/app/escalations" icon={AlertTriangle} active={path.startsWith("/app/escalations")}>Escalations</NavItem>
+      </nav>
+
+      {/* Divisions tree */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+        {divisions.map((d) => (
+          <DivisionSection
+            key={d.id}
+            division={d}
+            folders={folders.filter((f) => f.division_id === d.id)}
+            projects={projects.filter((p) => p.division_id === d.id)}
+            currentPath={path}
+          />
+        ))}
+      </div>
+
+      {/* Bottom utility nav */}
+      <nav className="space-y-0.5 border-t border-sidebar-border px-2 py-2">
         <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
         <NavItem to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")}>Meetings</NavItem>
         {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
@@ -243,48 +173,7 @@ export function AppSidebar() {
         <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
       </nav>
 
-      {/* Projects */}
-      <div className="flex items-center justify-between px-3 pb-1 pt-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Projects
-        </span>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setCreating(true)}>
-          <Plus className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        <ProjectTreeDnd projects={projects} currentPath={path} />
-        {creating && (
-          <div className="px-2 py-1">
-            <Input
-              autoFocus
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onBlur={submitNew}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submitNew();
-                if (e.key === "Escape") {
-                  setCreating(false);
-                  setNewName("");
-                }
-              }}
-              placeholder="Project name"
-              className="h-7 text-sm"
-            />
-          </div>
-        )}
-        {projects.length === 0 && !creating && (
-          <button
-            onClick={() => setCreating(true)}
-            className="mt-1 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-sidebar-accent/50"
-          >
-            <Plus className="h-3.5 w-3.5" /> New project
-          </button>
-        )}
-      </div>
-
-      {/* User chip footer */}
+      {/* User chip */}
       <button
         onClick={() => navigate({ to: "/app/profile" })}
         className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/50"
@@ -300,6 +189,171 @@ export function AppSidebar() {
         <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
       </button>
     </aside>
+  );
+}
+
+function DivisionSection({
+  division,
+  folders,
+  projects,
+  currentPath,
+}: {
+  division: Division;
+  folders: FolderRow[];
+  projects: Project[];
+  currentPath: string;
+}) {
+  const isActive = currentPath.startsWith(`/app/d/${division.slug}`)
+    || folders.some((f) => currentPath.includes(`/app/f/${f.id}`))
+    || projects.some((p) => currentPath.includes(`/app/p/${p.id}`));
+  const [open, setOpen] = useState(division.is_default || isActive);
+  const Icon = divisionIcon(division.slug);
+  const createFolder = useCreateFolder();
+  const createProject = useCreateProject();
+  const [adding, setAdding] = useState<null | "folder" | "project">(null);
+  const [name, setName] = useState("");
+
+  // tree by parent
+  const byParent = useMemo(() => {
+    const m = new Map<string | null, FolderRow[]>();
+    for (const f of folders) {
+      const k = f.parent_id ?? null;
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(f);
+    }
+    return m;
+  }, [folders]);
+
+  const submit = async () => {
+    if (!name.trim()) { setAdding(null); setName(""); return; }
+    if (adding === "folder") {
+      await createFolder.mutateAsync({ division_id: division.id, name: name.trim() });
+    } else if (adding === "project") {
+      await createProject.mutateAsync({ name: name.trim() });
+    }
+    setAdding(null);
+    setName("");
+  };
+
+  return (
+    <div className="mt-1">
+      <div className="group flex items-center gap-1 rounded-md px-1 py-1 hover:bg-sidebar-accent/40">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex flex-1 items-center gap-1.5 text-left"
+        >
+          {open ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+          <Icon className="h-3.5 w-3.5" style={{ color: division.color }} />
+          <Link
+            to="/app/d/$divisionSlug"
+            params={{ divisionSlug: division.slug }}
+            className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {division.name}
+          </Link>
+        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100">
+              <Plus className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => setAdding("folder")}>New folder</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setAdding("project")}>New project</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {open && (
+        <div className="ml-3 border-l border-sidebar-border pl-1">
+          {(byParent.get(null) ?? []).map((f) => (
+            <FolderNode key={f.id} folder={f} byParent={byParent} projects={projects.filter((p) => p.folder_id === f.id)} currentPath={currentPath} depth={0} />
+          ))}
+          {projects.filter((p) => !p.folder_id && !p.parent_id).map((p) => (
+            <ProjectLeaf key={p.id} project={p} currentPath={currentPath} />
+          ))}
+          {adding && (
+            <div className="px-1 py-1">
+              <Input
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={submit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submit();
+                  if (e.key === "Escape") { setAdding(null); setName(""); }
+                }}
+                placeholder={adding === "folder" ? "Folder name" : "Project name"}
+                className="h-7 text-sm"
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FolderNode({
+  folder, byParent, projects, currentPath, depth,
+}: {
+  folder: FolderRow;
+  byParent: Map<string | null, FolderRow[]>;
+  projects: Project[];
+  currentPath: string;
+  depth: number;
+}) {
+  const children = byParent.get(folder.id) ?? [];
+  const hasChildren = children.length > 0 || projects.length > 0;
+  const isActive = currentPath.includes(`/app/f/${folder.id}`);
+  const [open, setOpen] = useState(isActive);
+  return (
+    <div>
+      <div className="flex items-center gap-1 rounded-md px-1 py-1 hover:bg-sidebar-accent/40">
+        {hasChildren ? (
+          <button onClick={() => setOpen((v) => !v)} className="text-muted-foreground">
+            {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          </button>
+        ) : (
+          <span className="w-3" />
+        )}
+        {open ? <FolderOpen className="h-3.5 w-3.5 text-muted-foreground" /> : <Folder className="h-3.5 w-3.5 text-muted-foreground" />}
+        <Link
+          to="/app/f/$folderId"
+          params={{ folderId: folder.id }}
+          className={`flex-1 truncate text-sm ${isActive ? "font-medium text-foreground" : "text-foreground/80 hover:text-foreground"}`}
+        >
+          {folder.name}
+        </Link>
+      </div>
+      {open && (
+        <div className="ml-3 border-l border-sidebar-border pl-1">
+          {children.map((c) => (
+            <FolderNode key={c.id} folder={c} byParent={byParent} projects={[]} currentPath={currentPath} depth={depth + 1} />
+          ))}
+          {projects.map((p) => (
+            <ProjectLeaf key={p.id} project={p} currentPath={currentPath} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectLeaf({ project, currentPath }: { project: Project; currentPath: string }) {
+  const isActive = currentPath === `/app/p/${project.id}` || currentPath.startsWith(`/app/p/${project.id}/`);
+  return (
+    <Link
+      to="/app/p/$projectId"
+      params={{ projectId: project.id }}
+      className={`flex items-center gap-1.5 rounded-md px-1 py-1 pl-4 text-sm ${
+        isActive ? "bg-aura-gradient-subtle font-medium text-foreground" : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground"
+      }`}
+    >
+      <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: project.color }} />
+      <span className="truncate">{project.name}</span>
+    </Link>
   );
 }
 
@@ -332,283 +386,5 @@ function IconNav({ to, icon: Icon, active, label }: { to: string; icon: typeof F
       </TooltipTrigger>
       <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
-  );
-}
-
-function ProjectTreeDnd({ projects, currentPath }: { projects: Project[]; currentPath: string }) {
-  const updateProject = useUpdateProject();
-  const createProject = useCreateProject();
-  const deleteProject = useDeleteProject();
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [renaming, setRenaming] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-
-  const byParent = useMemo(() => {
-    const map = new Map<string | null, Project[]>();
-    for (const p of projects) {
-      const k = p.parent_id ?? null;
-      if (!map.has(k)) map.set(k, []);
-      map.get(k)!.push(p);
-    }
-    for (const list of map.values()) list.sort((a, b) => a.position - b.position);
-    return map;
-  }, [projects]);
-
-  const isDescendant = (ancestorId: string, candidateId: string): boolean => {
-    let cur = projects.find((p) => p.id === candidateId);
-    while (cur?.parent_id) {
-      if (cur.parent_id === ancestorId) return true;
-      cur = projects.find((p) => p.id === cur!.parent_id);
-    }
-    return false;
-  };
-
-  const handleDragEnd = (e: DragEndEvent) => {
-    setActiveId(null);
-    const dragged = e.active.id as string;
-    const overId = e.over?.id as string | undefined;
-    if (!overId || dragged === overId) return;
-
-    // Drop targets: "root" | `into:<id>` | `before:<id>` | `after:<id>`
-    if (overId === "root") {
-      if (isDescendant(dragged, dragged)) return;
-      const siblings = byParent.get(null) ?? [];
-      const lastPos = siblings.length ? siblings[siblings.length - 1].position : 0;
-      updateProject.mutate({ id: dragged, parent_id: null, position: lastPos + 1 });
-      return;
-    }
-    if (overId.startsWith("into:")) {
-      const targetId = overId.slice(5);
-      if (targetId === dragged || isDescendant(dragged, targetId)) return;
-      const siblings = byParent.get(targetId) ?? [];
-      const lastPos = siblings.length ? siblings[siblings.length - 1].position : 0;
-      updateProject.mutate({ id: dragged, parent_id: targetId, position: lastPos + 1 });
-      setExpanded((prev) => new Set(prev).add(targetId));
-      return;
-    }
-    if (overId.startsWith("before:") || overId.startsWith("after:")) {
-      const isBefore = overId.startsWith("before:");
-      const targetId = overId.slice(isBefore ? 7 : 6);
-      if (targetId === dragged) return;
-      const target = projects.find((p) => p.id === targetId);
-      if (!target) return;
-      if (isDescendant(dragged, targetId)) return;
-      const newParent = target.parent_id ?? null;
-      const siblings = (byParent.get(newParent) ?? []).filter((s) => s.id !== dragged);
-      const idx = siblings.findIndex((s) => s.id === targetId);
-      const insertIdx = isBefore ? idx : idx + 1;
-      const prev = siblings[insertIdx - 1]?.position;
-      const next = siblings[insertIdx]?.position;
-      let newPos: number;
-      if (prev == null && next == null) newPos = 0;
-      else if (prev == null) newPos = next! - 1;
-      else if (next == null) newPos = prev + 1;
-      else newPos = (prev + next) / 2;
-      updateProject.mutate({ id: dragged, parent_id: newParent, position: newPos });
-    }
-  };
-
-  const draggedProject = activeId ? projects.find((p) => p.id === activeId) : null;
-
-  const renderRow = (p: Project, depth: number) => {
-    const children = byParent.get(p.id) ?? [];
-    const hasChildren = children.length > 0;
-    const isExpanded = expanded.has(p.id);
-    const active = currentPath === `/app/p/${p.id}`;
-
-    return (
-      <li key={p.id}>
-        <DropZone id={`before:${p.id}`} />
-        <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <DraggableRow id={p.id} folderId={p.id}>
-              <div
-                className={`group flex items-center gap-1 rounded-md px-1 py-1 transition-colors ${
-                  active ? "bg-aura-gradient-subtle font-medium" : "hover:bg-sidebar-accent/50"
-                }`}
-                style={{ paddingLeft: `${depth * 12 + 4}px` }}
-              >
-                <button
-                  className="flex h-4 w-4 shrink-0 items-center justify-center"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={() => {
-                    const next = new Set(expanded);
-                    if (isExpanded) next.delete(p.id);
-                    else next.add(p.id);
-                    setExpanded(next);
-                  }}
-                >
-                  {hasChildren ? (
-                    <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                  ) : null}
-                </button>
-                <span className="h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: p.color }} />
-                {renaming === p.id ? (
-                  <Input
-                    autoFocus
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onBlur={() => {
-                      if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
-                      setRenaming(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (renameValue.trim()) updateProject.mutate({ id: p.id, name: renameValue.trim() });
-                        setRenaming(null);
-                      }
-                      if (e.key === "Escape") setRenaming(null);
-                    }}
-                    className="h-6 flex-1 text-sm"
-                  />
-                ) : (
-                  <Link
-                    to="/app/p/$projectId"
-                    params={{ projectId: p.id }}
-                    className="flex-1 truncate text-sm"
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    {p.name}
-                  </Link>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="opacity-0 transition-opacity group-hover:opacity-100"
-                      onPointerDown={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
-                      <Pencil className="mr-2 h-4 w-4" /> Rename
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={async () => {
-                        const name = window.prompt("Subfolder name");
-                        if (name?.trim()) {
-                          await createProject.mutateAsync({ name: name.trim(), parent_id: p.id });
-                          setExpanded((prev) => new Set(prev).add(p.id));
-                        }
-                      }}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> New subfolder
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => {
-                        if (confirm(`Delete "${p.name}"? This will delete all tasks in it.`)) {
-                          deleteProject.mutate(p.id);
-                        }
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </DraggableRow>
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem onClick={() => { setRenaming(p.id); setRenameValue(p.name); }}>
-              <Pencil className="mr-2 h-4 w-4" /> Rename
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={async () => {
-                const name = window.prompt("Subfolder name");
-                if (name?.trim()) {
-                  await createProject.mutateAsync({ name: name.trim(), parent_id: p.id });
-                  setExpanded((prev) => new Set(prev).add(p.id));
-                }
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" /> New subfolder
-            </ContextMenuItem>
-            <ContextMenuItem
-              className="text-destructive"
-              onClick={() => {
-                if (confirm(`Delete "${p.name}"?`)) deleteProject.mutate(p.id);
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-        {hasChildren && isExpanded && (
-          <ul className="space-y-0.5">{children.map((c) => renderRow(c, depth + 1))}</ul>
-        )}
-        {hasChildren && isExpanded && <DropZone id={`after:${p.id}`} />}
-      </li>
-    );
-  };
-
-  const roots = byParent.get(null) ?? [];
-
-  return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={(e) => setActiveId(e.active.id as string)}
-      onDragCancel={() => setActiveId(null)}
-      onDragEnd={handleDragEnd}
-    >
-      <RootDropZone />
-      <ul className="space-y-0.5">{roots.map((p) => renderRow(p, 0))}</ul>
-      {roots.length > 0 && <DropZone id={`after:${roots[roots.length - 1].id}`} />}
-      <DragOverlay>
-        {draggedProject ? (
-          <div className="flex items-center gap-1 rounded-md bg-sidebar-accent px-2 py-1 text-sm shadow-lg">
-            <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: draggedProject.color }} />
-            <span className="truncate">{draggedProject.name}</span>
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  );
-}
-
-function DraggableRow({ id, folderId, children }: { id: string; folderId: string; children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({ id });
-  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: `into:${folderId}` });
-  return (
-    <div
-      ref={(el) => {
-        setDragRef(el);
-        setDropRef(el);
-      }}
-      {...attributes}
-      {...listeners}
-      className={`${isDragging ? "opacity-40" : ""} ${isOver ? "ring-1 ring-primary/60 rounded-md" : ""}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function DropZone({ id }: { id: string }) {
-  const { setNodeRef, isOver } = useDroppable({ id });
-  return (
-    <div
-      ref={setNodeRef}
-      className={`h-1 -my-0.5 rounded transition-colors ${isOver ? "bg-primary" : ""}`}
-    />
-  );
-}
-
-function RootDropZone() {
-  const { setNodeRef, isOver } = useDroppable({ id: "root" });
-  return (
-    <div
-      ref={setNodeRef}
-      className={`mb-1 h-2 rounded text-[10px] text-center transition-colors ${
-        isOver ? "bg-primary/20 text-primary" : "text-transparent"
-      }`}
-    >
-      Move to root
-    </div>
   );
 }

@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useProject } from "@/hooks/use-projects";
+import { useDivisions, useFolder } from "@/hooks/use-folders";
+import { ChevronRight } from "lucide-react";
 import { useTasks } from "@/hooks/use-tasks";
 import { useViews, useUpdateView, useCreateView } from "@/hooks/use-views";
 import { useCustomFields } from "@/hooks/use-custom-fields";
@@ -38,6 +40,9 @@ export const Route = createFileRoute("/app/p/$projectId")({
 function ProjectPage() {
   const { projectId } = Route.useParams();
   const { data: project } = useProject(projectId);
+  const { data: divisions = [] } = useDivisions();
+  const { data: parentFolder } = useFolder(project?.folder_id ?? undefined);
+  const division = divisions.find((d) => d.id === project?.division_id);
   const { data: tasks = [], isLoading } = useTasks(projectId);
   const { data: views = [] } = useViews(projectId);
   const { data: fields = [] } = useCustomFields();
@@ -138,6 +143,23 @@ function ProjectPage() {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-border px-4 py-3 lg:px-6 lg:py-4">
+        {(division || parentFolder) && (
+          <div className="mb-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+            {division && (
+              <>
+                <Link to="/app/d/$divisionSlug" params={{ divisionSlug: division.slug }} className="hover:text-foreground">{division.name}</Link>
+                <ChevronRight className="h-3 w-3" />
+              </>
+            )}
+            {parentFolder && (
+              <>
+                <Link to="/app/f/$folderId" params={{ folderId: parentFolder.id }} className="hover:text-foreground">{parentFolder.name}</Link>
+                <ChevronRight className="h-3 w-3" />
+              </>
+            )}
+            <span className="text-foreground">{project.name}</span>
+          </div>
+        )}
         <div className="flex items-center gap-3">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-lg text-base"
@@ -161,9 +183,7 @@ function ProjectPage() {
                 <LayoutDashboard className="mr-1.5 h-4 w-4" /> Overview
               </Link>
             </Button>
-            <ProjectActionsMenu projectId={projectId} group="plan" />
-            <ProjectActionsMenu projectId={projectId} group="delivery" />
-            <ProjectActionsMenu projectId={projectId} group="workspace" />
+            <ProjectActionsMenu projectId={projectId} />
             <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" /> Share
             </Button>
