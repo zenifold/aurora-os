@@ -189,6 +189,7 @@ export function QuickCaptureSheet() {
         due_date: effectiveDate,
         task_type: taskType,
         parent_task_id: parentTaskId,
+        assignee_ids: assigneeIds,
       } as never);
       if (error) throw error;
       haptic("success");
