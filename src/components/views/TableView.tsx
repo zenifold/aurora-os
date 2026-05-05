@@ -190,40 +190,12 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     await createField.mutateAsync({ name, field_type: type, options: opts });
   };
 
+  const allSelected = tasks.length > 0 && selected.size === tasks.length;
+
   return (
     <div className="min-w-max [&_.sticky-col]:sticky [&_.sticky-col]:left-0 [&_.sticky-col]:z-[5] [&_.sticky-col]:bg-background">
-      {selected.size > 0 && (
-        <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-aura-gradient-subtle px-4 py-2 text-sm">
-          <span className="font-medium">{selected.size} selected</span>
-          <div className="flex-1" />
-          <Select onValueChange={(v) => bulk.mutate({ ids: Array.from(selected), patch: { status: v } })}>
-            <SelectTrigger className="h-7 w-32"><SelectValue placeholder="Set status" /></SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive"
-            onClick={() => {
-              if (confirm(`Delete ${selected.size} tasks?`)) {
-                Array.from(selected).forEach((id) => remove.mutate(id));
-                setSelected(new Set());
-              }
-            }}
-          >
-            <Trash2 className="mr-1.5 h-4 w-4" /> Delete
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setSelected(new Set())}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       <table className="border-collapse text-sm" style={{ tableLayout: "fixed", width: "max-content", minWidth: "100%" }}>
         <colgroup>
-          <col style={{ width: widths.select }} />
           <col style={{ width: widths.title }} />
           {showStatus && <col style={{ width: widths.status }} />}
           {showPriority && <col style={{ width: widths.priority }} />}
