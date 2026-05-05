@@ -219,6 +219,7 @@ export function TaskDetailPanel({ projectId, taskId, onClose, fields }: { projec
               <AssigneePicker
                 value={task.assignee_ids ?? []}
                 onChange={(ids) => update.mutate({ id: task.id, assignee_ids: ids as never })}
+                taskId={task.id}
               />
             </FieldRow>
             <FieldRow label="Tags" icon={<TagIcon className="h-3 w-3" />}>
