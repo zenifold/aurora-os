@@ -232,7 +232,45 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     [tasks, effortFieldId, scenario.enabled],
   );
 
-  // Effort summary
+  const taskMap = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
+  const rowIndex = useMemo(
+    () => new Map(visibleTasks.map((t, i) => [t.id, i])),
+    [visibleTasks],
+  );
+  const edgesByFrom = useMemo(() => {
+    const m = new Map<string, DependencyEdge[]>();
+    for (const e of edges) {
+      const arr = m.get(e.from) ?? [];
+      arr.push(e);
+      m.set(e.from, arr);
+    }
+    return m;
+  }, [edges]);
+
+  // Conflicts: successor whose start is before predecessor.end + lag + 1
+  const conflicts = useMemo(() => {
+    const out = new Map<string, string[]>();
+    for (const e of edges) {
+      const fromT = taskMap.get(e.from);
+      const toT = taskMap.get(e.to);
+      if (!fromT || !toT) continue;
+      const fromEnd = fromT.due_date ? parseISO(fromT.due_date) : null;
+      const toStart = toT.start_date
+        ? parseISO(toT.start_date)
+        : toT.due_date
+        ? parseISO(toT.due_date)
+        : null;
+      if (!fromEnd || !toStart) continue;
+      const earliest = addDays(fromEnd, e.lagDays + 1);
+      if (toStart < earliest) {
+        const arr = out.get(e.to) ?? [];
+        arr.push(fromT.title);
+        out.set(e.to, arr);
+      }
+    }
+    return out;
+  }, [edges, taskMap]);
+
   const summary = useMemo(() => {
     if (!effortFieldId) return null;
     let totalDays = 0;
