@@ -105,7 +105,7 @@ function Column({
   wipLimit: number | null;
   overLimit: boolean;
   tasks: Task[];
-  indicators?: Map<string, { blockedBy: number; blocking: number }>;
+  indicators?: Map<string, { blockedBy: number; blocking: number }> | Record<string, { blockedBy: number; blocking: number }>;
   cardFields: Array<"priority" | "due_date" | "assignees" | "tags">;
   colorFor: (t: Task) => string | null;
   onAdd: (title: string) => void;
@@ -152,7 +152,7 @@ function Column({
             cardFields={cardFields}
             accent={colorFor(t)}
             onClick={() => onTaskClick(t.id)}
-            indicator={indicators?.get(t.id)}
+            indicator={indicators ? (typeof (indicators as { get?: unknown }).get === "function" ? (indicators as Map<string, { blockedBy: number; blocking: number }>).get(t.id) : (indicators as unknown as Record<string, { blockedBy: number; blocking: number }>)[t.id]) : undefined}
           />
         ))}
         {adding && (
