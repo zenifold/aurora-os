@@ -439,6 +439,8 @@ function TaskRow({
   showStatus = true,
   showPriority = true,
   showDue = true,
+  showAssignees = false,
+  showTags = false,
   rowColor = null,
   titleStickyLeft = 40,
   depth = 0,
