@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { WorkspacePresetsCard } from "@/components/app/WorkspacePresetsCard";
 
 export const Route = createFileRoute("/app/settings/")({
   component: WorkspaceSettings,
@@ -212,6 +213,8 @@ function WorkspaceSettings() {
           </div>
         )}
       </section>
+
+      <WorkspacePresetsCard />
 
       <section className="max-w-xl rounded-xl border border-border bg-card p-6">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Plan</h3>
