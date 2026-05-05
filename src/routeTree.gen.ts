@@ -39,6 +39,7 @@ import { Route as AppSettingsAutomationsRouteImport } from './routes/app.setting
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
+import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
 
 const TermsRoute = TermsRouteImport.update({
@@ -191,6 +192,11 @@ const AppMeetingsMeetingIdRoute = AppMeetingsMeetingIdRouteImport.update({
   path: '/$meetingId',
   getParentRoute: () => AppMeetingsRoute,
 } as any)
+const AppPProjectIdSprintsRoute = AppPProjectIdSprintsRouteImport.update({
+  id: '/sprints',
+  path: '/sprints',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
+  '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
+  '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/app/settings/profile': typeof AppSettingsProfileRoute
   '/app/settings/': typeof AppSettingsIndexRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
+  '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/'
     | '/app/p/$projectId/settings'
+    | '/app/p/$projectId/sprints'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings'
     | '/app/p/$projectId/settings'
+    | '/app/p/$projectId/sprints'
   id:
     | '__root__'
     | '/'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/app/settings/profile'
     | '/app/settings/'
     | '/app/p/$projectId/settings'
+    | '/app/p/$projectId/sprints'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -622,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsMeetingIdRouteImport
       parentRoute: typeof AppMeetingsRoute
     }
+    '/app/p/$projectId/sprints': {
+      id: '/app/p/$projectId/sprints'
+      path: '/sprints'
+      fullPath: '/app/p/$projectId/sprints'
+      preLoaderRoute: typeof AppPProjectIdSprintsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/settings': {
       id: '/app/p/$projectId/settings'
       path: '/settings'
@@ -672,10 +691,12 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
 
 interface AppPProjectIdRouteChildren {
   AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
+  AppPProjectIdSprintsRoute: typeof AppPProjectIdSprintsRoute
 }
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
+  AppPProjectIdSprintsRoute: AppPProjectIdSprintsRoute,
 }
 
 const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
@@ -725,12 +746,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
