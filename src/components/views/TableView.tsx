@@ -51,6 +51,13 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const bulk = useBulkUpdateTasks(projectId);
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
+  const getIndicator = (id: string) => {
+    if (!indicators) return undefined;
+    if (typeof (indicators as { get?: unknown }).get === "function") {
+      return (indicators as Map<string, { blockedBy: number; blocking: number }>).get(id);
+    }
+    return (indicators as Record<string, { blockedBy: number; blocking: number }>)[id];
+  };
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
   const statusColorMap = useMemo(() => new Map(workflow.map((s) => [s.id, s.color])), [workflow]);
