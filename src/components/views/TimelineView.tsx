@@ -32,7 +32,17 @@ import {
   Save,
   Sparkles,
   Gauge,
+  Bookmark,
+  Trash2,
+  Plus,
+  ChevronDown,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { useUpdateTask } from "@/hooks/use-tasks";
 import { useCustomFields } from "@/hooks/use-custom-fields";
 import { toast } from "sonner";
@@ -74,12 +84,37 @@ function readEffort(task: Task, effortFieldId: string | null): EffortValue | nul
   return { amount: v.amount, unit };
 }
 
+interface ScenarioSnapshot {
+  id: string;
+  name: string;
+  state: ScenarioState;
+  savedAt: string;
+}
+
+function snapshotsKey(projectId: string) {
+  return `aura.scenarios.${projectId}`;
+}
+
+function loadSnapshots(projectId: string): ScenarioSnapshot[] {
+  try {
+    const raw = localStorage.getItem(snapshotsKey(projectId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
   const [zoom, setZoom] = useState<Zoom>("week");
   const [colorBy, setColorBy] = useState<ColorBy>("priority");
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
   const [scenario, setScenario] = useState<ScenarioState>(DEFAULT_SCENARIO);
   const [showScenario, setShowScenario] = useState(false);
+  const [snapshots, setSnapshots] = useState<ScenarioSnapshot[]>(() => loadSnapshots(projectId));
+  const [activeSnapshotId, setActiveSnapshotId] = useState<string | null>(null);
+  const [newSnapshotName, setNewSnapshotName] = useState("");
   const [drag, setDrag] = useState<{
     id: string;
     mode: "move" | "resize-start" | "resize-end";
@@ -312,6 +347,53 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
     setScenario((s) => ({ ...s, overrides: {} }));
   };
 
+  // Persist snapshots to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(snapshotsKey(projectId), JSON.stringify(snapshots));
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [snapshots, projectId]);
+
+  const saveSnapshot = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const snap: ScenarioSnapshot = {
+      id: crypto.randomUUID(),
+      name: trimmed,
+      state: { ...scenario, enabled: true },
+      savedAt: new Date().toISOString(),
+    };
+    setSnapshots((s) => [...s, snap]);
+    setActiveSnapshotId(snap.id);
+    setNewSnapshotName("");
+    toast.success(`Saved scenario "${trimmed}"`);
+  };
+
+  const loadSnapshot = (id: string) => {
+    const snap = snapshots.find((s) => s.id === id);
+    if (!snap) return;
+    setScenario(snap.state);
+    setActiveSnapshotId(id);
+    setShowScenario(true);
+    toast.success(`Loaded "${snap.name}"`);
+  };
+
+  const deleteSnapshot = (id: string) => {
+    setSnapshots((s) => s.filter((x) => x.id !== id));
+    if (activeSnapshotId === id) setActiveSnapshotId(null);
+  };
+
+  const updateSnapshot = (id: string) => {
+    setSnapshots((s) =>
+      s.map((x) => (x.id === id ? { ...x, state: { ...scenario, enabled: true }, savedAt: new Date().toISOString() } : x)),
+    );
+    toast.success("Snapshot updated");
+  };
+
+  const activeSnapshot = snapshots.find((s) => s.id === activeSnapshotId) ?? null;
+
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
@@ -400,69 +482,228 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
 
       {/* Scenario panel */}
       {showScenario && effortFieldId && (
-        <div className="flex flex-wrap items-center gap-4 border-b border-border bg-aura-gradient-subtle px-4 py-3 text-xs">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="font-medium">Scenario</span>
-            <button
-              className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
-              onClick={() => setScenario((s) => ({ ...s, enabled: !s.enabled }))}
+        <div className="flex flex-col gap-2 border-b border-border bg-aura-gradient-subtle px-4 py-3 text-xs">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="font-medium">Scenario</span>
+              <button
+                className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
+                onClick={() => setScenario((s) => ({ ...s, enabled: !s.enabled }))}
+              >
+                {scenario.enabled ? "● Live" : "○ Off"}
+              </button>
+            </div>
+            <div className="flex min-w-[260px] items-center gap-3">
+              <span className="text-muted-foreground">Effort multiplier</span>
+              <Slider
+                value={[scenario.multiplier * 100]}
+                min={50}
+                max={300}
+                step={10}
+                className="w-44"
+                onValueChange={(v) => setScenario((s) => ({ ...s, multiplier: v[0] / 100 }))}
+              />
+              <span className="w-10 text-right font-mono">{Math.round(scenario.multiplier * 100)}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Hours / day</span>
+              <input
+                type="number"
+                min="1"
+                max="24"
+                value={scenario.hoursPerDay}
+                onChange={(e) =>
+                  setScenario((s) => ({ ...s, hoursPerDay: Math.max(1, Number(e.target.value) || 8) }))
+                }
+                className="h-7 w-14 rounded border border-border bg-background px-2 text-xs"
+              />
+            </div>
+            <div className="flex-1" />
+            {[0.75, 1, 1.25, 1.5, 2].map((m) => (
+              <button
+                key={m}
+                onClick={() => setScenario((s) => ({ ...s, multiplier: m }))}
+                className={`rounded border px-2 py-1 text-[11px] ${
+                  Math.abs(scenario.multiplier - m) < 0.01
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                {m === 1 ? "Realistic" : m < 1 ? `Optimistic ${m}×` : `Buffer ${m}×`}
+              </button>
+            ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1"
+              onClick={() => {
+                setScenario(DEFAULT_SCENARIO);
+                setActiveSnapshotId(null);
+              }}
             >
-              {scenario.enabled ? "● Live" : "○ Off"}
-            </button>
+              <RotateCcw className="h-3 w-3" /> Reset
+            </Button>
+            <Button size="sm" className="h-7 gap-1" onClick={applyScenario}>
+              <Save className="h-3 w-3" /> Apply to dates
+            </Button>
           </div>
-          <div className="flex min-w-[260px] items-center gap-3">
-            <span className="text-muted-foreground">Effort multiplier</span>
-            <Slider
-              value={[scenario.multiplier * 100]}
-              min={50}
-              max={300}
-              step={10}
-              className="w-44"
-              onValueChange={(v) => setScenario((s) => ({ ...s, multiplier: v[0] / 100 }))}
-            />
-            <span className="w-10 text-right font-mono">{Math.round(scenario.multiplier * 100)}%</span>
+
+          {/* Snapshots row */}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-2">
+            <Bookmark className="h-3.5 w-3.5 text-primary" />
+            <span className="font-medium">Snapshots</span>
+            {snapshots.length === 0 && (
+              <span className="text-muted-foreground">None saved — capture the current dials as Baseline, Optimistic, Buffer…</span>
+            )}
+            {snapshots.map((snap) => (
+              <div
+                key={snap.id}
+                className={`group flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+                  activeSnapshotId === snap.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background hover:bg-accent"
+                }`}
+              >
+                <button onClick={() => loadSnapshot(snap.id)} title={`Load "${snap.name}"`}>
+                  {snap.name}
+                  <span className="ml-1 font-mono opacity-60">{Math.round(snap.state.multiplier * 100)}%</span>
+                </button>
+                {activeSnapshotId === snap.id && (
+                  <button
+                    onClick={() => updateSnapshot(snap.id)}
+                    className="rounded p-0.5 hover:bg-background/60"
+                    title="Update with current settings"
+                  >
+                    <Save className="h-2.5 w-2.5" />
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteSnapshot(snap.id)}
+                  className="rounded p-0.5 opacity-0 transition group-hover:opacity-100 hover:bg-destructive/20"
+                  title="Delete snapshot"
+                >
+                  <Trash2 className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            ))}
+            <div className="flex-1" />
+            <div className="flex items-center gap-1">
+              <Input
+                value={newSnapshotName}
+                onChange={(e) => setNewSnapshotName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveSnapshot(newSnapshotName);
+                }}
+                placeholder="Name (Baseline, Optimistic…)"
+                className="h-7 w-44 text-xs"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1"
+                onClick={() => saveSnapshot(newSnapshotName)}
+                disabled={!newSnapshotName.trim()}
+              >
+                <Plus className="h-3 w-3" /> Save
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Hours / day</span>
-            <input
-              type="number"
-              min="1"
-              max="24"
-              value={scenario.hoursPerDay}
-              onChange={(e) =>
-                setScenario((s) => ({ ...s, hoursPerDay: Math.max(1, Number(e.target.value) || 8) }))
-              }
-              className="h-7 w-14 rounded border border-border bg-background px-2 text-xs"
-            />
-          </div>
-          <div className="flex-1" />
-          {[0.75, 1, 1.25, 1.5, 2].map((m) => (
-            <button
-              key={m}
-              onClick={() => setScenario((s) => ({ ...s, multiplier: m }))}
-              className={`rounded border px-2 py-1 text-[11px] ${
-                Math.abs(scenario.multiplier - m) < 0.01
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-accent"
-              }`}
-            >
-              {m === 1 ? "Realistic" : m < 1 ? `Optimistic ${m}×` : `Buffer ${m}×`}
-            </button>
-          ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 gap-1"
-            onClick={() => setScenario(DEFAULT_SCENARIO)}
-          >
-            <RotateCcw className="h-3 w-3" /> Reset
-          </Button>
-          <Button size="sm" className="h-7 gap-1" onClick={applyScenario}>
-            <Save className="h-3 w-3" /> Apply to dates
-          </Button>
+
+          {/* Per-task overrides editor */}
+          {scenario.enabled && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1 self-start rounded px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent">
+                  <ChevronDown className="h-3 w-3" />
+                  Per-task overrides
+                  {Object.keys(scenario.overrides).length > 0 && (
+                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                      {Object.keys(scenario.overrides).length}
+                    </Badge>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[420px] p-0">
+                <div className="flex items-center justify-between border-b border-border px-3 py-2 text-xs">
+                  <span className="font-medium">Override per task</span>
+                  <button
+                    className="text-[11px] text-muted-foreground hover:text-foreground"
+                    onClick={() => setScenario((s) => ({ ...s, overrides: {} }))}
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="max-h-[320px] overflow-auto p-2">
+                  {visibleTasks.filter((t) => readEffort(t, effortFieldId)).length === 0 && (
+                    <p className="p-3 text-center text-xs text-muted-foreground">
+                      No sized tasks yet.
+                    </p>
+                  )}
+                  {visibleTasks
+                    .filter((t) => readEffort(t, effortFieldId))
+                    .map((t) => {
+                      const e = readEffort(t, effortFieldId)!;
+                      const override = scenario.overrides[t.id] ?? 1;
+                      return (
+                        <div
+                          key={t.id}
+                          className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-muted/50"
+                        >
+                          <span className="min-w-0 flex-1 truncate text-xs" title={t.title}>
+                            {t.title}
+                          </span>
+                          <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                            {e.amount}
+                            {e.unit === "hours" ? "h" : e.unit === "days" ? "d" : "p"}
+                          </span>
+                          <Slider
+                            value={[override * 100]}
+                            min={25}
+                            max={300}
+                            step={25}
+                            className="w-28"
+                            onValueChange={(v) =>
+                              setScenario((s) => ({
+                                ...s,
+                                overrides: { ...s.overrides, [t.id]: v[0] / 100 },
+                              }))
+                            }
+                          />
+                          <span className="w-10 text-right font-mono text-[10px]">
+                            {Math.round(override * 100)}%
+                          </span>
+                          {scenario.overrides[t.id] !== undefined && (
+                            <button
+                              onClick={() =>
+                                setScenario((s) => {
+                                  const next = { ...s.overrides };
+                                  delete next[t.id];
+                                  return { ...s, overrides: next };
+                                })
+                              }
+                              className="rounded p-0.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                              title="Reset to 100%"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {activeSnapshot && (
+            <div className="text-[11px] text-muted-foreground">
+              Active snapshot: <span className="font-medium text-foreground">{activeSnapshot.name}</span>
+            </div>
+          )}
         </div>
       )}
+
 
       {/* Timeline body */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
