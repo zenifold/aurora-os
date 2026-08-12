@@ -40,6 +40,34 @@ jobs:
           VITE_BRAND_APP_NAME: ${{ vars.VITE_BRAND_APP_NAME }}
           VITE_BRAND_SUPPORT_EMAIL: ${{ vars.VITE_BRAND_SUPPORT_EMAIL }}
 
+      # Cloudflare rejects a Worker over 3 MiB gzipped, but only at upload — as
+      # `code: 10027`, after a full build, with no hint about the cause. Check it
+      # here so the failure names the problem and the fix. Excalidraw's graph
+      # (mermaid, cytoscape, katex) took this from 2.07 to 4.89 MiB once already.
+      - name: Check worker size against Cloudflare's limit
+        run: |
+          node -e "
+          const fs=require('fs'),path=require('path'),zlib=require('zlib');
+          let total=0;
+          (function walk(d){
+            for (const e of fs.readdirSync(d,{withFileTypes:true})) {
+              const p=path.join(d,e.name);
+              if (e.isDirectory()) walk(p);
+              else if (e.name.endsWith('.js')) total+=zlib.gzipSync(fs.readFileSync(p)).length;
+            }
+          })('dist/server');
+          const MiB=1048576, limit=3*MiB, warn=2.6*MiB;
+          const mb=n=>(n/MiB).toFixed(2)+' MiB';
+          console.log('worker gzipped: '+mb(total)+'  (limit '+mb(limit)+')');
+          if (total>=limit) {
+            console.error('::error::Worker is '+mb(total)+', over Cloudflare-s 3 MiB free-plan limit. Something client-only is being bundled into the SSR graph — add it to CLIENT_ONLY_IN_SSR in vite.config.ts, or upgrade to Workers Paid for 10 MiB.');
+            process.exit(1);
+          }
+          if (total>=warn) {
+            console.log('::warning::Worker is '+mb(total)+', within '+mb(limit-total)+' of the 3 MiB limit.');
+          }
+          "
+
       # Runtime secrets (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
       # OPENROUTER_API_KEY) are NOT set here. They live in Cloudflare as Worker
       # secrets via `wrangler secret put`, and `wrangler deploy` leaves them
