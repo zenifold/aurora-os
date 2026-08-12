@@ -46,12 +46,20 @@ jobs:
           bun-version: "1.3.14"
       - run: bun install --frozen-lockfile
       - run: bun run test:e2e:install
-      - run: bun run test:e2e
+
+      # The smoke tests run against the built worker, and this job does not
+      # share a filesystem with the `build` job — without this step
+      # dist/ is absent and playwright's webServer times out. VITE_* values are
+      # inlined here at build time, which is why the dummies live on this step.
+      - run: bun run build
         env:
-          CI: "true"
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: dummy
           VITE_SUPABASE_PROJECT_ID: example
+
+      - run: bun run test:e2e
+        env:
+          CI: "true"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
