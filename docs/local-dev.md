@@ -38,17 +38,20 @@ The local container is named after `project_id` in `supabase/config.toml`, so
 substitute your own ref (it changes whenever you `supabase link`):
 
 ```bash
-docker exec -i supabase_db_<project_id> psql -U supabase_admin -d postgres -c \
-  "alter database postgres set app.base_url = 'http://host.docker.internal:5173';"
+docker exec -i supabase_db_<project_id> psql -U postgres -d postgres -c \
+  "insert into public.app_config (key, value) values \
+     ('base_url', 'http://host.docker.internal:5173') \
+   on conflict (key) do update set value = excluded.value, updated_at = now();"
 ```
 
 Because the container name is derived from `project_id`, linking to a different
 project makes `supabase start` create a *fresh, empty* local stack — the previous
 one keeps its data under the old name.
 
-Also set `app.anon_key` to the local anon key from `npx supabase status`. Both
-must be set by `supabase_admin` — `postgres` gets *permission denied* on
-`ALTER DATABASE`. See [de-lovable-db.md](de-lovable-db.md).
+Add an `anon_key` row the same way, using the local anon key from
+`npx supabase status`. These are plain table rows, so `postgres` is sufficient —
+no `supabase_admin` and no `ALTER DATABASE`. See
+[de-lovable-db.md](de-lovable-db.md).
 
 ## Everyday commands
 

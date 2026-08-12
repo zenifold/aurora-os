@@ -24,28 +24,47 @@ these**, which is deliberate: if `app.base_url` is unset,
 `current_setting(…, true)` returns NULL, `net.http_post` receives a NULL url, and
 nothing fires. Dormant beats firing at a stale host.
 
-These must be set by a role that can `ALTER DATABASE` — `supabase_admin` locally,
-or the SQL editor on hosted Supabase. The `postgres` role is not sufficient in
-the local stack.
+Set them as rows in `public.app_config` — ordinary table data, so no elevated
+privileges are involved:
 
 ```sql
-alter database postgres set app.base_url = 'https://your-domain';
-alter database postgres set app.anon_key = '<anon / publishable key>';
+insert into public.app_config (key, value) values
+  ('base_url', 'https://your-domain'),
+  ('anon_key', '<anon / publishable key>')
+on conflict (key) do update set value = excluded.value, updated_at = now();
 ```
 
 For the local Docker stack, Postgres reaches the host through
 `host.docker.internal`:
 
 ```sql
-alter database postgres set app.base_url = 'http://host.docker.internal:8080';
+insert into public.app_config (key, value) values
+  ('base_url', 'http://host.docker.internal:5173')
+on conflict (key) do update set value = excluded.value, updated_at = now();
 ```
 
-Settings apply to *new* sessions, so `pg_cron` picks them up on its next tick.
+Read on every call, so `pg_cron` picks up a change on its next tick.
+
+> **Why a table and not `alter database … set app.base_url`?** Earlier revisions
+> of this doc said to use a database GUC. That cannot work on hosted Supabase:
+> `app.*` is a *placeholder* GUC, and PostgreSQL only lets a **superuser** set
+> placeholders via `ALTER DATABASE`/`ALTER ROLE`. Hosted Supabase's `postgres`
+> role has `rolsuper = false`, so it fails with `42501 permission denied` — from
+> the dashboard SQL editor and the Management API alike. Worse, the failure was
+> silent in effect: the settings stayed NULL and all three callbacks were
+> permanently dormant with nothing logged.
+> `20260812000000_app_config_without_superuser.sql` moved them to a table.
+> `public.app_config_get()` still falls back to the old GUC, so self-hosted
+> installs that already set it keep working untouched.
+
+`app_config` has RLS enabled with no policies and no grants to `anon` or
+`authenticated`: only `service_role` and `postgres` can read it, since it holds
+the anon key today and may hold real secrets later.
 
 ## Verifying
 
 ```sql
-select current_setting('app.base_url', true);
+select public.app_config_get('base_url');
 select jobname, schedule, command from cron.job;
 select position('lovable' in prosrc) from pg_proc where proname = 'emit_agent_event';  -- expect 0
 select column_default from information_schema.columns
