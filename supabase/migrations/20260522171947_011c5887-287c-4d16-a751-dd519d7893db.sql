@@ -125,7 +125,7 @@ CREATE TABLE public.delivery_deliverable_share_links (
   workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
   deliverable_id uuid NOT NULL REFERENCES public.delivery_deliverables(id) ON DELETE CASCADE,
   version_id uuid REFERENCES public.delivery_deliverable_versions(id) ON DELETE CASCADE,
-  token text NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  token text NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   access text NOT NULL DEFAULT 'read' CHECK (access IN ('read','comment')),
   recipient_email text,
   expires_at timestamptz,

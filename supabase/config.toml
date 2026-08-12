@@ -1,1 +1,25 @@
 project_id = "lzsqfaftstmnbzbpbwyf"
+
+[auth]
+# Production origin for aurora-app.work. Auth emails and OAuth callbacks resolve
+# against this, so a stale value silently breaks confirmation and reset links.
+site_url = "https://aurora-app.work"
+# localhost is listed so the same config works for local dev against the linked
+# project; the dev server runs on :5173 (see vite.config.ts).
+additional_redirect_urls = [
+  "https://aurora-app.work/**",
+  "http://localhost:5173/**",
+]
+
+# Pinned deliberately. `supabase config push` fills anything omitted here with
+# CLI defaults and pushes that to the remote, so leaving these out silently
+# turned email confirmation OFF on a live domain. Values below match what the
+# hosted project shipped with — change them on purpose, not by omission.
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+secure_password_change = false
+max_frequency = "1m0s"
+otp_length = 8
+otp_expiry = 3600

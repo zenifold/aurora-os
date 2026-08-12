@@ -52,6 +52,9 @@ interface Props {
 
 export function CanvasEditor({ pageId, initial, onChange, onApiReady, topRightExtras, overlay }: Props) {
   const apiRef = useRef<ExcalidrawAPI | null>(null);
+  // Gates the Excalidraw render to the client; see the comment at its usage.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [aiOpen, setAiOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [running, setRunning] = useState(false);
@@ -224,6 +227,18 @@ export function CanvasEditor({ pageId, initial, onChange, onApiReady, topRightEx
         </Dialog>
       </div>
 
+      {/*
+        Rendered only after hydration. React.lazy would otherwise execute the
+        import during SSR, pulling Excalidraw's transitive graph (mermaid,
+        cytoscape, katex) into the worker bundle — 2.4 MiB gzipped against
+        Cloudflare's 3 MiB limit. vite.config.ts stubs those modules out of the
+        server build, so rendering this server-side would now throw.
+      */}
+      {!mounted ? (
+        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading canvas…
+        </div>
+      ) : (
       <Suspense
         fallback={
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -248,6 +263,7 @@ export function CanvasEditor({ pageId, initial, onChange, onApiReady, topRightEx
           onChange={handleSceneChange as never}
         />
       </Suspense>
+      )}
       {overlay}
     </div>
   );

@@ -11,7 +11,7 @@ CREATE TABLE public.client_request_bundles (
   instructions TEXT,
   due_date DATE,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','sent','partial','completed','archived')),
-  share_token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  share_token TEXT NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   recipient_name TEXT,
   recipient_email TEXT,
   sent_at TIMESTAMPTZ,

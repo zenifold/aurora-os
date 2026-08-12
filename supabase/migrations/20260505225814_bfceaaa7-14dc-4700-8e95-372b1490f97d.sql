@@ -26,7 +26,7 @@ create table if not exists public.folder_invitations (
   email text not null,
   role public.folder_role not null default 'viewer',
   invited_by uuid,
-  token text not null default encode(gen_random_bytes(24),'hex'),
+  token text not null default encode(extensions.gen_random_bytes(24),'hex'),
   status text not null default 'pending',
   expires_at timestamptz not null default (now() + interval '14 days'),
   created_at timestamptz not null default now()

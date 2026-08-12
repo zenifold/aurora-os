@@ -4,7 +4,7 @@ CREATE TABLE public.workspace_invitations (
   workspace_id UUID NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'member',
-  token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  token TEXT NOT NULL UNIQUE DEFAULT encode(extensions.gen_random_bytes(24), 'hex'),
   status TEXT NOT NULL DEFAULT 'pending',
   invited_by UUID NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '14 days'),

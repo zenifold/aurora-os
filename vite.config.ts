@@ -6,6 +6,57 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv, type PluginOption } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+// Modules that only ever run in the browser. Excalidraw drags in a large
+// transitive graph — mermaid (via @excalidraw/mermaid-to-excalidraw), cytoscape,
+// katex, font subsetting — worth ~2.4 MiB gzipped. Vite emits those chunks into
+// the SSR build even though they are behind dynamic imports, and the Cloudflare
+// Workers free plan caps a script at 3 MiB, which put the whole deploy over.
+//
+// Stubbing them in the SSR graph keeps them out of dist/server. Anything that
+// renders them server-side now throws a named error instead of silently
+// bloating the bundle, so the client-only gate in CanvasEditor is load-bearing.
+const CLIENT_ONLY_IN_SSR = [
+  "@excalidraw/excalidraw",
+  "@excalidraw/mermaid-to-excalidraw",
+  "mermaid",
+  "cytoscape",
+  "katex",
+];
+
+function stubClientOnlyInSsr(): PluginOption {
+  const PREFIX = "\0client-only-stub:";
+  return {
+    name: "stub-client-only-in-ssr",
+    enforce: "pre",
+    resolveId(id, _importer, options) {
+      if (!options?.ssr) return null;
+      // Stylesheets are not uploaded to the Worker, so leave them resolvable.
+      if (id.endsWith(".css")) return null;
+      const match = CLIENT_ONLY_IN_SSR.some((m) => id === m || id.startsWith(`${m}/`));
+      return match ? PREFIX + id : null;
+    },
+    load(id) {
+      if (!id.startsWith(PREFIX)) return null;
+      const name = id.slice(PREFIX.length);
+      const message =
+        `${name} is client-only and was stubbed out of the server bundle. ` +
+        `Something rendered it during SSR — gate it behind a mounted check.`;
+      return [
+        `const message = ${JSON.stringify(message)};`,
+        `export default new Proxy(`,
+        `  {},`,
+        `  {`,
+        `    get(_target, prop) {`,
+        `      if (prop === "__esModule") return true;`,
+        `      throw new Error(message);`,
+        `    },`,
+        `  },`,
+        `);`,
+      ].join("\n");
+    },
+  };
+}
+
 // Self-owned Vite config. This replaces @lovable.dev/vite-tanstack-config,
 // which used to supply every plugin below implicitly. Nothing here is magic —
 // add or reorder plugins as the project needs.
@@ -19,6 +70,7 @@ export default defineConfig(({ command, mode }) => {
   );
 
   const plugins: PluginOption[] = [
+    stubClientOnlyInSsr(),
     tailwindcss(),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     // Cloudflare's plugin only participates in builds; loading it in dev

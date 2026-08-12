@@ -8,7 +8,7 @@ create table public.client_portal_access (
   company text,
   avatar_url text,
   role text not null default 'contributor' check (role in ('viewer','contributor','stakeholder')),
-  access_token text not null unique default encode(gen_random_bytes(24), 'hex'),
+  access_token text not null unique default encode(extensions.gen_random_bytes(24), 'hex'),
   token_expires_at timestamptz,
   visible_task_types text[] not null default array['task'],
   can_see_financials boolean not null default false,
