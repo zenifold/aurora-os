@@ -49,7 +49,7 @@ export function FilterBar({ filters, sorts, groupBy, fields, onFiltersChange, on
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 px-6 py-2">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 px-4 py-2 lg:px-6">
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7">

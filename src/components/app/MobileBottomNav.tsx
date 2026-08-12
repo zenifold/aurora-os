@@ -15,7 +15,7 @@ type Tab = LinkTab | ActionTab;
 
 const TABS: Tab[] = [
   { kind: "link", to: "/app", label: "Home", icon: Home, exact: true },
-  { kind: "link", to: "/app/my-tasks", label: "Tasks", icon: Inbox, exact: true },
+  { kind: "link", to: "/app/my-tasks", label: "Work", icon: Inbox, exact: true },
   { kind: "fab", label: "Create", icon: Plus },
   { kind: "drawer", label: "Projects", icon: Folder },
   { kind: "link", to: "/app/settings", label: "More", icon: MoreHorizontal, exact: false },
@@ -81,14 +81,17 @@ export function MobileBottomNav() {
               <Link
                 to={linkTab.to}
                 onClick={() => haptic("tap")}
-                className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-md text-[10px] transition-colors ${
+                className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-md text-[10px] transition-colors ${
                   active
-                    ? "text-foreground"
+                    ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {active && (
+                  <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-aura-gradient" />
+                )}
                 <Icon
-                  className={`h-5 w-5 ${active ? "text-aura-gradient" : ""}`}
+                  className="h-5 w-5"
                   strokeWidth={active ? 2.5 : 2}
                 />
                 <span className={active ? "font-medium" : ""}>{linkTab.label}</span>

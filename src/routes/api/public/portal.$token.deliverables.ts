@@ -1,21 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-async function loadAccess(token: string) {
-  const { data } = await supabaseAdmin
-    .from("client_portal_access")
-    .select("*")
-    .eq("access_token", token)
-    .eq("is_active", true)
-    .maybeSingle();
-  return data;
-}
+import { loadPortalAccess } from "@/server/portal-access.server";
 
 export const Route = createFileRoute("/api/public/portal/$token/deliverables")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const access = await loadAccess(params.token);
+        const access = await loadPortalAccess(params.token);
         if (!access) return new Response("Not found", { status: 404 });
 
         const { data: deliverables, error } = await supabaseAdmin

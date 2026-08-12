@@ -118,17 +118,140 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
         }
 
         const start = Date.now();
+        const action = rule.apply_action as string;
+        const isAiAction = action === "comment" || action === "description_append" || action === "tag";
+        const cfg = (rule.action_config ?? {}) as Record<string, unknown>;
 
-        if (!apiKey) {
+        const recordRun = async (
+          status: "success" | "failed",
+          output: string | null,
+          error_message: string | null,
+          tokens: number | null,
+        ) => {
           await supabaseAdmin.from("ai_automation_runs").insert({
             workspace_id: workspaceId,
             automation_id: rule.id,
             task_id: task.id,
-            status: "failed",
+            status,
             trigger_event: data.event,
-            error_message: "No OpenRouter API key configured for workspace.",
+            output: output ? output.slice(0, 4000) : null,
+            error_message,
             duration_ms: Date.now() - start,
+            tokens_used: tokens,
           });
+          if (status === "success") {
+            await supabaseAdmin
+              .from("ai_automations")
+              .update({
+                run_count: (rule.run_count ?? 0) + 1,
+                last_run_at: new Date().toISOString(),
+              })
+              .eq("id", rule.id);
+            ran++;
+          }
+        };
+
+        // ---- Deterministic actions (no AI required) ----
+        if (!isAiAction && action !== "none") {
+          try {
+            let summary = "";
+            if (action === "set_status" && typeof cfg.status === "string") {
+              await supabaseAdmin.from("tasks").update({ status: cfg.status }).eq("id", task.id);
+              summary = `Set status → ${cfg.status}`;
+            } else if (action === "set_priority" && typeof cfg.priority === "string") {
+              await supabaseAdmin.from("tasks").update({ priority: cfg.priority as "low" | "medium" | "high" | "urgent" }).eq("id", task.id);
+              summary = `Set priority → ${cfg.priority}`;
+            } else if (action === "add_tags" && Array.isArray(cfg.tags)) {
+              const existing = (task.tags as string[] | null) ?? [];
+              const merged = Array.from(new Set([...existing, ...(cfg.tags as string[])]));
+              await supabaseAdmin.from("tasks").update({ tags: merged }).eq("id", task.id);
+              summary = `Added tags: ${(cfg.tags as string[]).join(", ")}`;
+            } else if (action === "remove_tags" && Array.isArray(cfg.tags)) {
+              const existing = (task.tags as string[] | null) ?? [];
+              const toRemove = new Set((cfg.tags as string[]).map((t) => t.toLowerCase()));
+              const filtered = existing.filter((t) => !toRemove.has(t.toLowerCase()));
+              await supabaseAdmin.from("tasks").update({ tags: filtered }).eq("id", task.id);
+              summary = `Removed tags: ${(cfg.tags as string[]).join(", ")}`;
+            } else if (action === "set_due_date") {
+              let due: string | null = null;
+              if (typeof cfg.due_date_offset_days === "number") {
+                const d = new Date();
+                d.setDate(d.getDate() + cfg.due_date_offset_days);
+                due = d.toISOString().slice(0, 10);
+              } else if (typeof cfg.due_date === "string" && cfg.due_date) {
+                due = cfg.due_date;
+              }
+              if (due) {
+                await supabaseAdmin.from("tasks").update({ due_date: due }).eq("id", task.id);
+                summary = `Set due date → ${due}`;
+              } else {
+                summary = "Set due date skipped (no value)";
+              }
+            } else if (action === "add_assignee" && typeof cfg.assignee_id === "string") {
+              const existing = (task.assignee_ids as string[] | null) ?? [];
+              if (!existing.includes(cfg.assignee_id)) {
+                await supabaseAdmin
+                  .from("tasks")
+                  .update({ assignee_ids: [...existing, cfg.assignee_id] })
+                  .eq("id", task.id);
+              }
+              summary = `Assigned to ${cfg.assignee_id}`;
+            } else if (action === "webhook" && typeof cfg.webhook_url === "string") {
+              const ctrl = new AbortController();
+              const timer = setTimeout(() => ctrl.abort(), 10_000);
+              const res = await fetch(cfg.webhook_url, {
+                method: (cfg.webhook_method as string) ?? "POST",
+                signal: ctrl.signal,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  event: data.event,
+                  automation: { id: rule.id, name: rule.name },
+                  task: taskRec,
+                }),
+              }).finally(() => clearTimeout(timer));
+              summary = `Webhook ${res.status} → ${cfg.webhook_url}`;
+              if (!res.ok) throw new Error(summary);
+            } else if (action === "notify") {
+              const message = (cfg.notify_message as string) ?? `Automation "${rule.name}" fired on "${task.title}"`;
+              const recipients = (cfg.notify_user_ids as string[] | undefined) ?? [];
+              const targets = recipients.length > 0 ? recipients : ((task.assignee_ids as string[] | null) ?? []);
+              if (targets.length > 0) {
+                await supabaseAdmin.from("notifications").insert(
+                  targets.map((uid) => ({
+                    workspace_id: workspaceId,
+                    recipient_id: uid,
+                    actor_id: userId,
+                    type: "automation",
+                    title: rule.name,
+                    body: renderTemplate(message, taskRec),
+                    task_id: task.id,
+                  })),
+                );
+              }
+              summary = `Notified ${targets.length} user(s)`;
+            } else {
+              summary = "No-op (action not configured)";
+            }
+            await recordRun("success", summary, null, null);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            await recordRun("failed", null, message, null);
+          }
+          continue;
+        }
+
+        if (action === "none") {
+          await recordRun("success", "Logged (no action)", null, null);
+          continue;
+        }
+
+        // ---- AI-backed actions ----
+        if (!apiKey) {
+          await recordRun("failed", null, "No OpenRouter API key configured for workspace.", null);
+          continue;
+        }
+        if (!rule.agent_id) {
+          await recordRun("failed", null, "AI action requires an agent.", null);
           continue;
         }
 
@@ -139,15 +262,7 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
           .maybeSingle();
 
         if (!agent) {
-          await supabaseAdmin.from("ai_automation_runs").insert({
-            workspace_id: workspaceId,
-            automation_id: rule.id,
-            task_id: task.id,
-            status: "failed",
-            trigger_event: data.event,
-            error_message: "Agent not found",
-            duration_ms: Date.now() - start,
-          });
+          await recordRun("failed", null, "Agent not found", null);
           continue;
         }
 
@@ -156,7 +271,6 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
           : `Task: ${task.title}\n\nDescription: ${getField(taskRec, "description")}`;
 
         try {
-          // Hard timeout so a hanging OpenRouter call can't block the response
           const ctrl = new AbortController();
           const timer = setTimeout(() => ctrl.abort(), 25_000);
           const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -165,8 +279,8 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
             headers: {
               Authorization: `Bearer ${apiKey}`,
               "Content-Type": "application/json",
-              "HTTP-Referer": "https://lovable.dev",
-              "X-Title": "Aura Tasks Automation",
+              "HTTP-Referer": "https://github.com/zenifold/aurora-os",
+              "X-Title": "Aurora Tasks Automation",
             },
             body: JSON.stringify({
               model: agent.model,
@@ -191,9 +305,8 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
           const output = (json.choices?.[0]?.message?.content ?? "").trim();
           const tokens = json.usage?.total_tokens ?? null;
 
-          // Apply action
           if (output) {
-            if (rule.apply_action === "comment") {
+            if (action === "comment") {
               await supabaseAdmin.from("comments").insert({
                 workspace_id: workspaceId,
                 task_id: task.id,
@@ -208,7 +321,7 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
                   ],
                 },
               });
-            } else if (rule.apply_action === "description_append") {
+            } else if (action === "description_append") {
               const current = getField(taskRec, "description") as string;
               const appended = (current ? current + "\n\n" : "") + `🤖 ${agent.name}:\n${output}`;
               await supabaseAdmin
@@ -225,7 +338,7 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
                   },
                 })
                 .eq("id", task.id);
-            } else if (rule.apply_action === "tag") {
+            } else if (action === "tag") {
               const newTags = output
                 .split(/[,\n]/)
                 .map((s) => s.trim().replace(/^#/, ""))
@@ -237,37 +350,10 @@ export const triggerTaskAutomations = createServerFn({ method: "POST" })
             }
           }
 
-          await supabaseAdmin.from("ai_automation_runs").insert({
-            workspace_id: workspaceId,
-            automation_id: rule.id,
-            task_id: task.id,
-            status: "success",
-            trigger_event: data.event,
-            output: output.slice(0, 4000),
-            duration_ms: Date.now() - start,
-            tokens_used: tokens,
-          });
-
-          await supabaseAdmin
-            .from("ai_automations")
-            .update({
-              run_count: (rule.run_count ?? 0) + 1,
-              last_run_at: new Date().toISOString(),
-            })
-            .eq("id", rule.id);
-
-          ran++;
+          await recordRun("success", output, null, tokens);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          await supabaseAdmin.from("ai_automation_runs").insert({
-            workspace_id: workspaceId,
-            automation_id: rule.id,
-            task_id: task.id,
-            status: "failed",
-            trigger_event: data.event,
-            error_message: message,
-            duration_ms: Date.now() - start,
-          });
+          await recordRun("failed", null, message, null);
         }
       }
 

@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.global_search(uuid, text, int) FROM PUBLIC, anon;

@@ -11,7 +11,39 @@ export type AutomationCondition = {
   value?: unknown;
 };
 
-export type ApplyAction = "comment" | "description_append" | "tag" | "none";
+export type ApplyAction =
+  | "comment"
+  | "description_append"
+  | "tag"
+  | "none"
+  // Deterministic (no AI required):
+  | "set_status"
+  | "set_priority"
+  | "add_tags"
+  | "remove_tags"
+  | "add_assignee"
+  | "set_due_date"
+  | "webhook"
+  | "notify";
+
+export const AI_ACTIONS: ApplyAction[] = ["comment", "description_append", "tag"];
+
+export function actionRequiresAgent(a: ApplyAction): boolean {
+  return AI_ACTIONS.includes(a);
+}
+
+export interface ActionConfig {
+  status?: string;
+  priority?: string;
+  tags?: string[];
+  assignee_id?: string;
+  due_date?: string; // ISO date
+  due_date_offset_days?: number; // e.g. +3 days from now
+  webhook_url?: string;
+  webhook_method?: "POST" | "PUT" | "PATCH";
+  notify_message?: string;
+  notify_user_ids?: string[];
+}
 
 export interface AiAutomation {
   id: string;
@@ -21,9 +53,10 @@ export interface AiAutomation {
   is_active: boolean;
   trigger_event: "task.created" | "task.updated" | "task.status_changed";
   conditions: AutomationCondition[];
-  agent_id: string;
+  agent_id: string | null;
   instructions_template: string | null;
   apply_action: ApplyAction;
+  action_config: ActionConfig;
   run_count: number;
   last_run_at: string | null;
   created_at: string;
@@ -64,7 +97,7 @@ export function useUpsertAutomation() {
   const workspaceId = useWorkspaceStore((s) => s.current?.id);
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async (a: Partial<AiAutomation> & { name: string; agent_id: string }) => {
+    mutationFn: async (a: Partial<AiAutomation> & { name: string }) => {
       if (!workspaceId) throw new Error("No workspace");
       const payload = {
         workspace_id: workspaceId,
@@ -73,9 +106,10 @@ export function useUpsertAutomation() {
         is_active: a.is_active ?? true,
         trigger_event: a.trigger_event ?? "task.created",
         conditions: (a.conditions ?? []) as never,
-        agent_id: a.agent_id,
+        agent_id: a.agent_id ?? null,
         instructions_template: a.instructions_template ?? null,
         apply_action: a.apply_action ?? "comment",
+        action_config: (a.action_config ?? {}) as never,
         created_by: user?.id ?? null,
       };
       if (a.id) {

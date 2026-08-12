@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { Pin, Archive, Trash2, X, FileText, List as ListIcon, ListChecks } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { NoteEditor } from "./NoteEditor";
 import { NOTE_COLORS } from "@/lib/note-colors";
 import { useUpdateNote, useDeleteNote, useTogglePin } from "@/hooks/use-notes";
+import { EntityLinksPanel } from "@/components/entity-links/EntityLinksPanel";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import type { Note, NoteType } from "@/lib/types";
@@ -173,8 +175,13 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (confirm("Delete this note?")) {
+                    onClick={async () => {
+                      const ok = await confirmDialog({
+                        title: "Delete this note?",
+                        confirmLabel: "Delete",
+                        tone: "destructive",
+                      });
+                      if (ok) {
                         del.mutate(note.id);
                         onOpenChange(false);
                       }
@@ -223,6 +230,9 @@ export function NoteEditorDialog({ note, open, onOpenChange }: NoteEditorDialogP
               type === "check_list" ? "List item" : type === "bullet_list" ? "List item" : "Take a note…"
             }
           />
+          <div className="mt-4">
+            <EntityLinksPanel kind="note" id={note.id} compact />
+          </div>
         </div>
 
         {/* Footer */}

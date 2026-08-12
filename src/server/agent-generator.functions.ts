@@ -63,8 +63,8 @@ Respond with ONLY valid JSON, no markdown, matching:
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://lovable.dev",
-        "X-Title": "Aura Agent Builder",
+        "HTTP-Referer": "https://github.com/zenifold/aurora-os",
+        "X-Title": "Aurora Agent Builder",
       },
       body: JSON.stringify({
         model: "xiaomi/mimo-v2-flash",

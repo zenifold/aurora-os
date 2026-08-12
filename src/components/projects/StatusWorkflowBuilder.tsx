@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -94,14 +95,15 @@ export function StatusWorkflowBuilder({ projectId }: { projectId: string }) {
                 key={s.id}
                 status={s}
                 onChange={(patch) => updateStatus.mutate({ id: s.id, ...patch })}
-                onRemove={() => {
+                onRemove={async () => {
                   if (statuses.length <= 2) return;
-                  if (
-                    !confirm(
-                      "Delete this status? Tasks using it will keep the value but it won't appear in pickers.",
-                    )
-                  )
-                    return;
+                  const ok = await confirmDialog({
+                    title: "Delete this status?",
+                    description: "Tasks using it will keep their current value, but the status won't appear in pickers anymore.",
+                    confirmLabel: "Delete status",
+                    tone: "destructive",
+                  });
+                  if (!ok) return;
                   deleteStatus.mutate(s.id);
                 }}
                 canRemove={statuses.length > 2}

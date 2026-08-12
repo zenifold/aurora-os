@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   useMeeting,
@@ -52,8 +52,15 @@ import {
   Wand2,
   FolderOpen,
   Download,
+  Printer,
+  Paperclip,
+  Mail,
 } from "lucide-react";
-import { meetingToMarkdown, downloadMarkdown } from "@/lib/meeting-export";
+import { meetingToMarkdown, downloadMarkdown, meetingToEmailRecap, openMailto } from "@/lib/meeting-export";
+import { printPage } from "@/lib/exports";
+import { AttachmentsList } from "@/components/app/AttachmentsList";
+import { EntityLinksPanel } from "@/components/entity-links/EntityLinksPanel";
+import { EntityBacklinksPanel } from "@/components/entity-links/EntityBacklinksPanel";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
@@ -122,9 +129,9 @@ function MeetingDetailPage() {
   };
 
   return (
-    <div className="flex h-full min-h-screen flex-col">
+    <div className="flex h-full min-h-screen flex-col" data-print="true">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b bg-background/95 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3" data-print-hide="true">
         <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
           <Link to="/app/meetings">
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -162,6 +169,29 @@ function MeetingDetailPage() {
               <Download className="mr-1.5 h-3.5 w-3.5" /> Export
             </Button>
           )}
+          {meeting.ai_status === "completed" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                const { subject, body } = meetingToEmailRecap(meeting, actionItems);
+                try {
+                  await navigator.clipboard.writeText(`${subject}\n\n${body}`);
+                  toast.success("Recap copied to clipboard");
+                } catch {
+                  // ignore
+                }
+                const to = meeting.participant_emails ?? [];
+                openMailto(to, subject, body);
+              }}
+              title="Open in your email client with the recap pre-filled"
+            >
+              <Mail className="mr-1.5 h-3.5 w-3.5" /> Email recap
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={printPage} title="Print or save as PDF">
+            <Printer className="mr-1.5 h-3.5 w-3.5" /> Print
+          </Button>
           <Button
             onClick={runAnalysis}
             disabled={analyzing || !transcript.trim()}
@@ -181,6 +211,7 @@ function MeetingDetailPage() {
       <div className="grid flex-1 grid-cols-1 gap-0 lg:grid-cols-[3fr_2fr]">
         {/* Transcript */}
         <div className="border-b p-3 sm:p-4 lg:border-b-0 lg:border-r lg:p-6">
+          {meeting.audio_path && <AudioPlayback path={meeting.audio_path} />}
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-sm">
               Transcript
@@ -200,7 +231,7 @@ function MeetingDetailPage() {
         {/* Sidebar */}
         <div className="p-3 sm:p-4 lg:p-6">
           <Tabs defaultValue="summary">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="summary"><FileText className="mr-1.5 h-3.5 w-3.5" />Summary</TabsTrigger>
               <TabsTrigger value="actions">
                 <ListChecks className="mr-1.5 h-3.5 w-3.5" />
@@ -208,6 +239,7 @@ function MeetingDetailPage() {
               </TabsTrigger>
               <TabsTrigger value="topics"><Tags className="mr-1.5 h-3.5 w-3.5" />Topics</TabsTrigger>
               <TabsTrigger value="people"><Users className="mr-1.5 h-3.5 w-3.5" />People</TabsTrigger>
+              <TabsTrigger value="files"><Paperclip className="mr-1.5 h-3.5 w-3.5" />Files</TabsTrigger>
             </TabsList>
 
             <TabsContent value="summary" className="mt-4 space-y-4">
@@ -236,7 +268,16 @@ function MeetingDetailPage() {
             <TabsContent value="people" className="mt-4">
               <ParticipantsPanel meetingId={meeting.id} />
             </TabsContent>
+
+            <TabsContent value="files" className="mt-4">
+              <AttachmentsList entityType="meeting" entityId={meeting.id} />
+            </TabsContent>
           </Tabs>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <EntityLinksPanel kind="meeting" id={meeting.id} />
+            <EntityBacklinksPanel kind="meeting" id={meeting.id} />
+          </div>
 
           <p className="mt-6 text-xs text-muted-foreground">
             Created {formatDistanceToNow(new Date(meeting.created_at), { addSuffix: true })}
@@ -402,6 +443,7 @@ function ActionItemsView({
           .order("position", { ascending: false })
           .limit(1);
         const nextPos = existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
+        const guessId = (item as { assignee_guess_user_id?: string | null }).assignee_guess_user_id ?? null;
         const { data: task, error } = await supabase
           .from("tasks")
           .insert({
@@ -413,6 +455,7 @@ function ActionItemsView({
             due_date: item.due_guess,
             position: nextPos,
             created_by: user.id,
+            assignee_ids: guessId ? [guessId] : [],
           })
           .select()
           .single();
@@ -789,5 +832,25 @@ function ProjectLinkSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+function AudioPlayback({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.storage
+      .from("meeting-recordings")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => {
+        if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
+      });
+    return () => { cancelled = true; };
+  }, [path]);
+  if (!url) return null;
+  return (
+    <div className="mb-3 rounded-md border bg-muted/30 p-2">
+      <audio controls src={url} className="h-8 w-full" preload="metadata" />
+    </div>
   );
 }

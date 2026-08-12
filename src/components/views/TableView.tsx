@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { CustomFieldDef, Task, ViewConfig } from "@/lib/types";
+import type { CustomFieldDef, Project, Task, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/types";
 import { useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
 import { useProjectRelationIndicators } from "@/hooks/use-task-relations";
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { Plus, Trash2, X, ArrowLeftCircle, ArrowRightCircle, ChevronRight as ChevronRightIcon, Maximize2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
@@ -35,7 +35,13 @@ import {
 import { useCreateCustomField } from "@/hooks/use-custom-fields";
 import type { FieldType } from "@/lib/types";
 import { AssigneeAvatars } from "@/components/tasks/AssigneeAvatars";
+import { AssigneePicker } from "@/components/tasks/AssigneePicker";
 import { BulkActionBar } from "@/components/views/BulkActionBar";
+import { TaskRefBadge } from "@/components/tasks/TaskRefBadge";
+import { TaskTypeChip } from "@/components/tasks/TaskTypeChip";
+import { useProject } from "@/hooks/use-projects";
+import { OptionCell } from "@/components/views/OptionCell";
+import { useProjectTimeTotals } from "@/hooks/use-project-time-totals";
 
 interface Props {
   projectId: string;
@@ -50,6 +56,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const create = useCreateTask(projectId);
   const update = useUpdateTask(projectId);
   const remove = useDeleteTask(projectId);
+  const { data: project } = useProject(projectId);
   
   const createField = useCreateCustomField();
   const { data: indicators } = useProjectRelationIndicators(projectId);
@@ -69,6 +76,10 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
   const showDue = isColumnVisible(viewConfig, "due");
   const showAssignees = isColumnVisible(viewConfig, "assignees");
   const showTags = isColumnVisible(viewConfig, "tags");
+  // Time tracking columns are off by default — opt in via View options.
+  const isOptIn = (key: string) => (viewConfig.columns ?? []).some((c) => c.key === key && c.visible === true);
+  const showEstimate = isOptIn("estimate");
+  const showLogged = isOptIn("logged");
   const visibleFields = fields.filter((f) => isColumnVisible(viewConfig, `f:${f.id}`));
   const visibleColCount =
     1 +
@@ -77,8 +88,12 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     (showDue ? 1 : 0) +
     (showAssignees ? 1 : 0) +
     (showTags ? 1 : 0) +
+    (showEstimate ? 1 : 0) +
+    (showLogged ? 1 : 0) +
     visibleFields.length +
     1;
+
+  const { data: timeTotals } = useProjectTimeTotals(showLogged ? projectId : undefined);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [newTitle, setNewTitle] = useState("");
@@ -94,6 +109,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
     due: 128,
     assignees: 120,
     tags: 180,
+    estimate: 96,
+    logged: 112,
     add: 40,
   };
   fields.forEach((f) => { defaultWidths[`f:${f.id}`] = 160; });
@@ -202,6 +219,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
           {showDue && <col style={{ width: widths.due }} />}
           {showAssignees && <col style={{ width: widths.assignees }} />}
           {showTags && <col style={{ width: widths.tags }} />}
+          {showEstimate && <col style={{ width: widths.estimate }} />}
+          {showLogged && <col style={{ width: widths.logged }} />}
           {visibleFields.map((f) => <col key={f.id} style={{ width: widths[`f:${f.id}`] ?? 160 }} />)}
           <col style={{ width: widths.add }} />
         </colgroup>
@@ -236,6 +255,8 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
             {showDue && <ResizableTh colKey="due" widths={widths} setWidths={setWidths}>Due</ResizableTh>}
             {showAssignees && <ResizableTh colKey="assignees" widths={widths} setWidths={setWidths}>Assignees</ResizableTh>}
             {showTags && <ResizableTh colKey="tags" widths={widths} setWidths={setWidths}>Tags</ResizableTh>}
+            {showEstimate && <ResizableTh colKey="estimate" widths={widths} setWidths={setWidths}>Est. (h)</ResizableTh>}
+            {showLogged && <ResizableTh colKey="logged" widths={widths} setWidths={setWidths}>Logged (h)</ResizableTh>}
             {visibleFields.map((f) => (
               <ResizableTh key={f.id} colKey={`f:${f.id}`} widths={widths} setWidths={setWidths}>
                 {f.name}
@@ -269,6 +290,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                 <TaskRow
                   key={t.id}
                   task={t}
+                  project={project}
                   fields={visibleFields}
                   workflow={workflow}
                   selected={selected.has(t.id)}
@@ -278,6 +300,9 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   showDue={showDue}
                   showAssignees={showAssignees}
                   showTags={showTags}
+                  showEstimate={showEstimate}
+                  showLogged={showLogged}
+                  loggedHours={timeTotals?.totals.get(t.id)}
                   rowColor={colorForTask(t, viewConfig, statusColorMap)}
                   titleStickyLeft={widths.select}
                   depth={node.depth}
@@ -289,7 +314,6 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                   onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                   onClickRow={() => onTaskClick(t.id)}
-                  onDelete={() => remove.mutate(t.id)}
                 />
               );
             })
@@ -309,6 +333,7 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                   <TaskRow
                     key={t.id}
                     task={t}
+                    project={project}
                     fields={visibleFields}
                     workflow={workflow}
                     selected={selected.has(t.id)}
@@ -318,12 +343,14 @@ export function TableView({ projectId, tasks, fields, groupBy, viewConfig = {}, 
                     showDue={showDue}
                     showAssignees={showAssignees}
                     showTags={showTags}
+                    showEstimate={showEstimate}
+                    showLogged={showLogged}
+                    loggedHours={timeTotals?.totals.get(t.id)}
                     rowColor={colorForTask(t, viewConfig, statusColorMap)}
                     titleStickyLeft={widths.select}
                     onToggleSelect={(e) => toggleOne(t.id, { additive: e?.metaKey || e?.ctrlKey, range: e?.shiftKey })}
                     onUpdate={(patch) => update.mutate({ id: t.id, ...patch })}
                     onClickRow={() => onTaskClick(t.id)}
-                    onDelete={() => remove.mutate(t.id)}
                   />
                 ))}
               </>
@@ -438,6 +465,7 @@ function ResizableThInner({
 
 function TaskRow({
   task,
+  project,
   fields,
   workflow,
   selected,
@@ -447,6 +475,9 @@ function TaskRow({
   showDue = true,
   showAssignees = false,
   showTags = false,
+  showEstimate = false,
+  showLogged = false,
+  loggedHours,
   rowColor = null,
   titleStickyLeft = 40,
   depth = 0,
@@ -458,9 +489,9 @@ function TaskRow({
   onToggleSelect,
   onUpdate,
   onClickRow,
-  onDelete,
 }: {
   task: Task;
+  project?: Project | null;
   fields: CustomFieldDef[];
   workflow: WorkflowStatus[];
   selected: boolean;
@@ -470,6 +501,9 @@ function TaskRow({
   showDue?: boolean;
   showAssignees?: boolean;
   showTags?: boolean;
+  showEstimate?: boolean;
+  showLogged?: boolean;
+  loggedHours?: number;
   rowColor?: string | null;
   titleStickyLeft?: number;
   depth?: number;
@@ -481,7 +515,6 @@ function TaskRow({
   onToggleSelect: (e?: { metaKey?: boolean; ctrlKey?: boolean; shiftKey?: boolean }) => void;
   onUpdate: (patch: Partial<Task>) => void;
   onClickRow: () => void;
-  onDelete: () => void;
 }) {
   const [titleEdit, setTitleEdit] = useState<string | null>(null);
   const STATUS_OPTIONS = workflow.map((s) => ({ value: s.id, label: s.name, color: s.color }));
@@ -491,8 +524,8 @@ function TaskRow({
   const isBlocking = (indicator?.blocking ?? 0) > 0;
 
   const typeMeta = getTaskTypeMeta(task.task_type);
-  const TypeIcon = typeMeta.icon;
-  const indent = typeMeta.indent;
+  // Indent based on actual tree depth (not task type), so top-level rows sit flush left.
+  const indent = depth * 16;
   // Type color takes precedence over rule-based row color so hierarchy is always visible.
   const borderColor = typeMeta.color;
   const borderWidth =
@@ -571,11 +604,13 @@ function TaskRow({
               ) : (
                 <span className="inline-block h-4 w-4 shrink-0" />
               )}
-              {/* Type icon */}
-              <TypeIcon
-                className="h-3.5 w-3.5 shrink-0"
-                style={{ color: typeMeta.color }}
-                aria-label={typeMeta.label}
+              {/* Type icon — click to change */}
+              <TaskTypeChip
+                value={task.task_type}
+                onChange={(next) => onUpdate({ task_type: next } as Partial<Task>)}
+                iconOnly
+                size={14}
+                hasChildren={(task.child_count ?? 0) > 0}
               />
               {isBlocked && (
                 <ArrowLeftCircle
@@ -600,17 +635,25 @@ function TaskRow({
                   {rollup.done}/{rollup.total}
                 </span>
               )}
-              <button
-                onClick={() => setTitleEdit(task.title)}
+              <TaskRefBadge
+                task={task}
+                project={project}
                 className="opacity-0 transition-opacity group-hover:opacity-100"
+              />
+              <button
+                onClick={(e) => { e.stopPropagation(); setTitleEdit(task.title); }}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+                aria-label="Rename"
               >
                 <span className="text-xs text-muted-foreground">edit</span>
               </button>
               <button
-                onClick={onDelete}
-                className="opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => { e.stopPropagation(); onClickRow(); }}
+                className="rounded p-0.5 opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
+                aria-label="Open task details"
+                title="Open task"
               >
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                <Maximize2 className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
               </button>
             </div>
             {/* Roll-up progress bar (parents only) */}
@@ -626,42 +669,27 @@ function TaskRow({
         )}
       </td>
       {showStatus && (
-        <td className="px-3 py-1.5">
-          <Select value={task.status} onValueChange={(v) => onUpdate({ status: v })}>
-            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: status?.color }} />
-                <span className="text-xs">{status?.label ?? task.status}</span>
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                    {s.label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <td className="px-2 py-1.5">
+          <OptionCell
+            value={(task as Task & { workflow_status_id?: string }).workflow_status_id ?? STATUS_OPTIONS.find((s) => s.label.toLowerCase() === String(task.status ?? "").toLowerCase())?.value ?? ""}
+            options={STATUS_OPTIONS}
+            onChange={(v) => onUpdate({ status: v, workflow_status_id: v } as Partial<Task>)}
+            placeholder="Set status"
+            ariaLabel="Status"
+            variant="pill"
+          />
         </td>
       )}
       {showPriority && (
-        <td className="px-3 py-1.5">
-          <Select value={task.priority} onValueChange={(v) => onUpdate({ priority: v as Task["priority"] })}>
-            <SelectTrigger className="h-7 border-none bg-transparent px-2 hover:bg-accent">
-              <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-3 rounded-full" style={{ backgroundColor: priority?.color }} />
-                <span className="text-xs">{priority?.label}</span>
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {PRIORITY_OPTIONS.map((p) => (
-                <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <td className="px-2 py-1.5">
+          <OptionCell
+            value={task.priority}
+            options={PRIORITY_OPTIONS.map((p) => ({ value: p.value, label: p.label, color: p.color }))}
+            onChange={(v) => onUpdate({ priority: v as Task["priority"] })}
+            placeholder="Set priority"
+            ariaLabel="Priority"
+            variant="pill"
+          />
         </td>
       )}
       {showDue && (
@@ -691,11 +719,24 @@ function TaskRow({
       )}
       {showAssignees && (
         <td className="px-3 py-1.5">
-          {task.assignee_ids.length > 0 ? (
-            <AssigneeAvatars ids={task.assignee_ids} max={3} size={22} />
-          ) : (
-            <span className="text-xs text-muted-foreground">—</span>
-          )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex h-7 w-full items-center rounded px-2 text-left hover:bg-accent">
+                {task.assignee_ids.length > 0 ? (
+                  <AssigneeAvatars ids={task.assignee_ids} max={3} size={22} />
+                ) : (
+                  <span className="text-xs text-muted-foreground">Assign…</span>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-2" align="start">
+              <AssigneePicker
+                value={task.assignee_ids}
+                onChange={(next) => onUpdate({ assignee_ids: next })}
+                taskId={task.id}
+              />
+            </PopoverContent>
+          </Popover>
         </td>
       )}
       {showTags && (
@@ -709,6 +750,53 @@ function TaskRow({
             ))}
             {task.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{task.tags.length - 3}</span>}
           </div>
+        </td>
+      )}
+      {showEstimate && (
+        <td className="px-2 py-1.5">
+          <Input
+            type="number"
+            min={0}
+            step={0.25}
+            defaultValue={
+              (task as unknown as { estimated_hours?: number | null }).estimated_hours ?? ""
+            }
+            onBlur={(e) => {
+              const raw = e.target.value;
+              const next = raw === "" ? null : Number(raw);
+              onUpdate({ estimated_hours: next } as never);
+            }}
+            placeholder="—"
+            className="h-7 border-none bg-transparent px-2 text-xs tabular-nums hover:bg-accent"
+          />
+        </td>
+      )}
+      {showLogged && (
+        <td className="px-3 py-1.5">
+          {(() => {
+            const est = Number(
+              (task as unknown as { estimated_hours?: number | null }).estimated_hours ?? 0,
+            );
+            const logged = Number(loggedHours ?? 0);
+            const over = est > 0 && logged > est;
+            return (
+              <span
+                className={`text-xs tabular-nums ${
+                  logged === 0
+                    ? "text-muted-foreground"
+                    : over
+                    ? "font-medium text-destructive"
+                    : "text-foreground"
+                }`}
+                title={est > 0 ? `${logged.toFixed(2)}h / ${est}h estimate` : `${logged.toFixed(2)}h logged`}
+              >
+                {logged > 0 ? `${logged.toFixed(2)}h` : "—"}
+                {est > 0 && (
+                  <span className="ml-1 text-[10px] text-muted-foreground">/ {est}h</span>
+                )}
+              </span>
+            );
+          })()}
         </td>
       )}
       {fields.map((f) => (

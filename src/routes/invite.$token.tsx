@@ -32,26 +32,57 @@ function AcceptInvite() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
+  const [alreadyMember, setAlreadyMember] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase
-        .from("workspace_invitations")
-        .select("id, workspace_id, email, role, status, expires_at, workspace:workspaces(name, slug)")
-        .eq("token", token)
+        .rpc("lookup_workspace_invitation", { _token: token })
         .maybeSingle();
       if (error || !data) {
-        setError("This invitation doesn't exist or has been revoked.");
+        setError("This invitation link is invalid or has been revoked. Ask the person who invited you to send a new one.");
+      } else if (data.status === "accepted") {
+        setError("This invitation has already been accepted. If that wasn't you, ask for a new invite.");
       } else if (data.status !== "pending") {
-        setError("This invitation has already been used.");
+        setError("This invitation is no longer valid.");
       } else if (new Date(data.expires_at) < new Date()) {
-        setError("This invitation has expired.");
+        setError("This invitation has expired. Ask the person who invited you to send a new one.");
       } else {
-        setInvite(data as unknown as InviteData);
+        setInvite({
+          id: data.id,
+          workspace_id: data.workspace_id,
+          email: data.email,
+          role: data.role,
+          status: data.status,
+          expires_at: data.expires_at,
+          workspace: { name: data.workspace_name, slug: data.workspace_slug },
+        } as unknown as InviteData);
+        // Check if signed-in user is already a member of this workspace
+        if (user) {
+          const { data: existing } = await supabase
+            .from("workspace_members")
+            .select("user_id")
+            .eq("workspace_id", data.workspace_id)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (existing) setAlreadyMember(true);
+        }
       }
       setLoading(false);
     })();
-  }, [token]);
+  }, [token, user]);
+
+  const openWorkspace = async () => {
+    if (!invite) return;
+    const { data: ws } = await supabase
+      .from("workspaces")
+      .select("id, name, slug, owner_id, plan, kind, linked_delivery_workspace_id")
+      .eq("id", invite.workspace_id)
+      .single();
+    if (ws) setCurrent(ws as never);
+    await fetchWs();
+    navigate({ to: "/app" });
+  };
 
   const accept = async () => {
     if (!invite || !user) return;
@@ -63,8 +94,10 @@ function AcceptInvite() {
         supabase.from("user_roles").insert({ workspace_id: invite.workspace_id, user_id: user.id, role: (invite.role === "owner" ? "owner" : "member") }),
       ]);
       // Ignore duplicate key errors (already a member)
-      if (memErr && !memErr.message.includes("duplicate")) throw memErr;
-      if (roleErr && !roleErr.message.includes("duplicate")) throw roleErr;
+      const isDup = (e: { code?: string; message?: string } | null) =>
+        !!e && (e.code === "23505" || (e.message ?? "").toLowerCase().includes("duplicate"));
+      if (memErr && !isDup(memErr)) throw memErr;
+      if (roleErr && !isDup(roleErr)) throw roleErr;
 
       const { error: updErr } = await supabase
         .from("workspace_invitations")
@@ -104,7 +137,7 @@ function AcceptInvite() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aura-gradient shadow-pop">
             <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
           </div>
-          <span className="text-2xl font-semibold">Aura</span>
+          <span className="text-2xl font-semibold">Aurora</span>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-8 shadow-pop">
@@ -138,10 +171,22 @@ function AcceptInvite() {
                     Sign in or create an account to accept.
                   </p>
                   <Button asChild className="w-full bg-aura-gradient text-primary-foreground hover:opacity-90">
-                    <Link to="/signup" search={{ redirect: `/invite/${token}` } as never}>Create account</Link>
+                    <Link to="/signup" search={{ redirect: `/invite/${token}`, email: invite.email } as never}>Create account</Link>
                   </Button>
                   <Button asChild variant="outline" className="w-full">
                     <Link to="/login" search={{ redirect: `/invite/${token}` } as never}>Sign in</Link>
+                  </Button>
+                </div>
+              ) : alreadyMember ? (
+                <div className="mt-6 space-y-3">
+                  <p className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
+                    You're already a member of <strong>{invite.workspace?.name}</strong>.
+                  </p>
+                  <Button
+                    onClick={openWorkspace}
+                    className="w-full bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90"
+                  >
+                    Open workspace
                   </Button>
                 </div>
               ) : (
@@ -149,7 +194,11 @@ function AcceptInvite() {
                   {user.email?.toLowerCase() !== invite.email.toLowerCase() && (
                     <p className="mb-3 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
                       Heads up: this invite was sent to <strong>{invite.email}</strong>, but you're signed in as{" "}
-                      <strong>{user.email}</strong>. You can still accept.
+                      <strong>{user.email}</strong>. You can{" "}
+                      <Link to="/login" search={{ redirect: `/invite/${token}` } as never} className="underline">
+                        sign in with a different account
+                      </Link>{" "}
+                      or accept anyway.
                     </p>
                   )}
                   <Button

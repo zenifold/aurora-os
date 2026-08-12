@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { useAuth } from "@/lib/auth-context";
 import {
   useComments,
@@ -11,6 +12,7 @@ import {
 } from "@/hooks/use-comments";
 import { useTypingIndicator } from "@/hooks/use-presence";
 import { MentionInput, MentionText } from "./MentionInput";
+import { AttachmentsList } from "@/components/app/AttachmentsList";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -301,8 +303,13 @@ function CommentItem({
                 </button>
                 <button
                   className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-destructive hover:bg-destructive/10"
-                  onClick={() => {
-                    if (confirm("Delete this comment?")) remove.mutate(comment.id);
+                  onClick={async () => {
+                    const ok = await confirmDialog({
+                      title: "Delete this comment?",
+                      confirmLabel: "Delete",
+                      tone: "destructive",
+                    });
+                    if (ok) remove.mutate(comment.id);
                   }}
                 >
                   <Trash2 className="h-3 w-3" /> Delete
@@ -344,6 +351,10 @@ function CommentItem({
             </div>
           )}
         </div>
+      </div>
+
+      <div className="ml-8 mt-2">
+        <AttachmentsList entityType="comment" entityId={comment.id} compact />
       </div>
 
       {comment.children.length > 0 && (

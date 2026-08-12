@@ -89,8 +89,8 @@ Goal: ${data.prompt}`;
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://lovable.dev",
-        "X-Title": "Aura Magic Add",
+        "HTTP-Referer": "https://github.com/zenifold/aurora-os",
+        "X-Title": "Aurora Magic Add",
       },
       body: JSON.stringify({
         model,

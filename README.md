@@ -1,17 +1,16 @@
-# Aura — The Company OS for Agencies & Software Delivery Teams
+# Aurora — The Company OS for Agencies & Software Delivery Teams
 
 > **Sales → Delivery → Ops, all in one place.**
-> Aura replaces the patchwork of Jira, Linear, Notion, HubSpot, Fathom, Asana, and Harvest with a single, opinionated workspace built for agencies and software delivery teams.
+> Aurora replaces the patchwork of Jira, Linear, Notion, HubSpot, Fathom, Asana, and Harvest with a single, opinionated workspace built for agencies and software delivery teams.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Built with Lovable](https://img.shields.io/badge/Built%20with-Lovable-ff69b4.svg)](https://lovable.dev)
 
 ---
 
-## ✨ What is Aura?
+## ✨ What is Aurora?
 
-Aura is an open-source **Company OS** that unifies the full lifecycle of client and product work:
+Aurora is an open-source **Company OS** that unifies the full lifecycle of client and product work:
 
 - 🎯 **Sales** — Pipeline, proposals, SOWs, forecasting
 - 🚀 **Delivery** — Sprints, tasks, milestones, client portals, deliverables
@@ -39,29 +38,33 @@ It replaces:
 - **Magic Add** — One input creates the right entity (task, note, meeting, etc.) with AI
 - **Realtime collaboration** — Presence, comments, mentions
 - **PWA** — Installable, offline-aware
-- **AI built-in** — Powered by the [Lovable AI Gateway](https://docs.lovable.dev) (Gemini, GPT-5)
+- **Aura AI assistant** — Workspace-grounded chat that can answer questions, ask clarifying multiple-choice questions, and autonomously generate pages, canvases, plans, folders, and projects
+- **Chrome extension** — Quick capture, context lens sidebar, omnibox search, and meeting recorder for any tab
+- **Apps menu + Create FAB** — 9-dot launcher for business workflows; floating Create button for tasks, pages, plans, projects, AI generation, and Aura chat
+- **AI built-in** — Powered by [OpenRouter](https://openrouter.ai) using `xiaomi/mimo-v2-flash` as the default model across the entire app
 
 ## 🏗️ Tech stack
 
 - **Framework:** [TanStack Start](https://tanstack.com/start) (React 19 + Vite 7) with SSR on Cloudflare Workers
-- **Backend:** Supabase (Postgres + Auth + Storage + Realtime + Edge Functions) via [Lovable Cloud](https://lovable.dev/cloud)
+- **Backend:** [Supabase](https://supabase.com) (Postgres + Auth + Storage + Realtime)
 - **Styling:** Tailwind CSS v4 + shadcn/ui + Radix
 - **State:** Zustand + TanStack Query (with persist)
 - **Editor:** Tiptap
-- **AI:** Lovable AI Gateway
+- **AI:** OpenRouter (default model: `xiaomi/mimo-v2-flash`, configurable per workspace in **Settings → AI**)
+- **Browser extension:** Manifest V3 (`extension/`, packaged as `public/aura-extension.zip`)
 
 ## 🚀 Quick start
 
 ### Prerequisites
 - [Bun](https://bun.sh/) (or Node 20+)
-- A Supabase project (or use Lovable Cloud)
+- A Supabase project (local via Docker, or hosted)
 
 ### Install
 
 ```bash
-git clone https://github.com/<your-org>/aura.git
-cd aura
-bun install
+git clone <your-repo-url> aurora-osx
+cd aurora-osx
+npm install   # or: bun install
 ```
 
 ### Configure
@@ -74,6 +77,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=<anon-key>
 VITE_SUPABASE_PROJECT_ID=<your-ref>
 ```
 
+> For a zero-cloud setup (local Supabase in Docker), follow
+> [docs/local-dev.md](docs/local-dev.md) instead of the steps below.
+
 ### Run migrations
 
 All schema lives in `supabase/migrations/`. Apply with the Supabase CLI:
@@ -85,15 +91,15 @@ supabase db push
 ### Develop
 
 ```bash
-bun dev
+npm run dev   # or: bun dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:5173> (wait for Vite's `ready in …` line — ~55s on this project).
 
 ### Build
 
 ```bash
-bun run build
+npm run build   # or: bun run build
 ```
 
 Output deploys to Cloudflare Workers (see `wrangler.jsonc`) or any edge host that supports TanStack Start.
@@ -128,8 +134,11 @@ supabase/
 - [x] Client portal & deliverables review
 - [x] Financials, health, change orders
 - [x] Magic Add (AI entity creation)
+- [x] Magic Add (AI entity creation)
+- [x] Aura AI with clarifying questions + agentic artifact generation
+- [x] Chrome extension (quick capture, sidebar, omnibox, meeting recorder)
 - [ ] Escalation engine (L1–L5 tiered automation)
-- [ ] Proposal → Project auto-conversion
+- [x] Proposal → Project auto-conversion
 - [ ] Executive rollup dashboard
 - [ ] Mobile native shells
 
@@ -150,9 +159,8 @@ Found a vulnerability? Please email **security@<your-domain>** instead of openin
 
 ## 📜 License
 
-[MIT](LICENSE) © Aura contributors.
+[MIT](LICENSE) © Aurora contributors.
 
 ## 🙌 Built with
 
-- [Lovable](https://lovable.dev) — AI-powered app builder used to scaffold and iterate Aura
 - [TanStack](https://tanstack.com), [Supabase](https://supabase.com), [shadcn/ui](https://ui.shadcn.com)

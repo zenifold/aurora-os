@@ -1,7 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "aurora-app",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  // Apex custom domain. Cloudflare creates the DNS record and provisions the
+  // TLS cert on first deploy, since the zone lives in the same account.
+  "routes": [{ "pattern": "aurora-app.work", "custom_domain": true }],
+  "observability": { "enabled": true },
 }

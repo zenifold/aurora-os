@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGuard } from "@/components/app/RoleGuard";
+import { confirmDialog } from "@/lib/dialogs";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -7,11 +9,14 @@ import {
   useDeleteAutomation,
   useToggleAutomation,
   useAutomationRuns,
+  actionRequiresAgent,
   type AiAutomation,
   type AutomationCondition,
   type ApplyAction,
+  type ActionConfig,
 } from "@/hooks/use-automations";
 import { useAiAgents } from "@/hooks/use-ai";
+import { useTeamMembers } from "@/hooks/use-team";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,10 +37,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Zap, Plus, Trash2, Sparkles, History, X, Tag, MessageSquare, FileText } from "lucide-react";
+import { Zap, Plus, Trash2, Sparkles, History, X, Tag, MessageSquare, FileText, ArrowRightCircle, Flag, UserPlus, Webhook, Bell, CircleDashed, FlaskConical, Loader2, CheckCircle2, XCircle, Calendar, TagsIcon } from "lucide-react";
+import { simulateAutomation } from "@/server/automation-simulate.functions";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 export const Route = createFileRoute("/app/settings/automations")({
-  component: AutomationsPage,
+  component: () => (
+    <RoleGuard min="manager">
+      <AutomationsPage />
+    </RoleGuard>
+  ),
 });
 
 type Template = {
@@ -44,9 +55,10 @@ type Template = {
   trigger_event: AiAutomation["trigger_event"];
   conditions: AutomationCondition[];
   apply_action: ApplyAction;
-  instructions_template: string;
-  agentSystemPrompt: string;
-  agentEmoji: string;
+  instructions_template?: string;
+  agentSystemPrompt?: string;
+  agentEmoji?: string;
+  action_config?: ActionConfig;
 };
 
 const TEMPLATES: Template[] = [
@@ -86,6 +98,47 @@ const TEMPLATES: Template[] = [
       "You are a friendly engineering lead reviewing completed work. Be encouraging but suggest meaningful follow-ups when relevant.",
     agentEmoji: "✅",
   },
+  // No-AI templates
+  {
+    name: "Auto-prioritize urgent",
+    description: "When a task title contains 'urgent', set priority to high — no AI required",
+    trigger_event: "task.created",
+    conditions: [{ field: "title", op: "contains", value: "urgent" }],
+    apply_action: "set_priority",
+    action_config: { priority: "high" },
+  },
+  {
+    name: "Notify on done",
+    description: "Ping the assignees when a task is moved to Done",
+    trigger_event: "task.status_changed",
+    conditions: [{ field: "status", op: "changed_to", value: "done" }],
+    apply_action: "notify",
+    action_config: { notify_message: "✅ {{title}} was marked done" },
+  },
+  {
+    name: "Webhook on creation",
+    description: "POST a JSON payload to your endpoint whenever a task is created",
+    trigger_event: "task.created",
+    conditions: [],
+    apply_action: "webhook",
+    action_config: { webhook_url: "https://example.com/webhook", webhook_method: "POST" },
+  },
+  {
+    name: "Default 7-day deadline",
+    description: "Set due date to 7 days out for newly created tasks without one",
+    trigger_event: "task.created",
+    conditions: [{ field: "due_date", op: "is_empty" }],
+    apply_action: "set_due_date",
+    action_config: { due_date_offset_days: 7 },
+  },
+  {
+    name: "Clean up done tags",
+    description: "Remove 'wip' or 'in-review' tags when a task moves to Done",
+    trigger_event: "task.status_changed",
+    conditions: [{ field: "status", op: "changed_to", value: "done" }],
+    apply_action: "remove_tags",
+    action_config: { tags: ["wip", "in-review"] },
+  },
 ];
 
 function AutomationsPage() {
@@ -107,7 +160,8 @@ function AutomationsPage() {
             <Zap className="h-5 w-5 text-primary" /> Automations
           </h1>
           <p className="text-sm text-muted-foreground">
-            Run AI agents automatically when tasks are created or updated.
+            Trigger actions automatically when tasks change. Use AI agents for smart actions, or set
+            simple rules without AI.
           </p>
         </div>
         <div className="flex gap-2">
@@ -117,7 +171,6 @@ function AutomationsPage() {
           <Button
             size="sm"
             onClick={() => setCreating(true)}
-            disabled={agents.length === 0}
             className="bg-aura-gradient text-primary-foreground hover:opacity-90"
           >
             <Plus className="mr-1.5 h-4 w-4" /> New automation
@@ -125,14 +178,8 @@ function AutomationsPage() {
         </div>
       </div>
 
-      {agents.length === 0 && (
-        <div className="mt-6 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Create at least one AI agent in <strong>AI agents</strong> before adding automations.
-        </div>
-      )}
-
       <div className="mt-6 space-y-2">
-        {automations.length === 0 && agents.length > 0 && (
+        {automations.length === 0 && (
           <div className="rounded-xl border border-dashed border-border p-10 text-center">
             <Zap className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="mt-2 text-sm font-medium">No automations yet</p>
@@ -178,8 +225,14 @@ function AutomationsPage() {
                   variant="ghost"
                   size="icon"
                   className="text-destructive"
-                  onClick={() => {
-                    if (confirm(`Delete automation "${a.name}"?`)) remove.mutate(a.id);
+                  onClick={async () => {
+                    const ok = await confirmDialog({
+                      title: "Delete automation?",
+                      description: `"${a.name}" will be removed and stop running.`,
+                      confirmLabel: "Delete",
+                      tone: "destructive",
+                    });
+                    if (ok) remove.mutate(a.id);
                   }}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -213,13 +266,21 @@ function AutomationsPage() {
 }
 
 function ActionBadge({ action }: { action: ApplyAction }) {
-  const map = {
-    comment: { label: "Comment", icon: MessageSquare },
-    description_append: { label: "Description", icon: FileText },
-    tag: { label: "Tags", icon: Tag },
+  const map: Record<ApplyAction, { label: string; icon: typeof MessageSquare }> = {
+    comment: { label: "AI comment", icon: MessageSquare },
+    description_append: { label: "AI description", icon: FileText },
+    tag: { label: "AI tags", icon: Tag },
     none: { label: "Log only", icon: History },
-  } as const;
-  const { label, icon: Icon } = map[action];
+    set_status: { label: "Set status", icon: ArrowRightCircle },
+    set_priority: { label: "Set priority", icon: Flag },
+    add_tags: { label: "Add tags", icon: Tag },
+    remove_tags: { label: "Remove tags", icon: TagsIcon },
+    add_assignee: { label: "Assign", icon: UserPlus },
+    set_due_date: { label: "Set due date", icon: Calendar },
+    webhook: { label: "Webhook", icon: Webhook },
+    notify: { label: "Notify", icon: Bell },
+  };
+  const { label, icon: Icon } = map[action] ?? { label: action, icon: CircleDashed };
   return (
     <Badge variant="secondary" className="gap-1 font-normal">
       <Icon className="h-3 w-3" /> {label}
@@ -238,16 +299,19 @@ function AutomationDialog({
 }) {
   const upsert = useUpsertAutomation();
   const { data: agents = [] } = useAiAgents();
+  const { data: members = [] } = useTeamMembers();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [triggerEvent, setTriggerEvent] = useState<AiAutomation["trigger_event"]>("task.created");
   const [agentId, setAgentId] = useState<string>("");
-  const [applyAction, setApplyAction] = useState<ApplyAction>("comment");
+  const [applyAction, setApplyAction] = useState<ApplyAction>("set_priority");
   const [instructionsTemplate, setInstructionsTemplate] = useState("");
   const [conditions, setConditions] = useState<AutomationCondition[]>([]);
+  const [actionConfig, setActionConfig] = useState<ActionConfig>({});
 
   const isEdit = !!automation;
+  const needsAgent = actionRequiresAgent(applyAction);
 
   // Initialize form on open
   const [initKey, setInitKey] = useState<string | null>(null);
@@ -258,15 +322,20 @@ function AutomationDialog({
     setDescription(automation?.description ?? "");
     setTriggerEvent(automation?.trigger_event ?? "task.created");
     setAgentId(automation?.agent_id ?? agents[0]?.id ?? "");
-    setApplyAction(automation?.apply_action ?? "comment");
+    setApplyAction(automation?.apply_action ?? "set_priority");
     setInstructionsTemplate(automation?.instructions_template ?? "");
     setConditions(automation?.conditions ?? []);
+    setActionConfig(automation?.action_config ?? {});
   }
   if (!open && initKey !== null) setInitKey(null);
 
   const save = async () => {
-    if (!name.trim() || !agentId) {
-      toast.error("Name and agent are required");
+    if (!name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    if (needsAgent && !agentId) {
+      toast.error("Pick an AI agent for this action");
       return;
     }
     await upsert.mutateAsync({
@@ -274,15 +343,18 @@ function AutomationDialog({
       name: name.trim(),
       description: description.trim() || null,
       trigger_event: triggerEvent,
-      agent_id: agentId,
+      agent_id: needsAgent ? agentId : null,
       apply_action: applyAction,
-      instructions_template: instructionsTemplate.trim() || null,
+      instructions_template: needsAgent ? (instructionsTemplate.trim() || null) : null,
       conditions,
+      action_config: actionConfig,
       is_active: automation?.is_active ?? true,
     });
     toast.success(isEdit ? "Automation updated" : "Automation created");
     onClose();
   };
+
+  const updateCfg = (patch: Partial<ActionConfig>) => setActionConfig((c) => ({ ...c, ...patch }));
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -293,70 +365,192 @@ function AutomationDialog({
         <div className="grid max-h-[60vh] gap-4 overflow-y-auto pr-1">
           <div className="grid gap-1.5">
             <Label>Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Auto-tag bugs" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Auto-prioritize urgent" />
           </div>
           <div className="grid gap-1.5">
             <Label>Description (optional)</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-1.5">
-              <Label>Trigger</Label>
-              <Select value={triggerEvent} onValueChange={(v) => setTriggerEvent(v as AiAutomation["trigger_event"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="task.created">Task created</SelectItem>
-                  <SelectItem value="task.updated">Task updated</SelectItem>
-                  <SelectItem value="task.status_changed">Status changed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-1.5">
-              <Label>Run agent</Label>
-              <Select value={agentId} onValueChange={setAgentId}>
-                <SelectTrigger><SelectValue placeholder="Select agent" /></SelectTrigger>
-                <SelectContent>
-                  {agents.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.avatar_emoji ?? "🤖"} {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid gap-1.5">
+            <Label>Trigger</Label>
+            <Select value={triggerEvent} onValueChange={(v) => setTriggerEvent(v as AiAutomation["trigger_event"])}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="task.created">Task created</SelectItem>
+                <SelectItem value="task.updated">Task updated</SelectItem>
+                <SelectItem value="task.status_changed">Status changed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <ConditionsEditor value={conditions} onChange={setConditions} />
 
           <div className="grid gap-1.5">
-            <Label>Apply output as</Label>
+            <Label>Action</Label>
             <Select value={applyAction} onValueChange={(v) => setApplyAction(v as ApplyAction)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="comment">Comment on task</SelectItem>
-                <SelectItem value="description_append">Append to description</SelectItem>
-                <SelectItem value="tag">Add as tags (comma-separated output)</SelectItem>
-                <SelectItem value="none">Log only (don't apply)</SelectItem>
+                <SelectItem value="set_priority">Set priority</SelectItem>
+                <SelectItem value="set_status">Set status</SelectItem>
+                <SelectItem value="set_due_date">Set due date</SelectItem>
+                <SelectItem value="add_tags">Add tags</SelectItem>
+                <SelectItem value="remove_tags">Remove tags</SelectItem>
+                <SelectItem value="add_assignee">Assign to user</SelectItem>
+                <SelectItem value="notify">Send notification</SelectItem>
+                <SelectItem value="webhook">Call webhook (HTTP)</SelectItem>
+                <SelectItem value="none">Log only (no action)</SelectItem>
+                <SelectItem value="comment">AI: comment on task</SelectItem>
+                <SelectItem value="description_append">AI: append to description</SelectItem>
+                <SelectItem value="tag">AI: add tags</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="grid gap-1.5">
-            <Label>Prompt template</Label>
-            <Textarea
-              value={instructionsTemplate}
-              onChange={(e) => setInstructionsTemplate(e.target.value)}
-              rows={5}
-              placeholder="Use {{title}}, {{description}}, {{status}}, {{priority}}, {{tags}}"
-              className="font-mono text-xs"
-            />
             <p className="text-[10px] text-muted-foreground">
-              Variables: <code>{`{{title}}`}</code> <code>{`{{description}}`}</code>{" "}
-              <code>{`{{status}}`}</code> <code>{`{{priority}}`}</code>{" "}
-              <code>{`{{tags}}`}</code>
+              {needsAgent ? "Uses an AI agent to generate output." : "No AI required — runs deterministically."}
             </p>
           </div>
+
+          {/* Action-specific config */}
+          {applyAction === "set_priority" && (
+            <div className="grid gap-1.5">
+              <Label>Priority</Label>
+              <Select value={actionConfig.priority ?? ""} onValueChange={(v) => updateCfg({ priority: v })}>
+                <SelectTrigger><SelectValue placeholder="Choose…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {applyAction === "set_status" && (
+            <div className="grid gap-1.5">
+              <Label>Status (id or slug)</Label>
+              <Input value={actionConfig.status ?? ""} onChange={(e) => updateCfg({ status: e.target.value })} placeholder="todo / in_progress / done" />
+            </div>
+          )}
+          {(applyAction === "add_tags" || applyAction === "remove_tags") && (
+            <div className="grid gap-1.5">
+              <Label>Tags (comma-separated)</Label>
+              <Input
+                value={(actionConfig.tags ?? []).join(", ")}
+                onChange={(e) => updateCfg({ tags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
+                placeholder="bug, urgent, frontend"
+              />
+            </div>
+          )}
+          {applyAction === "set_due_date" && (
+            <div className="grid gap-2">
+              <div className="grid gap-1.5">
+                <Label>Days from now (e.g. 3 = in 3 days, -1 = yesterday)</Label>
+                <Input
+                  type="number"
+                  value={actionConfig.due_date_offset_days ?? ""}
+                  onChange={(e) => updateCfg({ due_date_offset_days: e.target.value === "" ? undefined : Number(e.target.value) })}
+                  placeholder="3"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Or use a fixed date below (offset takes priority if both set).
+              </p>
+              <div className="grid gap-1.5">
+                <Label>Fixed date</Label>
+                <Input type="date" value={actionConfig.due_date ?? ""} onChange={(e) => updateCfg({ due_date: e.target.value })} />
+              </div>
+            </div>
+          )}
+          {applyAction === "add_assignee" && (
+            <div className="grid gap-1.5">
+              <Label>Assignee</Label>
+              <Select value={actionConfig.assignee_id ?? ""} onValueChange={(v) => updateCfg({ assignee_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Pick teammate" /></SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>{m.role} · {m.user_id.slice(0, 8)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {applyAction === "webhook" && (
+            <div className="grid gap-2">
+              <div className="grid gap-1.5">
+                <Label>Webhook URL</Label>
+                <Input
+                  value={actionConfig.webhook_url ?? ""}
+                  onChange={(e) => updateCfg({ webhook_url: e.target.value })}
+                  placeholder="https://hooks.example.com/..."
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Method</Label>
+                <Select
+                  value={actionConfig.webhook_method ?? "POST"}
+                  onValueChange={(v) => updateCfg({ webhook_method: v as "POST" | "PUT" | "PATCH" })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="POST">POST</SelectItem>
+                    <SelectItem value="PUT">PUT</SelectItem>
+                    <SelectItem value="PATCH">PATCH</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Body includes <code>event</code>, <code>automation</code>, and full <code>task</code>.
+              </p>
+            </div>
+          )}
+          {applyAction === "notify" && (
+            <div className="grid gap-1.5">
+              <Label>Message (supports {`{{title}}`}, {`{{status}}`} variables)</Label>
+              <Input
+                value={actionConfig.notify_message ?? ""}
+                onChange={(e) => updateCfg({ notify_message: e.target.value })}
+                placeholder="✅ {{title}} was updated"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Defaults to notifying the task's assignees.
+              </p>
+            </div>
+          )}
+
+          {needsAgent && (
+            <>
+              <div className="grid gap-1.5">
+                <Label>Run agent</Label>
+                <Select value={agentId} onValueChange={setAgentId}>
+                  <SelectTrigger><SelectValue placeholder="Select agent" /></SelectTrigger>
+                  <SelectContent>
+                    {agents.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.avatar_emoji ?? "🤖"} {a.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {agents.length === 0 && (
+                  <p className="text-[10px] text-destructive">
+                    Create an AI agent first in <strong>AI agents</strong>.
+                  </p>
+                )}
+              </div>
+              <div className="grid gap-1.5">
+                <Label>Prompt template</Label>
+                <Textarea
+                  value={instructionsTemplate}
+                  onChange={(e) => setInstructionsTemplate(e.target.value)}
+                  rows={5}
+                  placeholder="Use {{title}}, {{description}}, {{status}}, {{priority}}, {{tags}}"
+                  className="font-mono text-xs"
+                />
+              </div>
+            </>
+          )}
+
+          <SimulatorPanel conditions={conditions} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
@@ -451,20 +645,23 @@ function TemplatesDialog({ open, onClose }: { open: boolean; onClose: () => void
   const { data: agents = [] } = useAiAgents();
 
   const apply = async (t: Template) => {
-    if (agents.length === 0) {
+    const needsAgent = actionRequiresAgent(t.apply_action);
+    if (needsAgent && agents.length === 0) {
       toast.error("Create an AI agent first");
       return;
     }
-    // Pick best agent: try matching by emoji else first
-    const agent = agents.find((a) => a.avatar_emoji === t.agentEmoji) ?? agents[0];
+    const agent = needsAgent
+      ? (agents.find((a) => a.avatar_emoji === t.agentEmoji) ?? agents[0])
+      : null;
     await upsert.mutateAsync({
       name: t.name,
       description: t.description,
       trigger_event: t.trigger_event,
       conditions: t.conditions,
-      agent_id: agent.id,
+      agent_id: agent?.id ?? null,
       apply_action: t.apply_action,
-      instructions_template: t.instructions_template,
+      instructions_template: t.instructions_template ?? null,
+      action_config: t.action_config ?? {},
       is_active: true,
     });
     toast.success(`"${t.name}" automation created`);
@@ -486,7 +683,7 @@ function TemplatesDialog({ open, onClose }: { open: boolean; onClose: () => void
               className="group flex items-start gap-3 rounded-lg border border-border p-3 text-left transition hover:border-primary/40 hover:bg-accent"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient-subtle text-lg">
-                {t.agentEmoji}
+                {t.agentEmoji ?? (actionRequiresAgent(t.apply_action) ? "🤖" : "⚡")}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{t.name}</p>
@@ -514,6 +711,22 @@ function RunsDialog({
   onClose: () => void;
 }) {
   const { data: runs = [] } = useAutomationRuns(automation?.id ?? null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "success" | "failed">("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = runs.filter((r) => {
+    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const hay = `${r.output ?? ""} ${r.error_message ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const successCount = runs.filter((r) => r.status === "success").length;
+  const failedCount = runs.filter((r) => r.status === "failed").length;
+
   return (
     <Dialog open={!!automation} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
@@ -522,11 +735,34 @@ function RunsDialog({
             <History className="h-4 w-4" /> Run history · {automation?.name}
           </DialogTitle>
         </DialogHeader>
-        <div className="max-h-[60vh] space-y-2 overflow-y-auto">
-          {runs.length === 0 && (
-            <p className="py-8 text-center text-sm text-muted-foreground">No runs yet.</p>
+        <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as "all" | "success" | "failed")}>
+            <SelectTrigger className="h-8 w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All ({runs.length})</SelectItem>
+              <SelectItem value="success">Success ({successCount})</SelectItem>
+              <SelectItem value="failed">Failed ({failedCount})</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search output / error…"
+            className="h-8 max-w-xs"
+          />
+          {(statusFilter !== "all" || search) && (
+            <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setSearch(""); }}>
+              Clear
+            </Button>
           )}
-          {runs.map((r) => (
+        </div>
+        <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+          {filtered.length === 0 && (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              {runs.length === 0 ? "No runs yet." : "No runs match filters."}
+            </p>
+          )}
+          {filtered.map((r) => (
             <div key={r.id} className="rounded-lg border border-border p-3 text-sm">
               <div className="flex items-center justify-between gap-2">
                 <Badge
@@ -552,5 +788,87 @@ function RunsDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SimulatorPanel({ conditions }: { conditions: AutomationCondition[] }) {
+  const ws = useWorkspaceStore((s) => s.current);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{
+    evaluated: number;
+    matched: { id: string; title: string; status: string; project_id: string | null }[];
+    misses: { id: string; title: string; failed: string }[];
+    error: string | null;
+  } | null>(null);
+
+  const run = async () => {
+    if (!ws) return;
+    setLoading(true);
+    try {
+      const r = await simulateAutomation({ data: { workspace_id: ws.id, conditions: conditions as unknown[] } });
+      setResult(r);
+      setOpen(true);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Test failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <FlaskConical className="h-4 w-4 text-primary" />
+          <div>
+            <p className="text-sm font-medium">Test rule</p>
+            <p className="text-[11px] text-muted-foreground">Preview which existing tasks would match (last 200).</p>
+          </div>
+        </div>
+        <Button type="button" size="sm" variant="outline" onClick={run} disabled={loading}>
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Run test"}
+        </Button>
+      </div>
+      {open && result && (
+        <div className="mt-3 space-y-2">
+          {result.error && <p className="text-xs text-destructive">{result.error}</p>}
+          <div className="flex items-center gap-3 text-xs">
+            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />{result.matched.length} match</span>
+            <span className="flex items-center gap-1 text-muted-foreground"><XCircle className="h-3.5 w-3.5" />{result.evaluated - result.matched.length} skipped</span>
+            <span className="text-muted-foreground">of {result.evaluated} evaluated</span>
+          </div>
+          {result.matched.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold uppercase text-muted-foreground">Matched</p>
+              <div className="max-h-40 space-y-1 overflow-y-auto rounded border border-border bg-background p-2">
+                {result.matched.slice(0, 20).map((t) => (
+                  <div key={t.id} className="flex items-center justify-between text-xs">
+                    <span className="truncate">{t.title}</span>
+                    <Badge variant="outline" className="ml-2 text-[10px]">{t.status}</Badge>
+                  </div>
+                ))}
+                {result.matched.length > 20 && (
+                  <p className="text-[10px] text-muted-foreground">+ {result.matched.length - 20} more</p>
+                )}
+              </div>
+            </div>
+          )}
+          {result.misses.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold uppercase text-muted-foreground">Sample misses</p>
+              <div className="space-y-1 rounded border border-border bg-background p-2">
+                {result.misses.map((m) => (
+                  <div key={m.id} className="text-xs">
+                    <span className="truncate">{m.title}</span>
+                    <span className="ml-2 text-[10px] text-muted-foreground">failed: {m.failed}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

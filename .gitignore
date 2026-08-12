@@ -7,6 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment / secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local state (contains generated container secrets)
+supabase/.branches
+supabase/.temp
+supabase/.env
+
 node_modules
 dist
 dist-ssr
@@ -30,3 +40,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+playwright-report/
+test-results/

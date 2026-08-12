@@ -1,4 +1,4 @@
-/* Aura service worker — minimal app-shell + runtime cache */
+/* Aurora service worker — minimal app-shell + runtime cache */
 const VERSION = "v1";
 const RUNTIME = `aura-runtime-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -27,7 +27,6 @@ self.addEventListener("fetch", (event) => {
   if (
     url.origin !== self.location.origin ||
     url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/lovable/") ||
     url.pathname.startsWith("/_server/") ||
     url.pathname.includes("supabase")
   ) {

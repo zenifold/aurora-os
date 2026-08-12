@@ -6,13 +6,13 @@ import { Check, Github, Heart, Sparkles, Server, Cloud } from "lucide-react";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Aura. Free forever, open source." },
+      { title: "Pricing — Aurora. Free forever, open source." },
       {
         name: "description",
         content:
-          "Aura is MIT-licensed and free to self-host forever. Hosted plans cover the cost of running it for you — no per-seat AI markup.",
+          "Aurora is MIT-licensed and free to self-host forever. Hosted plans cover the cost of running it for you — no per-seat AI markup.",
       },
-      { property: "og:title", content: "Aura — pricing that respects you" },
+      { property: "og:title", content: "Aurora — pricing that respects you" },
       {
         property: "og:description",
         content: "Self-host free. Hosted from $5/user. AI is BYO OpenRouter — pay providers directly.",
@@ -56,7 +56,7 @@ const TIERS: Tier[] = [
     name: "Hosted Personal",
     price: "$5",
     cadence: "/ user / mo",
-    desc: "Hassle-free hosted Aura for solo work and small projects.",
+    desc: "Hassle-free hosted Aurora for solo work and small projects.",
     features: [
       "Unlimited projects",
       "1 workspace, 1 user",
@@ -104,7 +104,7 @@ function PricingPage() {
               Fair when you don't.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-              Aura is open source. The hosted plans only exist to pay for the servers — AI features
+              Aurora is open source. The hosted plans only exist to pay for the servers — AI features
               run on your own OpenRouter key, so you pay providers directly at cost.
             </p>
           </div>
@@ -196,7 +196,7 @@ function PricingPage() {
                 },
                 {
                   q: "How does AI work without an API key from you?",
-                  a: "Aura talks to OpenRouter — you create an account, top up $5, paste the key into Settings → AI. We never see or store the key on the server beyond your own workspace, and you pay OpenRouter at provider cost.",
+                  a: "Aurora talks to OpenRouter — you create an account, top up $5, paste the key into Settings → AI. We never see or store the key on the server beyond your own workspace, and you pay OpenRouter at provider cost.",
                 },
                 {
                   q: "Can I migrate off the hosted version later?",

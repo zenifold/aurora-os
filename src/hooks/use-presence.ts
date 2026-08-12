@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
@@ -8,6 +8,10 @@ export interface PresenceUser {
   avatar_url: string | null;
   color: string;
   online_at: string;
+  viewing_task_id?: string | null;
+  is_editing?: boolean;
+  cursor_x?: number | null;
+  cursor_y?: number | null;
 }
 
 // Stable color from a user id — for cursor / outline color
@@ -28,10 +32,16 @@ export function colorForUser(userId: string): string {
  */
 export function usePresence(
   channelKey: string | null,
-  meta?: { display_name?: string | null; avatar_url?: string | null },
+  meta?: {
+    display_name?: string | null;
+    avatar_url?: string | null;
+    viewing_task_id?: string | null;
+    is_editing?: boolean;
+  },
 ): { users: PresenceUser[]; selfColor: string } {
   const { user } = useAuth();
   const [users, setUsers] = useState<PresenceUser[]>([]);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     if (!channelKey || !user) {
@@ -42,6 +52,7 @@ export function usePresence(
     const channel = supabase.channel(channelKey, {
       config: { presence: { key: user.id } },
     });
+    channelRef.current = channel;
 
     const sync = () => {
       const state = channel.presenceState<PresenceUser>();
@@ -66,14 +77,35 @@ export function usePresence(
             avatar_url: meta?.avatar_url ?? null,
             color: colorForUser(user.id),
             online_at: new Date().toISOString(),
+            viewing_task_id: meta?.viewing_task_id ?? null,
+            is_editing: meta?.is_editing ?? false,
           });
         }
       });
 
     return () => {
+      channelRef.current = null;
       void supabase.removeChannel(channel);
     };
-  }, [channelKey, user, meta?.display_name, meta?.avatar_url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelKey, user?.id]);
+
+  // Update tracked metadata (e.g. viewing_task_id) without reconnecting.
+  useEffect(() => {
+    const ch = channelRef.current;
+    if (!ch || !user) return;
+    void ch.track({
+      user_id: user.id,
+      display_name:
+        meta?.display_name ||
+        (user.email ? user.email.split("@")[0] : "Someone"),
+      avatar_url: meta?.avatar_url ?? null,
+      color: colorForUser(user.id),
+      online_at: new Date().toISOString(),
+      viewing_task_id: meta?.viewing_task_id ?? null,
+      is_editing: meta?.is_editing ?? false,
+    });
+  }, [meta?.viewing_task_id, meta?.display_name, meta?.avatar_url, meta?.is_editing, user]);
 
   return { users, selfColor: user ? colorForUser(user.id) : "#888" };
 }

@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Target,
   Flag,
+  Layers,
   UsersRound,
   Activity,
   FileEdit,
@@ -22,7 +23,16 @@ import {
   DollarSign,
   MoreHorizontal,
   Move,
+  Rocket,
+  Sparkles,
+  GitPullRequest,
+  Lock,
+  Unlock,
 } from "lucide-react";
+
+
+import { ApplyPlaybookDialog } from "@/components/projects/ApplyPlaybookDialog";
+import { MagicPlanDialog } from "@/components/projects/MagicPlanDialog";
 import { MoveToFolderDialog } from "@/components/folders/MoveToFolderDialog";
 import { useProject, useUpdateProject } from "@/hooks/use-projects";
 import { toast } from "sonner";
@@ -37,6 +47,8 @@ const ICON = "mr-2 h-4 w-4 text-muted-foreground";
 
 export function ProjectActionsMenu({ projectId }: Props) {
   const [moveOpen, setMoveOpen] = useState(false);
+  const [playbookOpen, setPlaybookOpen] = useState(false);
+  const [magicOpen, setMagicOpen] = useState(false);
   const { data: project } = useProject(projectId);
   const updateProject = useUpdateProject();
 
@@ -53,8 +65,36 @@ export function ProjectActionsMenu({ projectId }: Props) {
         <DropdownMenuItem onSelect={() => setMoveOpen(true)}>
           <Move className={ICON} /> Move to folder…
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={async () => {
+            const next = !(project as { is_private?: boolean } | undefined)?.is_private;
+            try {
+              await updateProject.mutateAsync({ id: projectId, is_private: next } as never);
+              toast.success(next ? "Project is now private" : "Project is now public");
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
+          }}
+        >
+          {(project as { is_private?: boolean } | undefined)?.is_private ? (
+            <><Unlock className={ICON} /> Make public</>
+          ) : (
+            <><Lock className={ICON} /> Make private</>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setMagicOpen(true)}>
+          <Sparkles className={ICON} /> Magic Plan…
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setPlaybookOpen(true)}>
+          <Rocket className={ICON} /> Apply playbook…
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Plan</DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link to="/app/p/$projectId/phases" params={{ projectId }}>
+            <Layers className={ICON} /> Phases
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/app/p/$projectId/sprints" params={{ projectId }}>
             <Target className={ICON} /> Sprints
@@ -65,6 +105,7 @@ export function ProjectActionsMenu({ projectId }: Props) {
             <Flag className={ICON} /> Milestones
           </Link>
         </DropdownMenuItem>
+
         <DropdownMenuItem asChild>
           <Link to="/app/p/$projectId/allocations" params={{ projectId }}>
             <UsersRound className={ICON} /> Allocations
@@ -84,10 +125,16 @@ export function ProjectActionsMenu({ projectId }: Props) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link to="/app/p/$projectId/change-requests" params={{ projectId }}>
+            <GitPullRequest className={ICON} /> Change requests
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link to="/app/p/$projectId/financials" params={{ projectId }}>
             <DollarSign className={ICON} /> Financials
           </Link>
         </DropdownMenuItem>
+
         <DropdownMenuItem asChild>
           <Link to="/app/p/$projectId/clients" params={{ projectId }}>
             <Users className={ICON} /> Clients
@@ -112,16 +159,17 @@ export function ProjectActionsMenu({ projectId }: Props) {
       open={moveOpen}
       onOpenChange={setMoveOpen}
       title="Move project"
-      current={project ? { division_id: project.division_id ?? "", folder_id: project.folder_id ?? null } : null}
+      current={project ? { folder_id: project.folder_id ?? null } : null}
       onConfirm={async (target) => {
         await updateProject.mutateAsync({
           id: projectId,
-          division_id: target.division_id,
           folder_id: target.folder_id,
         });
         toast.success("Project moved");
       }}
     />
+    <ApplyPlaybookDialog projectId={projectId} open={playbookOpen} onOpenChange={setPlaybookOpen} />
+    <MagicPlanDialog projectId={projectId} open={magicOpen} onOpenChange={setMagicOpen} />
     </>
   );
 }

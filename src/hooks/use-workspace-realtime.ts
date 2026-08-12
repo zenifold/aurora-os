@@ -61,6 +61,38 @@ export function useWorkspaceRealtime() {
           qc.invalidateQueries({ queryKey: ["divisions"] });
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deals", filter: `workspace_id=eq.${ws.id}` },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as { id?: string } | null;
+          qc.invalidateQueries({ queryKey: ["deals", ws.id] });
+          if (row?.id) qc.invalidateQueries({ queryKey: ["deal", row.id] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deal_activities", filter: `workspace_id=eq.${ws.id}` },
+        (payload) => {
+          const row = (payload.new ?? payload.old) as { deal_id?: string } | null;
+          if (row?.deal_id) qc.invalidateQueries({ queryKey: ["deal_activities", row.deal_id] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contacts", filter: `workspace_id=eq.${ws.id}` },
+        () => {
+          qc.invalidateQueries({ queryKey: ["contacts", ws.id] });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["notifications"] });
+          qc.invalidateQueries({ queryKey: ["notifications-unread"] });
+        },
+      )
       .subscribe();
 
     return () => {

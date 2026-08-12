@@ -126,7 +126,9 @@ function loadSnapshots(projectId: string): ScenarioSnapshot[] {
 }
 
 export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
-  const [zoom, setZoom] = useState<Zoom>("week");
+  const [zoom, setZoom] = useState<Zoom>(() =>
+    typeof window !== "undefined" && window.innerWidth < 768 ? "day" : "week",
+  );
   const [colorBy, setColorBy] = useState<ColorBy>("priority");
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
   const [scenario, setScenario] = useState<ScenarioState>(DEFAULT_SCENARIO);
@@ -813,7 +815,7 @@ export function TimelineView({ projectId, tasks, onTaskClick }: Props) {
 
 
       {/* Timeline body */}
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto touch-pan-x [-webkit-overflow-scrolling:touch] overscroll-contain">
         <div className="relative" style={{ width: LABEL_W + totalWidth }}>
           {/* Header row: months + days */}
           <div className="sticky top-0 z-20 bg-background">

@@ -9,67 +9,189 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VsRouteImport } from './routes/vs'
+import { Route as UseCasesRouteImport } from './routes/use-cases'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as ForRouteImport } from './routes/for'
 import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as ExtensionEntryRouteImport } from './routes/extension-entry'
+import { Route as ExtensionRouteImport } from './routes/extension'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as VsNotionRouteImport } from './routes/vs.notion'
+import { Route as VsMondayRouteImport } from './routes/vs.monday'
+import { Route as VsLinearRouteImport } from './routes/vs.linear'
+import { Route as VsJiraRouteImport } from './routes/vs.jira'
+import { Route as VsHubspotRouteImport } from './routes/vs.hubspot'
+import { Route as UseCasesSoftwareDeliveryRouteImport } from './routes/use-cases.software-delivery'
+import { Route as UseCasesProfessionalServicesRouteImport } from './routes/use-cases.professional-services'
+import { Route as UseCasesFreelancersRouteImport } from './routes/use-cases.freelancers'
+import { Route as UseCasesConsultingRouteImport } from './routes/use-cases.consulting'
+import { Route as UseCasesClientPortalsRouteImport } from './routes/use-cases.client-portals'
+import { Route as UseCasesAgenciesRouteImport } from './routes/use-cases.agencies'
+import { Route as ShareTokenRouteImport } from './routes/share.$token'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as ForProjectManagersRouteImport } from './routes/for.project-managers'
+import { Route as ForOperationsRouteImport } from './routes/for.operations'
+import { Route as ForFoundersRouteImport } from './routes/for.founders'
+import { Route as ForFinanceRouteImport } from './routes/for.finance'
+import { Route as ForClientServicesRouteImport } from './routes/for.client-services'
+import { Route as FeaturesViewsRouteImport } from './routes/features.views'
+import { Route as FeaturesProjectsRouteImport } from './routes/features.projects'
+import { Route as FeaturesPermissionsRbacRouteImport } from './routes/features.permissions-rbac'
+import { Route as FeaturesMeetingsAiRouteImport } from './routes/features.meetings-ai'
+import { Route as FeaturesFinanceRouteImport } from './routes/features.finance'
+import { Route as FeaturesDocsAndNotesRouteImport } from './routes/features.docs-and-notes'
+import { Route as FeaturesCrmRouteImport } from './routes/features.crm'
+import { Route as FeaturesClientPortalsRouteImport } from './routes/features.client-portals'
+import { Route as FeaturesAgentsRouteImport } from './routes/features.agents'
 import { Route as DocsSelfHostRouteImport } from './routes/docs.self-host'
 import { Route as ClientTokenRouteImport } from './routes/client.$token'
+import { Route as AppTriggersRouteImport } from './routes/app.triggers'
+import { Route as AppTimesheetApprovalsRouteImport } from './routes/app.timesheet-approvals'
+import { Route as AppTimesheetRouteImport } from './routes/app.timesheet'
+import { Route as AppSowToProjectRouteImport } from './routes/app.sow-to-project'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppSalesRouteImport } from './routes/app.sales'
+import { Route as AppReportsRouteImport } from './routes/app.reports'
+import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPortfolioStatusRouteImport } from './routes/app.portfolio-status'
+import { Route as AppPipelineAnalyticsRouteImport } from './routes/app.pipeline-analytics'
+import { Route as AppPagesRouteImport } from './routes/app.pages'
 import { Route as AppOpsRouteImport } from './routes/app.ops'
+import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppNotesRouteImport } from './routes/app.notes'
 import { Route as AppMyTasksRouteImport } from './routes/app.my-tasks'
 import { Route as AppMeetingsRouteImport } from './routes/app.meetings'
+import { Route as AppInboxRouteImport } from './routes/app.inbox'
+import { Route as AppForecastRouteImport } from './routes/app.forecast'
+import { Route as AppFinanceRouteImport } from './routes/app.finance'
 import { Route as AppExecutiveRouteImport } from './routes/app.executive'
 import { Route as AppEscalationsRouteImport } from './routes/app.escalations'
-import { Route as AppDeliveryRouteImport } from './routes/app.delivery'
+import { Route as AppDocumentsRouteImport } from './routes/app.documents'
 import { Route as AppCrmRouteImport } from './routes/app.crm'
 import { Route as AppContactsRouteImport } from './routes/app.contacts'
+import { Route as AppChatRouteImport } from './routes/app.chat'
+import { Route as AppAuraRouteImport } from './routes/app.aura'
+import { Route as AppApprovalsRouteImport } from './routes/app.approvals'
+import { Route as AppAiArtifactsRouteImport } from './routes/app.ai-artifacts'
+import { Route as AppAgentsRouteImport } from './routes/app.agents'
 import { Route as AppAgentRunsRouteImport } from './routes/app.agent-runs'
+import { Route as AppActivityRouteImport } from './routes/app.activity'
 import { Route as AppSettingsIndexRouteImport } from './routes/app.settings.index'
 import { Route as AppResourcesIndexRouteImport } from './routes/app.resources.index'
+import { Route as AppClientsIndexRouteImport } from './routes/app.clients.index'
+import { Route as AppSettingsVocabularyRouteImport } from './routes/app.settings.vocabulary'
+import { Route as AppSettingsViewsRouteImport } from './routes/app.settings.views'
+import { Route as AppSettingsTemplatesRouteImport } from './routes/app.settings.templates'
+import { Route as AppSettingsShortcutsRouteImport } from './routes/app.settings.shortcuts'
+import { Route as AppSettingsSharingRouteImport } from './routes/app.settings.sharing'
+import { Route as AppSettingsSalesStagesRouteImport } from './routes/app.settings.sales-stages'
+import { Route as AppSettingsRolesRouteImport } from './routes/app.settings.roles'
 import { Route as AppSettingsResourcesRouteImport } from './routes/app.settings.resources'
+import { Route as AppSettingsRateCardsRouteImport } from './routes/app.settings.rate-cards'
 import { Route as AppSettingsProfileRouteImport } from './routes/app.settings.profile'
+import { Route as AppSettingsPlaybooksRouteImport } from './routes/app.settings.playbooks'
+import { Route as AppSettingsOverviewRouteImport } from './routes/app.settings.overview'
+import { Route as AppSettingsObjectTypesRouteImport } from './routes/app.settings.object-types'
 import { Route as AppSettingsMembersRouteImport } from './routes/app.settings.members'
+import { Route as AppSettingsIntegrationsRouteImport } from './routes/app.settings.integrations'
 import { Route as AppSettingsFieldsRouteImport } from './routes/app.settings.fields'
+import { Route as AppSettingsEscalationsRouteImport } from './routes/app.settings.escalations'
+import { Route as AppSettingsErrorsRouteImport } from './routes/app.settings.errors'
 import { Route as AppSettingsDataRouteImport } from './routes/app.settings.data'
 import { Route as AppSettingsDangerRouteImport } from './routes/app.settings.danger'
+import { Route as AppSettingsCustomizationRouteImport } from './routes/app.settings.customization'
 import { Route as AppSettingsAutomationsRouteImport } from './routes/app.settings.automations'
+import { Route as AppSettingsAuditRouteImport } from './routes/app.settings.audit'
 import { Route as AppSettingsAiRouteImport } from './routes/app.settings.ai'
+import { Route as AppRunsRunIdRouteImport } from './routes/app.runs.$runId'
 import { Route as AppResourcesCapacityRouteImport } from './routes/app.resources.capacity'
 import { Route as AppPProjectIdRouteImport } from './routes/app.p.$projectId'
+import { Route as AppOnboardingIdRouteImport } from './routes/app.onboarding.$id'
+import { Route as AppObjectsKeyRouteImport } from './routes/app.objects.$key'
 import { Route as AppMeetingsMeetingIdRouteImport } from './routes/app.meetings.$meetingId'
 import { Route as AppFFolderIdRouteImport } from './routes/app.f.$folderId'
 import { Route as AppEscalationsEscalationIdRouteImport } from './routes/app.escalations.$escalationId'
-import { Route as AppDDivisionSlugRouteImport } from './routes/app.d.$divisionSlug'
+import { Route as AppClientsAccountIdRouteImport } from './routes/app.clients.$accountId'
+import { Route as AppCClientIdRouteImport } from './routes/app.c.$clientId'
+import { Route as AppPProjectIdStatusRouteImport } from './routes/app.p.$projectId.status'
 import { Route as AppPProjectIdSprintsRouteImport } from './routes/app.p.$projectId.sprints'
 import { Route as AppPProjectIdSettingsRouteImport } from './routes/app.p.$projectId.settings'
+import { Route as AppPProjectIdRequirementsRouteImport } from './routes/app.p.$projectId.requirements'
+import { Route as AppPProjectIdRaidRouteImport } from './routes/app.p.$projectId.raid'
+import { Route as AppPProjectIdPhasesRouteImport } from './routes/app.p.$projectId.phases'
+import { Route as AppPProjectIdPagesRouteImport } from './routes/app.p.$projectId.pages'
 import { Route as AppPProjectIdOverviewRouteImport } from './routes/app.p.$projectId.overview'
 import { Route as AppPProjectIdMilestonesRouteImport } from './routes/app.p.$projectId.milestones'
+import { Route as AppPProjectIdInvoicesRouteImport } from './routes/app.p.$projectId.invoices'
+import { Route as AppPProjectIdIntakeRouteImport } from './routes/app.p.$projectId.intake'
 import { Route as AppPProjectIdHealthRouteImport } from './routes/app.p.$projectId.health'
 import { Route as AppPProjectIdFinancialsRouteImport } from './routes/app.p.$projectId.financials'
+import { Route as AppPProjectIdExpensesRouteImport } from './routes/app.p.$projectId.expenses'
 import { Route as AppPProjectIdDocumentsRouteImport } from './routes/app.p.$projectId.documents'
+import { Route as AppPProjectIdDependenciesRouteImport } from './routes/app.p.$projectId.dependencies'
 import { Route as AppPProjectIdClientsRouteImport } from './routes/app.p.$projectId.clients'
+import { Route as AppPProjectIdChatRouteImport } from './routes/app.p.$projectId.chat'
+import { Route as AppPProjectIdChangeRequestsRouteImport } from './routes/app.p.$projectId.change-requests'
 import { Route as AppPProjectIdChangeOrdersRouteImport } from './routes/app.p.$projectId.change-orders'
+import { Route as AppPProjectIdCanvasRouteImport } from './routes/app.p.$projectId.canvas'
+import { Route as AppPProjectIdBaselineRouteImport } from './routes/app.p.$projectId.baseline'
+import { Route as AppPProjectIdApprovalsRouteImport } from './routes/app.p.$projectId.approvals'
 import { Route as AppPProjectIdAllocationsRouteImport } from './routes/app.p.$projectId.allocations'
+import { Route as AppCClientIdSowsRouteImport } from './routes/app.c.$clientId.sows'
+import { Route as ApiPublicStatusReportsRunRouteImport } from './routes/api/public/status-reports.run'
 import { Route as ApiPublicPortalTokenRouteImport } from './routes/api/public/portal.$token'
+import { Route as ApiPublicHooksWeeklyClientBriefsRouteImport } from './routes/api/public/hooks/weekly-client-briefs'
+import { Route as ApiPublicHooksRefreshOverviewsRouteImport } from './routes/api/public/hooks/refresh-overviews'
+import { Route as ApiPublicExtensionSuggestRouteImport } from './routes/api/public/extension.suggest'
+import { Route as AppPProjectIdInvoicesInvoiceIdRouteImport } from './routes/app.p.$projectId.invoices.$invoiceId'
+import { Route as AppClientsAccountIdDealDealIdRouteImport } from './routes/app.clients.$accountId.deal.$dealId'
+import { Route as AppCClientIdSowSowIdRouteImport } from './routes/app.c.$clientId.sow.$sowId'
 import { Route as ApiPublicPortalTokenUploadRouteImport } from './routes/api/public/portal.$token.upload'
 import { Route as ApiPublicPortalTokenSubmitRouteImport } from './routes/api/public/portal.$token.submit'
+import { Route as ApiPublicPortalTokenOverviewRouteImport } from './routes/api/public/portal.$token.overview'
+import { Route as ApiPublicPortalTokenInvoicesRouteImport } from './routes/api/public/portal.$token.invoices'
 import { Route as ApiPublicPortalTokenImpactRouteImport } from './routes/api/public/portal.$token.impact'
+import { Route as ApiPublicPortalTokenFormsRouteImport } from './routes/api/public/portal.$token.forms'
+import { Route as ApiPublicPortalTokenDownloadRouteImport } from './routes/api/public/portal.$token.download'
+import { Route as ApiPublicPortalTokenDocumentsRouteImport } from './routes/api/public/portal.$token.documents'
 import { Route as ApiPublicPortalTokenDeliverablesRouteImport } from './routes/api/public/portal.$token.deliverables'
+import { Route as ApiPublicPortalTokenCsatRouteImport } from './routes/api/public/portal.$token.csat'
+import { Route as ApiPublicPortalTokenCommentsRouteImport } from './routes/api/public/portal.$token.comments'
+import { Route as ApiPublicPortalTokenChangeRequestsRouteImport } from './routes/api/public/portal.$token.change-requests'
+import { Route as ApiPublicIntegrationsGoogleCalendarCronRouteImport } from './routes/api/public/integrations/google-calendar.cron'
+import { Route as ApiPublicIntegrationsGoogleCalendarCallbackRouteImport } from './routes/api/public/integrations/google-calendar.callback'
+import { Route as ApiPublicHooksAgentTriggersRunRouteImport } from './routes/api/public/hooks/agent-triggers.run'
+import { Route as ApiPublicHooksAgentEventsDispatchRouteImport } from './routes/api/public/hooks/agent-events.dispatch'
+import { Route as ApiPublicPortalTokenMilestonesSignoffRouteImport } from './routes/api/public/portal.$token.milestones.signoff'
 
+const VsRoute = VsRouteImport.update({
+  id: '/vs',
+  path: '/vs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UseCasesRoute = UseCasesRouteImport.update({
+  id: '/use-cases',
+  path: '/use-cases',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -78,6 +200,11 @@ const TermsRoute = TermsRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -105,14 +232,49 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForRoute = ForRouteImport.update({
+  id: '/for',
+  path: '/for',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeaturesRoute = FeaturesRouteImport.update({
   id: '/features',
   path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExtensionEntryRoute = ExtensionEntryRouteImport.update({
+  id: '/extension-entry',
+  path: '/extension-entry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtensionRoute = ExtensionRouteImport.update({
+  id: '/extension',
+  path: '/extension',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -125,10 +287,147 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const VsNotionRoute = VsNotionRouteImport.update({
+  id: '/notion',
+  path: '/notion',
+  getParentRoute: () => VsRoute,
+} as any)
+const VsMondayRoute = VsMondayRouteImport.update({
+  id: '/monday',
+  path: '/monday',
+  getParentRoute: () => VsRoute,
+} as any)
+const VsLinearRoute = VsLinearRouteImport.update({
+  id: '/linear',
+  path: '/linear',
+  getParentRoute: () => VsRoute,
+} as any)
+const VsJiraRoute = VsJiraRouteImport.update({
+  id: '/jira',
+  path: '/jira',
+  getParentRoute: () => VsRoute,
+} as any)
+const VsHubspotRoute = VsHubspotRouteImport.update({
+  id: '/hubspot',
+  path: '/hubspot',
+  getParentRoute: () => VsRoute,
+} as any)
+const UseCasesSoftwareDeliveryRoute =
+  UseCasesSoftwareDeliveryRouteImport.update({
+    id: '/software-delivery',
+    path: '/software-delivery',
+    getParentRoute: () => UseCasesRoute,
+  } as any)
+const UseCasesProfessionalServicesRoute =
+  UseCasesProfessionalServicesRouteImport.update({
+    id: '/professional-services',
+    path: '/professional-services',
+    getParentRoute: () => UseCasesRoute,
+  } as any)
+const UseCasesFreelancersRoute = UseCasesFreelancersRouteImport.update({
+  id: '/freelancers',
+  path: '/freelancers',
+  getParentRoute: () => UseCasesRoute,
+} as any)
+const UseCasesConsultingRoute = UseCasesConsultingRouteImport.update({
+  id: '/consulting',
+  path: '/consulting',
+  getParentRoute: () => UseCasesRoute,
+} as any)
+const UseCasesClientPortalsRoute = UseCasesClientPortalsRouteImport.update({
+  id: '/client-portals',
+  path: '/client-portals',
+  getParentRoute: () => UseCasesRoute,
+} as any)
+const UseCasesAgenciesRoute = UseCasesAgenciesRouteImport.update({
+  id: '/agencies',
+  path: '/agencies',
+  getParentRoute: () => UseCasesRoute,
+} as any)
+const ShareTokenRoute = ShareTokenRouteImport.update({
+  id: '/share/$token',
+  path: '/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ForProjectManagersRoute = ForProjectManagersRouteImport.update({
+  id: '/project-managers',
+  path: '/project-managers',
+  getParentRoute: () => ForRoute,
+} as any)
+const ForOperationsRoute = ForOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => ForRoute,
+} as any)
+const ForFoundersRoute = ForFoundersRouteImport.update({
+  id: '/founders',
+  path: '/founders',
+  getParentRoute: () => ForRoute,
+} as any)
+const ForFinanceRoute = ForFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => ForRoute,
+} as any)
+const ForClientServicesRoute = ForClientServicesRouteImport.update({
+  id: '/client-services',
+  path: '/client-services',
+  getParentRoute: () => ForRoute,
+} as any)
+const FeaturesViewsRoute = FeaturesViewsRouteImport.update({
+  id: '/views',
+  path: '/views',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesProjectsRoute = FeaturesProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesPermissionsRbacRoute = FeaturesPermissionsRbacRouteImport.update({
+  id: '/permissions-rbac',
+  path: '/permissions-rbac',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesMeetingsAiRoute = FeaturesMeetingsAiRouteImport.update({
+  id: '/meetings-ai',
+  path: '/meetings-ai',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesFinanceRoute = FeaturesFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesDocsAndNotesRoute = FeaturesDocsAndNotesRouteImport.update({
+  id: '/docs-and-notes',
+  path: '/docs-and-notes',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesCrmRoute = FeaturesCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesClientPortalsRoute = FeaturesClientPortalsRouteImport.update({
+  id: '/client-portals',
+  path: '/client-portals',
+  getParentRoute: () => FeaturesRoute,
+} as any)
+const FeaturesAgentsRoute = FeaturesAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => FeaturesRoute,
 } as any)
 const DocsSelfHostRoute = DocsSelfHostRouteImport.update({
   id: '/docs/self-host',
@@ -139,6 +438,26 @@ const ClientTokenRoute = ClientTokenRouteImport.update({
   id: '/client/$token',
   path: '/client/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppTriggersRoute = AppTriggersRouteImport.update({
+  id: '/triggers',
+  path: '/triggers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTimesheetApprovalsRoute = AppTimesheetApprovalsRouteImport.update({
+  id: '/timesheet-approvals',
+  path: '/timesheet-approvals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTimesheetRoute = AppTimesheetRouteImport.update({
+  id: '/timesheet',
+  path: '/timesheet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSowToProjectRoute = AppSowToProjectRouteImport.update({
+  id: '/sow-to-project',
+  path: '/sow-to-project',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -155,14 +474,44 @@ const AppSalesRoute = AppSalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsRoute = AppProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPortfolioStatusRoute = AppPortfolioStatusRouteImport.update({
+  id: '/portfolio-status',
+  path: '/portfolio-status',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPipelineAnalyticsRoute = AppPipelineAnalyticsRouteImport.update({
+  id: '/pipeline-analytics',
+  path: '/pipeline-analytics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPagesRoute = AppPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOpsRoute = AppOpsRouteImport.update({
   id: '/ops',
   path: '/ops',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
@@ -185,6 +534,21 @@ const AppMeetingsRoute = AppMeetingsRouteImport.update({
   path: '/meetings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInboxRoute = AppInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppForecastRoute = AppForecastRouteImport.update({
+  id: '/forecast',
+  path: '/forecast',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinanceRoute = AppFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppExecutiveRoute = AppExecutiveRouteImport.update({
   id: '/executive',
   path: '/executive',
@@ -195,9 +559,9 @@ const AppEscalationsRoute = AppEscalationsRouteImport.update({
   path: '/escalations',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDeliveryRoute = AppDeliveryRouteImport.update({
-  id: '/delivery',
-  path: '/delivery',
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCrmRoute = AppCrmRouteImport.update({
@@ -210,9 +574,39 @@ const AppContactsRoute = AppContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuraRoute = AppAuraRouteImport.update({
+  id: '/aura',
+  path: '/aura',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppApprovalsRoute = AppApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiArtifactsRoute = AppAiArtifactsRouteImport.update({
+  id: '/ai-artifacts',
+  path: '/ai-artifacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAgentsRoute = AppAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAgentRunsRoute = AppAgentRunsRouteImport.update({
   id: '/agent-runs',
   path: '/agent-runs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
@@ -225,9 +619,54 @@ const AppResourcesIndexRoute = AppResourcesIndexRouteImport.update({
   path: '/resources/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClientsIndexRoute = AppClientsIndexRouteImport.update({
+  id: '/clients/',
+  path: '/clients/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsVocabularyRoute = AppSettingsVocabularyRouteImport.update({
+  id: '/vocabulary',
+  path: '/vocabulary',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsViewsRoute = AppSettingsViewsRouteImport.update({
+  id: '/views',
+  path: '/views',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsTemplatesRoute = AppSettingsTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsShortcutsRoute = AppSettingsShortcutsRouteImport.update({
+  id: '/shortcuts',
+  path: '/shortcuts',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsSharingRoute = AppSettingsSharingRouteImport.update({
+  id: '/sharing',
+  path: '/sharing',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsSalesStagesRoute = AppSettingsSalesStagesRouteImport.update({
+  id: '/sales-stages',
+  path: '/sales-stages',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsRolesRoute = AppSettingsRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsResourcesRoute = AppSettingsResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsRateCardsRoute = AppSettingsRateCardsRouteImport.update({
+  id: '/rate-cards',
+  path: '/rate-cards',
   getParentRoute: () => AppSettingsRoute,
 } as any)
 const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
@@ -235,14 +674,44 @@ const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsPlaybooksRoute = AppSettingsPlaybooksRouteImport.update({
+  id: '/playbooks',
+  path: '/playbooks',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsOverviewRoute = AppSettingsOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsObjectTypesRoute = AppSettingsObjectTypesRouteImport.update({
+  id: '/object-types',
+  path: '/object-types',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsMembersRoute = AppSettingsMembersRouteImport.update({
   id: '/members',
   path: '/members',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsIntegrationsRoute = AppSettingsIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 const AppSettingsFieldsRoute = AppSettingsFieldsRouteImport.update({
   id: '/fields',
   path: '/fields',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsEscalationsRoute = AppSettingsEscalationsRouteImport.update({
+  id: '/escalations',
+  path: '/escalations',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsErrorsRoute = AppSettingsErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
   getParentRoute: () => AppSettingsRoute,
 } as any)
 const AppSettingsDataRoute = AppSettingsDataRouteImport.update({
@@ -255,15 +724,31 @@ const AppSettingsDangerRoute = AppSettingsDangerRouteImport.update({
   path: '/danger',
   getParentRoute: () => AppSettingsRoute,
 } as any)
+const AppSettingsCustomizationRoute =
+  AppSettingsCustomizationRouteImport.update({
+    id: '/customization',
+    path: '/customization',
+    getParentRoute: () => AppSettingsRoute,
+  } as any)
 const AppSettingsAutomationsRoute = AppSettingsAutomationsRouteImport.update({
   id: '/automations',
   path: '/automations',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsAuditRoute = AppSettingsAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AppSettingsRoute,
 } as any)
 const AppSettingsAiRoute = AppSettingsAiRouteImport.update({
   id: '/ai',
   path: '/ai',
   getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppRunsRunIdRoute = AppRunsRunIdRouteImport.update({
+  id: '/runs/$runId',
+  path: '/runs/$runId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppResourcesCapacityRoute = AppResourcesCapacityRouteImport.update({
   id: '/resources/capacity',
@@ -273,6 +758,16 @@ const AppResourcesCapacityRoute = AppResourcesCapacityRouteImport.update({
 const AppPProjectIdRoute = AppPProjectIdRouteImport.update({
   id: '/p/$projectId',
   path: '/p/$projectId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingIdRoute = AppOnboardingIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppOnboardingRoute,
+} as any)
+const AppObjectsKeyRoute = AppObjectsKeyRouteImport.update({
+  id: '/objects/$key',
+  path: '/objects/$key',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMeetingsMeetingIdRoute = AppMeetingsMeetingIdRouteImport.update({
@@ -291,10 +786,20 @@ const AppEscalationsEscalationIdRoute =
     path: '/$escalationId',
     getParentRoute: () => AppEscalationsRoute,
   } as any)
-const AppDDivisionSlugRoute = AppDDivisionSlugRouteImport.update({
-  id: '/d/$divisionSlug',
-  path: '/d/$divisionSlug',
+const AppClientsAccountIdRoute = AppClientsAccountIdRouteImport.update({
+  id: '/clients/$accountId',
+  path: '/clients/$accountId',
   getParentRoute: () => AppRoute,
+} as any)
+const AppCClientIdRoute = AppCClientIdRouteImport.update({
+  id: '/c/$clientId',
+  path: '/c/$clientId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPProjectIdStatusRoute = AppPProjectIdStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => AppPProjectIdRoute,
 } as any)
 const AppPProjectIdSprintsRoute = AppPProjectIdSprintsRouteImport.update({
   id: '/sprints',
@@ -304,6 +809,27 @@ const AppPProjectIdSprintsRoute = AppPProjectIdSprintsRouteImport.update({
 const AppPProjectIdSettingsRoute = AppPProjectIdSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdRequirementsRoute =
+  AppPProjectIdRequirementsRouteImport.update({
+    id: '/requirements',
+    path: '/requirements',
+    getParentRoute: () => AppPProjectIdRoute,
+  } as any)
+const AppPProjectIdRaidRoute = AppPProjectIdRaidRouteImport.update({
+  id: '/raid',
+  path: '/raid',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdPhasesRoute = AppPProjectIdPhasesRouteImport.update({
+  id: '/phases',
+  path: '/phases',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdPagesRoute = AppPProjectIdPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
 const AppPProjectIdOverviewRoute = AppPProjectIdOverviewRouteImport.update({
@@ -316,6 +842,16 @@ const AppPProjectIdMilestonesRoute = AppPProjectIdMilestonesRouteImport.update({
   path: '/milestones',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdInvoicesRoute = AppPProjectIdInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdIntakeRoute = AppPProjectIdIntakeRouteImport.update({
+  id: '/intake',
+  path: '/intake',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdHealthRoute = AppPProjectIdHealthRouteImport.update({
   id: '/health',
   path: '/health',
@@ -326,32 +862,115 @@ const AppPProjectIdFinancialsRoute = AppPProjectIdFinancialsRouteImport.update({
   path: '/financials',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdExpensesRoute = AppPProjectIdExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdDocumentsRoute = AppPProjectIdDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdDependenciesRoute =
+  AppPProjectIdDependenciesRouteImport.update({
+    id: '/dependencies',
+    path: '/dependencies',
+    getParentRoute: () => AppPProjectIdRoute,
+  } as any)
 const AppPProjectIdClientsRoute = AppPProjectIdClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
   getParentRoute: () => AppPProjectIdRoute,
 } as any)
+const AppPProjectIdChatRoute = AppPProjectIdChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdChangeRequestsRoute =
+  AppPProjectIdChangeRequestsRouteImport.update({
+    id: '/change-requests',
+    path: '/change-requests',
+    getParentRoute: () => AppPProjectIdRoute,
+  } as any)
 const AppPProjectIdChangeOrdersRoute =
   AppPProjectIdChangeOrdersRouteImport.update({
     id: '/change-orders',
     path: '/change-orders',
     getParentRoute: () => AppPProjectIdRoute,
   } as any)
+const AppPProjectIdCanvasRoute = AppPProjectIdCanvasRouteImport.update({
+  id: '/canvas',
+  path: '/canvas',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdBaselineRoute = AppPProjectIdBaselineRouteImport.update({
+  id: '/baseline',
+  path: '/baseline',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
+const AppPProjectIdApprovalsRoute = AppPProjectIdApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AppPProjectIdRoute,
+} as any)
 const AppPProjectIdAllocationsRoute =
   AppPProjectIdAllocationsRouteImport.update({
     id: '/allocations',
     path: '/allocations',
     getParentRoute: () => AppPProjectIdRoute,
   } as any)
+const AppCClientIdSowsRoute = AppCClientIdSowsRouteImport.update({
+  id: '/sows',
+  path: '/sows',
+  getParentRoute: () => AppCClientIdRoute,
+} as any)
+const ApiPublicStatusReportsRunRoute =
+  ApiPublicStatusReportsRunRouteImport.update({
+    id: '/api/public/status-reports/run',
+    path: '/api/public/status-reports/run',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPortalTokenRoute = ApiPublicPortalTokenRouteImport.update({
   id: '/api/public/portal/$token',
   path: '/api/public/portal/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksWeeklyClientBriefsRoute =
+  ApiPublicHooksWeeklyClientBriefsRouteImport.update({
+    id: '/api/public/hooks/weekly-client-briefs',
+    path: '/api/public/hooks/weekly-client-briefs',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRefreshOverviewsRoute =
+  ApiPublicHooksRefreshOverviewsRouteImport.update({
+    id: '/api/public/hooks/refresh-overviews',
+    path: '/api/public/hooks/refresh-overviews',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicExtensionSuggestRoute =
+  ApiPublicExtensionSuggestRouteImport.update({
+    id: '/api/public/extension/suggest',
+    path: '/api/public/extension/suggest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AppPProjectIdInvoicesInvoiceIdRoute =
+  AppPProjectIdInvoicesInvoiceIdRouteImport.update({
+    id: '/$invoiceId',
+    path: '/$invoiceId',
+    getParentRoute: () => AppPProjectIdInvoicesRoute,
+  } as any)
+const AppClientsAccountIdDealDealIdRoute =
+  AppClientsAccountIdDealDealIdRouteImport.update({
+    id: '/deal/$dealId',
+    path: '/deal/$dealId',
+    getParentRoute: () => AppClientsAccountIdRoute,
+  } as any)
+const AppCClientIdSowSowIdRoute = AppCClientIdSowSowIdRouteImport.update({
+  id: '/sow/$sowId',
+  path: '/sow/$sowId',
+  getParentRoute: () => AppCClientIdRoute,
 } as any)
 const ApiPublicPortalTokenUploadRoute =
   ApiPublicPortalTokenUploadRouteImport.update({
@@ -365,10 +984,40 @@ const ApiPublicPortalTokenSubmitRoute =
     path: '/submit',
     getParentRoute: () => ApiPublicPortalTokenRoute,
   } as any)
+const ApiPublicPortalTokenOverviewRoute =
+  ApiPublicPortalTokenOverviewRouteImport.update({
+    id: '/overview',
+    path: '/overview',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenInvoicesRoute =
+  ApiPublicPortalTokenInvoicesRouteImport.update({
+    id: '/invoices',
+    path: '/invoices',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
 const ApiPublicPortalTokenImpactRoute =
   ApiPublicPortalTokenImpactRouteImport.update({
     id: '/impact',
     path: '/impact',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenFormsRoute =
+  ApiPublicPortalTokenFormsRouteImport.update({
+    id: '/forms',
+    path: '/forms',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenDownloadRoute =
+  ApiPublicPortalTokenDownloadRouteImport.update({
+    id: '/download',
+    path: '/download',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenDocumentsRoute =
+  ApiPublicPortalTokenDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
     getParentRoute: () => ApiPublicPortalTokenRoute,
   } as any)
 const ApiPublicPortalTokenDeliverablesRoute =
@@ -377,398 +1026,1152 @@ const ApiPublicPortalTokenDeliverablesRoute =
     path: '/deliverables',
     getParentRoute: () => ApiPublicPortalTokenRoute,
   } as any)
+const ApiPublicPortalTokenCsatRoute =
+  ApiPublicPortalTokenCsatRouteImport.update({
+    id: '/csat',
+    path: '/csat',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenCommentsRoute =
+  ApiPublicPortalTokenCommentsRouteImport.update({
+    id: '/comments',
+    path: '/comments',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicPortalTokenChangeRequestsRoute =
+  ApiPublicPortalTokenChangeRequestsRouteImport.update({
+    id: '/change-requests',
+    path: '/change-requests',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
+const ApiPublicIntegrationsGoogleCalendarCronRoute =
+  ApiPublicIntegrationsGoogleCalendarCronRouteImport.update({
+    id: '/api/public/integrations/google-calendar/cron',
+    path: '/api/public/integrations/google-calendar/cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicIntegrationsGoogleCalendarCallbackRoute =
+  ApiPublicIntegrationsGoogleCalendarCallbackRouteImport.update({
+    id: '/api/public/integrations/google-calendar/callback',
+    path: '/api/public/integrations/google-calendar/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentTriggersRunRoute =
+  ApiPublicHooksAgentTriggersRunRouteImport.update({
+    id: '/api/public/hooks/agent-triggers/run',
+    path: '/api/public/hooks/agent-triggers/run',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksAgentEventsDispatchRoute =
+  ApiPublicHooksAgentEventsDispatchRouteImport.update({
+    id: '/api/public/hooks/agent-events/dispatch',
+    path: '/api/public/hooks/agent-events/dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPortalTokenMilestonesSignoffRoute =
+  ApiPublicPortalTokenMilestonesSignoffRouteImport.update({
+    id: '/milestones/signoff',
+    path: '/milestones/signoff',
+    getParentRoute: () => ApiPublicPortalTokenRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
-  '/features': typeof FeaturesRoute
+  '/changelog': typeof ChangelogRoute
+  '/check-email': typeof CheckEmailRoute
+  '/contact': typeof ContactRoute
+  '/extension': typeof ExtensionRoute
+  '/extension-entry': typeof ExtensionEntryRoute
+  '/features': typeof FeaturesRouteWithChildren
+  '/for': typeof ForRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/use-cases': typeof UseCasesRouteWithChildren
+  '/vs': typeof VsRouteWithChildren
+  '/app/activity': typeof AppActivityRoute
   '/app/agent-runs': typeof AppAgentRunsRoute
+  '/app/agents': typeof AppAgentsRoute
+  '/app/ai-artifacts': typeof AppAiArtifactsRoute
+  '/app/approvals': typeof AppApprovalsRoute
+  '/app/aura': typeof AppAuraRoute
+  '/app/chat': typeof AppChatRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
-  '/app/delivery': typeof AppDeliveryRoute
+  '/app/documents': typeof AppDocumentsRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
   '/app/executive': typeof AppExecutiveRoute
+  '/app/finance': typeof AppFinanceRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/inbox': typeof AppInboxRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/onboarding': typeof AppOnboardingRouteWithChildren
   '/app/ops': typeof AppOpsRoute
+  '/app/pages': typeof AppPagesRoute
+  '/app/pipeline-analytics': typeof AppPipelineAnalyticsRoute
+  '/app/portfolio-status': typeof AppPortfolioStatusRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/projects': typeof AppProjectsRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/sales': typeof AppSalesRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/app/sow-to-project': typeof AppSowToProjectRoute
+  '/app/timesheet': typeof AppTimesheetRoute
+  '/app/timesheet-approvals': typeof AppTimesheetApprovalsRoute
+  '/app/triggers': typeof AppTriggersRoute
   '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
+  '/features/agents': typeof FeaturesAgentsRoute
+  '/features/client-portals': typeof FeaturesClientPortalsRoute
+  '/features/crm': typeof FeaturesCrmRoute
+  '/features/docs-and-notes': typeof FeaturesDocsAndNotesRoute
+  '/features/finance': typeof FeaturesFinanceRoute
+  '/features/meetings-ai': typeof FeaturesMeetingsAiRoute
+  '/features/permissions-rbac': typeof FeaturesPermissionsRbacRoute
+  '/features/projects': typeof FeaturesProjectsRoute
+  '/features/views': typeof FeaturesViewsRoute
+  '/for/client-services': typeof ForClientServicesRoute
+  '/for/finance': typeof ForFinanceRoute
+  '/for/founders': typeof ForFoundersRoute
+  '/for/operations': typeof ForOperationsRoute
+  '/for/project-managers': typeof ForProjectManagersRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/r/$token': typeof RTokenRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/use-cases/agencies': typeof UseCasesAgenciesRoute
+  '/use-cases/client-portals': typeof UseCasesClientPortalsRoute
+  '/use-cases/consulting': typeof UseCasesConsultingRoute
+  '/use-cases/freelancers': typeof UseCasesFreelancersRoute
+  '/use-cases/professional-services': typeof UseCasesProfessionalServicesRoute
+  '/use-cases/software-delivery': typeof UseCasesSoftwareDeliveryRoute
+  '/vs/hubspot': typeof VsHubspotRoute
+  '/vs/jira': typeof VsJiraRoute
+  '/vs/linear': typeof VsLinearRoute
+  '/vs/monday': typeof VsMondayRoute
+  '/vs/notion': typeof VsNotionRoute
   '/app/': typeof AppIndexRoute
-  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
+  '/app/c/$clientId': typeof AppCClientIdRouteWithChildren
+  '/app/clients/$accountId': typeof AppClientsAccountIdRouteWithChildren
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
+  '/app/objects/$key': typeof AppObjectsKeyRoute
+  '/app/onboarding/$id': typeof AppOnboardingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
+  '/app/runs/$runId': typeof AppRunsRunIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/audit': typeof AppSettingsAuditRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
+  '/app/settings/customization': typeof AppSettingsCustomizationRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
+  '/app/settings/errors': typeof AppSettingsErrorsRoute
+  '/app/settings/escalations': typeof AppSettingsEscalationsRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/integrations': typeof AppSettingsIntegrationsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/object-types': typeof AppSettingsObjectTypesRoute
+  '/app/settings/overview': typeof AppSettingsOverviewRoute
+  '/app/settings/playbooks': typeof AppSettingsPlaybooksRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/rate-cards': typeof AppSettingsRateCardsRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/settings/roles': typeof AppSettingsRolesRoute
+  '/app/settings/sales-stages': typeof AppSettingsSalesStagesRoute
+  '/app/settings/sharing': typeof AppSettingsSharingRoute
+  '/app/settings/shortcuts': typeof AppSettingsShortcutsRoute
+  '/app/settings/templates': typeof AppSettingsTemplatesRoute
+  '/app/settings/views': typeof AppSettingsViewsRoute
+  '/app/settings/vocabulary': typeof AppSettingsVocabularyRoute
+  '/app/clients/': typeof AppClientsIndexRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/extension/suggest': typeof ApiPublicExtensionSuggestRoute
+  '/api/public/hooks/refresh-overviews': typeof ApiPublicHooksRefreshOverviewsRoute
+  '/api/public/hooks/weekly-client-briefs': typeof ApiPublicHooksWeeklyClientBriefsRoute
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
+  '/api/public/status-reports/run': typeof ApiPublicStatusReportsRunRoute
+  '/app/c/$clientId/sows': typeof AppCClientIdSowsRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
+  '/app/p/$projectId/approvals': typeof AppPProjectIdApprovalsRoute
+  '/app/p/$projectId/baseline': typeof AppPProjectIdBaselineRoute
+  '/app/p/$projectId/canvas': typeof AppPProjectIdCanvasRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/change-requests': typeof AppPProjectIdChangeRequestsRoute
+  '/app/p/$projectId/chat': typeof AppPProjectIdChatRoute
   '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
+  '/app/p/$projectId/dependencies': typeof AppPProjectIdDependenciesRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
+  '/app/p/$projectId/expenses': typeof AppPProjectIdExpensesRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
+  '/app/p/$projectId/intake': typeof AppPProjectIdIntakeRoute
+  '/app/p/$projectId/invoices': typeof AppPProjectIdInvoicesRouteWithChildren
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
+  '/app/p/$projectId/pages': typeof AppPProjectIdPagesRoute
+  '/app/p/$projectId/phases': typeof AppPProjectIdPhasesRoute
+  '/app/p/$projectId/raid': typeof AppPProjectIdRaidRoute
+  '/app/p/$projectId/requirements': typeof AppPProjectIdRequirementsRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/app/p/$projectId/status': typeof AppPProjectIdStatusRoute
+  '/api/public/hooks/agent-events/dispatch': typeof ApiPublicHooksAgentEventsDispatchRoute
+  '/api/public/hooks/agent-triggers/run': typeof ApiPublicHooksAgentTriggersRunRoute
+  '/api/public/integrations/google-calendar/callback': typeof ApiPublicIntegrationsGoogleCalendarCallbackRoute
+  '/api/public/integrations/google-calendar/cron': typeof ApiPublicIntegrationsGoogleCalendarCronRoute
+  '/api/public/portal/$token/change-requests': typeof ApiPublicPortalTokenChangeRequestsRoute
+  '/api/public/portal/$token/comments': typeof ApiPublicPortalTokenCommentsRoute
+  '/api/public/portal/$token/csat': typeof ApiPublicPortalTokenCsatRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/documents': typeof ApiPublicPortalTokenDocumentsRoute
+  '/api/public/portal/$token/download': typeof ApiPublicPortalTokenDownloadRoute
+  '/api/public/portal/$token/forms': typeof ApiPublicPortalTokenFormsRoute
   '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
+  '/api/public/portal/$token/invoices': typeof ApiPublicPortalTokenInvoicesRoute
+  '/api/public/portal/$token/overview': typeof ApiPublicPortalTokenOverviewRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
+  '/app/c/$clientId/sow/$sowId': typeof AppCClientIdSowSowIdRoute
+  '/app/clients/$accountId/deal/$dealId': typeof AppClientsAccountIdDealDealIdRoute
+  '/app/p/$projectId/invoices/$invoiceId': typeof AppPProjectIdInvoicesInvoiceIdRoute
+  '/api/public/portal/$token/milestones/signoff': typeof ApiPublicPortalTokenMilestonesSignoffRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/features': typeof FeaturesRoute
+  '/about': typeof AboutRoute
+  '/changelog': typeof ChangelogRoute
+  '/check-email': typeof CheckEmailRoute
+  '/contact': typeof ContactRoute
+  '/extension': typeof ExtensionRoute
+  '/extension-entry': typeof ExtensionEntryRoute
+  '/features': typeof FeaturesRouteWithChildren
+  '/for': typeof ForRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/use-cases': typeof UseCasesRouteWithChildren
+  '/vs': typeof VsRouteWithChildren
+  '/app/activity': typeof AppActivityRoute
   '/app/agent-runs': typeof AppAgentRunsRoute
+  '/app/agents': typeof AppAgentsRoute
+  '/app/ai-artifacts': typeof AppAiArtifactsRoute
+  '/app/approvals': typeof AppApprovalsRoute
+  '/app/aura': typeof AppAuraRoute
+  '/app/chat': typeof AppChatRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
-  '/app/delivery': typeof AppDeliveryRoute
+  '/app/documents': typeof AppDocumentsRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
   '/app/executive': typeof AppExecutiveRoute
+  '/app/finance': typeof AppFinanceRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/inbox': typeof AppInboxRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/onboarding': typeof AppOnboardingRouteWithChildren
   '/app/ops': typeof AppOpsRoute
+  '/app/pages': typeof AppPagesRoute
+  '/app/pipeline-analytics': typeof AppPipelineAnalyticsRoute
+  '/app/portfolio-status': typeof AppPortfolioStatusRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/projects': typeof AppProjectsRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/sales': typeof AppSalesRoute
   '/app/search': typeof AppSearchRoute
+  '/app/sow-to-project': typeof AppSowToProjectRoute
+  '/app/timesheet': typeof AppTimesheetRoute
+  '/app/timesheet-approvals': typeof AppTimesheetApprovalsRoute
+  '/app/triggers': typeof AppTriggersRoute
   '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
+  '/features/agents': typeof FeaturesAgentsRoute
+  '/features/client-portals': typeof FeaturesClientPortalsRoute
+  '/features/crm': typeof FeaturesCrmRoute
+  '/features/docs-and-notes': typeof FeaturesDocsAndNotesRoute
+  '/features/finance': typeof FeaturesFinanceRoute
+  '/features/meetings-ai': typeof FeaturesMeetingsAiRoute
+  '/features/permissions-rbac': typeof FeaturesPermissionsRbacRoute
+  '/features/projects': typeof FeaturesProjectsRoute
+  '/features/views': typeof FeaturesViewsRoute
+  '/for/client-services': typeof ForClientServicesRoute
+  '/for/finance': typeof ForFinanceRoute
+  '/for/founders': typeof ForFoundersRoute
+  '/for/operations': typeof ForOperationsRoute
+  '/for/project-managers': typeof ForProjectManagersRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/r/$token': typeof RTokenRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/use-cases/agencies': typeof UseCasesAgenciesRoute
+  '/use-cases/client-portals': typeof UseCasesClientPortalsRoute
+  '/use-cases/consulting': typeof UseCasesConsultingRoute
+  '/use-cases/freelancers': typeof UseCasesFreelancersRoute
+  '/use-cases/professional-services': typeof UseCasesProfessionalServicesRoute
+  '/use-cases/software-delivery': typeof UseCasesSoftwareDeliveryRoute
+  '/vs/hubspot': typeof VsHubspotRoute
+  '/vs/jira': typeof VsJiraRoute
+  '/vs/linear': typeof VsLinearRoute
+  '/vs/monday': typeof VsMondayRoute
+  '/vs/notion': typeof VsNotionRoute
   '/app': typeof AppIndexRoute
-  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
+  '/app/c/$clientId': typeof AppCClientIdRouteWithChildren
+  '/app/clients/$accountId': typeof AppClientsAccountIdRouteWithChildren
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
+  '/app/objects/$key': typeof AppObjectsKeyRoute
+  '/app/onboarding/$id': typeof AppOnboardingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
+  '/app/runs/$runId': typeof AppRunsRunIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/audit': typeof AppSettingsAuditRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
+  '/app/settings/customization': typeof AppSettingsCustomizationRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
+  '/app/settings/errors': typeof AppSettingsErrorsRoute
+  '/app/settings/escalations': typeof AppSettingsEscalationsRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/integrations': typeof AppSettingsIntegrationsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/object-types': typeof AppSettingsObjectTypesRoute
+  '/app/settings/overview': typeof AppSettingsOverviewRoute
+  '/app/settings/playbooks': typeof AppSettingsPlaybooksRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/rate-cards': typeof AppSettingsRateCardsRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/settings/roles': typeof AppSettingsRolesRoute
+  '/app/settings/sales-stages': typeof AppSettingsSalesStagesRoute
+  '/app/settings/sharing': typeof AppSettingsSharingRoute
+  '/app/settings/shortcuts': typeof AppSettingsShortcutsRoute
+  '/app/settings/templates': typeof AppSettingsTemplatesRoute
+  '/app/settings/views': typeof AppSettingsViewsRoute
+  '/app/settings/vocabulary': typeof AppSettingsVocabularyRoute
+  '/app/clients': typeof AppClientsIndexRoute
   '/app/resources': typeof AppResourcesIndexRoute
   '/app/settings': typeof AppSettingsIndexRoute
+  '/api/public/extension/suggest': typeof ApiPublicExtensionSuggestRoute
+  '/api/public/hooks/refresh-overviews': typeof ApiPublicHooksRefreshOverviewsRoute
+  '/api/public/hooks/weekly-client-briefs': typeof ApiPublicHooksWeeklyClientBriefsRoute
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
+  '/api/public/status-reports/run': typeof ApiPublicStatusReportsRunRoute
+  '/app/c/$clientId/sows': typeof AppCClientIdSowsRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
+  '/app/p/$projectId/approvals': typeof AppPProjectIdApprovalsRoute
+  '/app/p/$projectId/baseline': typeof AppPProjectIdBaselineRoute
+  '/app/p/$projectId/canvas': typeof AppPProjectIdCanvasRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/change-requests': typeof AppPProjectIdChangeRequestsRoute
+  '/app/p/$projectId/chat': typeof AppPProjectIdChatRoute
   '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
+  '/app/p/$projectId/dependencies': typeof AppPProjectIdDependenciesRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
+  '/app/p/$projectId/expenses': typeof AppPProjectIdExpensesRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
+  '/app/p/$projectId/intake': typeof AppPProjectIdIntakeRoute
+  '/app/p/$projectId/invoices': typeof AppPProjectIdInvoicesRouteWithChildren
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
+  '/app/p/$projectId/pages': typeof AppPProjectIdPagesRoute
+  '/app/p/$projectId/phases': typeof AppPProjectIdPhasesRoute
+  '/app/p/$projectId/raid': typeof AppPProjectIdRaidRoute
+  '/app/p/$projectId/requirements': typeof AppPProjectIdRequirementsRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/app/p/$projectId/status': typeof AppPProjectIdStatusRoute
+  '/api/public/hooks/agent-events/dispatch': typeof ApiPublicHooksAgentEventsDispatchRoute
+  '/api/public/hooks/agent-triggers/run': typeof ApiPublicHooksAgentTriggersRunRoute
+  '/api/public/integrations/google-calendar/callback': typeof ApiPublicIntegrationsGoogleCalendarCallbackRoute
+  '/api/public/integrations/google-calendar/cron': typeof ApiPublicIntegrationsGoogleCalendarCronRoute
+  '/api/public/portal/$token/change-requests': typeof ApiPublicPortalTokenChangeRequestsRoute
+  '/api/public/portal/$token/comments': typeof ApiPublicPortalTokenCommentsRoute
+  '/api/public/portal/$token/csat': typeof ApiPublicPortalTokenCsatRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/documents': typeof ApiPublicPortalTokenDocumentsRoute
+  '/api/public/portal/$token/download': typeof ApiPublicPortalTokenDownloadRoute
+  '/api/public/portal/$token/forms': typeof ApiPublicPortalTokenFormsRoute
   '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
+  '/api/public/portal/$token/invoices': typeof ApiPublicPortalTokenInvoicesRoute
+  '/api/public/portal/$token/overview': typeof ApiPublicPortalTokenOverviewRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
+  '/app/c/$clientId/sow/$sowId': typeof AppCClientIdSowSowIdRoute
+  '/app/clients/$accountId/deal/$dealId': typeof AppClientsAccountIdDealDealIdRoute
+  '/app/p/$projectId/invoices/$invoiceId': typeof AppPProjectIdInvoicesInvoiceIdRoute
+  '/api/public/portal/$token/milestones/signoff': typeof ApiPublicPortalTokenMilestonesSignoffRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
-  '/features': typeof FeaturesRoute
+  '/changelog': typeof ChangelogRoute
+  '/check-email': typeof CheckEmailRoute
+  '/contact': typeof ContactRoute
+  '/extension': typeof ExtensionRoute
+  '/extension-entry': typeof ExtensionEntryRoute
+  '/features': typeof FeaturesRouteWithChildren
+  '/for': typeof ForRouteWithChildren
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/use-cases': typeof UseCasesRouteWithChildren
+  '/vs': typeof VsRouteWithChildren
+  '/app/activity': typeof AppActivityRoute
   '/app/agent-runs': typeof AppAgentRunsRoute
+  '/app/agents': typeof AppAgentsRoute
+  '/app/ai-artifacts': typeof AppAiArtifactsRoute
+  '/app/approvals': typeof AppApprovalsRoute
+  '/app/aura': typeof AppAuraRoute
+  '/app/chat': typeof AppChatRoute
   '/app/contacts': typeof AppContactsRoute
   '/app/crm': typeof AppCrmRoute
-  '/app/delivery': typeof AppDeliveryRoute
+  '/app/documents': typeof AppDocumentsRoute
   '/app/escalations': typeof AppEscalationsRouteWithChildren
   '/app/executive': typeof AppExecutiveRoute
+  '/app/finance': typeof AppFinanceRoute
+  '/app/forecast': typeof AppForecastRoute
+  '/app/inbox': typeof AppInboxRoute
   '/app/meetings': typeof AppMeetingsRouteWithChildren
   '/app/my-tasks': typeof AppMyTasksRoute
   '/app/notes': typeof AppNotesRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/onboarding': typeof AppOnboardingRouteWithChildren
   '/app/ops': typeof AppOpsRoute
+  '/app/pages': typeof AppPagesRoute
+  '/app/pipeline-analytics': typeof AppPipelineAnalyticsRoute
+  '/app/portfolio-status': typeof AppPortfolioStatusRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/projects': typeof AppProjectsRoute
+  '/app/reports': typeof AppReportsRoute
   '/app/sales': typeof AppSalesRoute
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRouteWithChildren
+  '/app/sow-to-project': typeof AppSowToProjectRoute
+  '/app/timesheet': typeof AppTimesheetRoute
+  '/app/timesheet-approvals': typeof AppTimesheetApprovalsRoute
+  '/app/triggers': typeof AppTriggersRoute
   '/client/$token': typeof ClientTokenRoute
   '/docs/self-host': typeof DocsSelfHostRoute
+  '/features/agents': typeof FeaturesAgentsRoute
+  '/features/client-portals': typeof FeaturesClientPortalsRoute
+  '/features/crm': typeof FeaturesCrmRoute
+  '/features/docs-and-notes': typeof FeaturesDocsAndNotesRoute
+  '/features/finance': typeof FeaturesFinanceRoute
+  '/features/meetings-ai': typeof FeaturesMeetingsAiRoute
+  '/features/permissions-rbac': typeof FeaturesPermissionsRbacRoute
+  '/features/projects': typeof FeaturesProjectsRoute
+  '/features/views': typeof FeaturesViewsRoute
+  '/for/client-services': typeof ForClientServicesRoute
+  '/for/finance': typeof ForFinanceRoute
+  '/for/founders': typeof ForFoundersRoute
+  '/for/operations': typeof ForOperationsRoute
+  '/for/project-managers': typeof ForProjectManagersRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/r/$token': typeof RTokenRoute
+  '/share/$token': typeof ShareTokenRoute
+  '/use-cases/agencies': typeof UseCasesAgenciesRoute
+  '/use-cases/client-portals': typeof UseCasesClientPortalsRoute
+  '/use-cases/consulting': typeof UseCasesConsultingRoute
+  '/use-cases/freelancers': typeof UseCasesFreelancersRoute
+  '/use-cases/professional-services': typeof UseCasesProfessionalServicesRoute
+  '/use-cases/software-delivery': typeof UseCasesSoftwareDeliveryRoute
+  '/vs/hubspot': typeof VsHubspotRoute
+  '/vs/jira': typeof VsJiraRoute
+  '/vs/linear': typeof VsLinearRoute
+  '/vs/monday': typeof VsMondayRoute
+  '/vs/notion': typeof VsNotionRoute
   '/app/': typeof AppIndexRoute
-  '/app/d/$divisionSlug': typeof AppDDivisionSlugRoute
+  '/app/c/$clientId': typeof AppCClientIdRouteWithChildren
+  '/app/clients/$accountId': typeof AppClientsAccountIdRouteWithChildren
   '/app/escalations/$escalationId': typeof AppEscalationsEscalationIdRoute
   '/app/f/$folderId': typeof AppFFolderIdRoute
   '/app/meetings/$meetingId': typeof AppMeetingsMeetingIdRoute
+  '/app/objects/$key': typeof AppObjectsKeyRoute
+  '/app/onboarding/$id': typeof AppOnboardingIdRoute
   '/app/p/$projectId': typeof AppPProjectIdRouteWithChildren
   '/app/resources/capacity': typeof AppResourcesCapacityRoute
+  '/app/runs/$runId': typeof AppRunsRunIdRoute
   '/app/settings/ai': typeof AppSettingsAiRoute
+  '/app/settings/audit': typeof AppSettingsAuditRoute
   '/app/settings/automations': typeof AppSettingsAutomationsRoute
+  '/app/settings/customization': typeof AppSettingsCustomizationRoute
   '/app/settings/danger': typeof AppSettingsDangerRoute
   '/app/settings/data': typeof AppSettingsDataRoute
+  '/app/settings/errors': typeof AppSettingsErrorsRoute
+  '/app/settings/escalations': typeof AppSettingsEscalationsRoute
   '/app/settings/fields': typeof AppSettingsFieldsRoute
+  '/app/settings/integrations': typeof AppSettingsIntegrationsRoute
   '/app/settings/members': typeof AppSettingsMembersRoute
+  '/app/settings/object-types': typeof AppSettingsObjectTypesRoute
+  '/app/settings/overview': typeof AppSettingsOverviewRoute
+  '/app/settings/playbooks': typeof AppSettingsPlaybooksRoute
   '/app/settings/profile': typeof AppSettingsProfileRoute
+  '/app/settings/rate-cards': typeof AppSettingsRateCardsRoute
   '/app/settings/resources': typeof AppSettingsResourcesRoute
+  '/app/settings/roles': typeof AppSettingsRolesRoute
+  '/app/settings/sales-stages': typeof AppSettingsSalesStagesRoute
+  '/app/settings/sharing': typeof AppSettingsSharingRoute
+  '/app/settings/shortcuts': typeof AppSettingsShortcutsRoute
+  '/app/settings/templates': typeof AppSettingsTemplatesRoute
+  '/app/settings/views': typeof AppSettingsViewsRoute
+  '/app/settings/vocabulary': typeof AppSettingsVocabularyRoute
+  '/app/clients/': typeof AppClientsIndexRoute
   '/app/resources/': typeof AppResourcesIndexRoute
   '/app/settings/': typeof AppSettingsIndexRoute
+  '/api/public/extension/suggest': typeof ApiPublicExtensionSuggestRoute
+  '/api/public/hooks/refresh-overviews': typeof ApiPublicHooksRefreshOverviewsRoute
+  '/api/public/hooks/weekly-client-briefs': typeof ApiPublicHooksWeeklyClientBriefsRoute
   '/api/public/portal/$token': typeof ApiPublicPortalTokenRouteWithChildren
+  '/api/public/status-reports/run': typeof ApiPublicStatusReportsRunRoute
+  '/app/c/$clientId/sows': typeof AppCClientIdSowsRoute
   '/app/p/$projectId/allocations': typeof AppPProjectIdAllocationsRoute
+  '/app/p/$projectId/approvals': typeof AppPProjectIdApprovalsRoute
+  '/app/p/$projectId/baseline': typeof AppPProjectIdBaselineRoute
+  '/app/p/$projectId/canvas': typeof AppPProjectIdCanvasRoute
   '/app/p/$projectId/change-orders': typeof AppPProjectIdChangeOrdersRoute
+  '/app/p/$projectId/change-requests': typeof AppPProjectIdChangeRequestsRoute
+  '/app/p/$projectId/chat': typeof AppPProjectIdChatRoute
   '/app/p/$projectId/clients': typeof AppPProjectIdClientsRoute
+  '/app/p/$projectId/dependencies': typeof AppPProjectIdDependenciesRoute
   '/app/p/$projectId/documents': typeof AppPProjectIdDocumentsRoute
+  '/app/p/$projectId/expenses': typeof AppPProjectIdExpensesRoute
   '/app/p/$projectId/financials': typeof AppPProjectIdFinancialsRoute
   '/app/p/$projectId/health': typeof AppPProjectIdHealthRoute
+  '/app/p/$projectId/intake': typeof AppPProjectIdIntakeRoute
+  '/app/p/$projectId/invoices': typeof AppPProjectIdInvoicesRouteWithChildren
   '/app/p/$projectId/milestones': typeof AppPProjectIdMilestonesRoute
   '/app/p/$projectId/overview': typeof AppPProjectIdOverviewRoute
+  '/app/p/$projectId/pages': typeof AppPProjectIdPagesRoute
+  '/app/p/$projectId/phases': typeof AppPProjectIdPhasesRoute
+  '/app/p/$projectId/raid': typeof AppPProjectIdRaidRoute
+  '/app/p/$projectId/requirements': typeof AppPProjectIdRequirementsRoute
   '/app/p/$projectId/settings': typeof AppPProjectIdSettingsRoute
   '/app/p/$projectId/sprints': typeof AppPProjectIdSprintsRoute
+  '/app/p/$projectId/status': typeof AppPProjectIdStatusRoute
+  '/api/public/hooks/agent-events/dispatch': typeof ApiPublicHooksAgentEventsDispatchRoute
+  '/api/public/hooks/agent-triggers/run': typeof ApiPublicHooksAgentTriggersRunRoute
+  '/api/public/integrations/google-calendar/callback': typeof ApiPublicIntegrationsGoogleCalendarCallbackRoute
+  '/api/public/integrations/google-calendar/cron': typeof ApiPublicIntegrationsGoogleCalendarCronRoute
+  '/api/public/portal/$token/change-requests': typeof ApiPublicPortalTokenChangeRequestsRoute
+  '/api/public/portal/$token/comments': typeof ApiPublicPortalTokenCommentsRoute
+  '/api/public/portal/$token/csat': typeof ApiPublicPortalTokenCsatRoute
   '/api/public/portal/$token/deliverables': typeof ApiPublicPortalTokenDeliverablesRoute
+  '/api/public/portal/$token/documents': typeof ApiPublicPortalTokenDocumentsRoute
+  '/api/public/portal/$token/download': typeof ApiPublicPortalTokenDownloadRoute
+  '/api/public/portal/$token/forms': typeof ApiPublicPortalTokenFormsRoute
   '/api/public/portal/$token/impact': typeof ApiPublicPortalTokenImpactRoute
+  '/api/public/portal/$token/invoices': typeof ApiPublicPortalTokenInvoicesRoute
+  '/api/public/portal/$token/overview': typeof ApiPublicPortalTokenOverviewRoute
   '/api/public/portal/$token/submit': typeof ApiPublicPortalTokenSubmitRoute
   '/api/public/portal/$token/upload': typeof ApiPublicPortalTokenUploadRoute
+  '/app/c/$clientId/sow/$sowId': typeof AppCClientIdSowSowIdRoute
+  '/app/clients/$accountId/deal/$dealId': typeof AppClientsAccountIdDealDealIdRoute
+  '/app/p/$projectId/invoices/$invoiceId': typeof AppPProjectIdInvoicesInvoiceIdRoute
+  '/api/public/portal/$token/milestones/signoff': typeof ApiPublicPortalTokenMilestonesSignoffRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/app'
+    | '/changelog'
+    | '/check-email'
+    | '/contact'
+    | '/extension'
+    | '/extension-entry'
     | '/features'
+    | '/for'
     | '/how-it-works'
     | '/login'
     | '/onboarding'
     | '/pricing'
     | '/privacy'
+    | '/security'
     | '/signup'
     | '/terms'
+    | '/use-cases'
+    | '/vs'
+    | '/app/activity'
     | '/app/agent-runs'
+    | '/app/agents'
+    | '/app/ai-artifacts'
+    | '/app/approvals'
+    | '/app/aura'
+    | '/app/chat'
     | '/app/contacts'
     | '/app/crm'
-    | '/app/delivery'
+    | '/app/documents'
     | '/app/escalations'
     | '/app/executive'
+    | '/app/finance'
+    | '/app/forecast'
+    | '/app/inbox'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
+    | '/app/onboarding'
     | '/app/ops'
+    | '/app/pages'
+    | '/app/pipeline-analytics'
+    | '/app/portfolio-status'
     | '/app/profile'
+    | '/app/projects'
+    | '/app/reports'
     | '/app/sales'
     | '/app/search'
     | '/app/settings'
+    | '/app/sow-to-project'
+    | '/app/timesheet'
+    | '/app/timesheet-approvals'
+    | '/app/triggers'
     | '/client/$token'
     | '/docs/self-host'
+    | '/features/agents'
+    | '/features/client-portals'
+    | '/features/crm'
+    | '/features/docs-and-notes'
+    | '/features/finance'
+    | '/features/meetings-ai'
+    | '/features/permissions-rbac'
+    | '/features/projects'
+    | '/features/views'
+    | '/for/client-services'
+    | '/for/finance'
+    | '/for/founders'
+    | '/for/operations'
+    | '/for/project-managers'
     | '/invite/$token'
+    | '/r/$token'
+    | '/share/$token'
+    | '/use-cases/agencies'
+    | '/use-cases/client-portals'
+    | '/use-cases/consulting'
+    | '/use-cases/freelancers'
+    | '/use-cases/professional-services'
+    | '/use-cases/software-delivery'
+    | '/vs/hubspot'
+    | '/vs/jira'
+    | '/vs/linear'
+    | '/vs/monday'
+    | '/vs/notion'
     | '/app/'
-    | '/app/d/$divisionSlug'
+    | '/app/c/$clientId'
+    | '/app/clients/$accountId'
     | '/app/escalations/$escalationId'
     | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
+    | '/app/objects/$key'
+    | '/app/onboarding/$id'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
+    | '/app/runs/$runId'
     | '/app/settings/ai'
+    | '/app/settings/audit'
     | '/app/settings/automations'
+    | '/app/settings/customization'
     | '/app/settings/danger'
     | '/app/settings/data'
+    | '/app/settings/errors'
+    | '/app/settings/escalations'
     | '/app/settings/fields'
+    | '/app/settings/integrations'
     | '/app/settings/members'
+    | '/app/settings/object-types'
+    | '/app/settings/overview'
+    | '/app/settings/playbooks'
     | '/app/settings/profile'
+    | '/app/settings/rate-cards'
     | '/app/settings/resources'
+    | '/app/settings/roles'
+    | '/app/settings/sales-stages'
+    | '/app/settings/sharing'
+    | '/app/settings/shortcuts'
+    | '/app/settings/templates'
+    | '/app/settings/views'
+    | '/app/settings/vocabulary'
+    | '/app/clients/'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/extension/suggest'
+    | '/api/public/hooks/refresh-overviews'
+    | '/api/public/hooks/weekly-client-briefs'
     | '/api/public/portal/$token'
+    | '/api/public/status-reports/run'
+    | '/app/c/$clientId/sows'
     | '/app/p/$projectId/allocations'
+    | '/app/p/$projectId/approvals'
+    | '/app/p/$projectId/baseline'
+    | '/app/p/$projectId/canvas'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/change-requests'
+    | '/app/p/$projectId/chat'
     | '/app/p/$projectId/clients'
+    | '/app/p/$projectId/dependencies'
     | '/app/p/$projectId/documents'
+    | '/app/p/$projectId/expenses'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
+    | '/app/p/$projectId/intake'
+    | '/app/p/$projectId/invoices'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/overview'
+    | '/app/p/$projectId/pages'
+    | '/app/p/$projectId/phases'
+    | '/app/p/$projectId/raid'
+    | '/app/p/$projectId/requirements'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/app/p/$projectId/status'
+    | '/api/public/hooks/agent-events/dispatch'
+    | '/api/public/hooks/agent-triggers/run'
+    | '/api/public/integrations/google-calendar/callback'
+    | '/api/public/integrations/google-calendar/cron'
+    | '/api/public/portal/$token/change-requests'
+    | '/api/public/portal/$token/comments'
+    | '/api/public/portal/$token/csat'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/documents'
+    | '/api/public/portal/$token/download'
+    | '/api/public/portal/$token/forms'
     | '/api/public/portal/$token/impact'
+    | '/api/public/portal/$token/invoices'
+    | '/api/public/portal/$token/overview'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
+    | '/app/c/$clientId/sow/$sowId'
+    | '/app/clients/$accountId/deal/$dealId'
+    | '/app/p/$projectId/invoices/$invoiceId'
+    | '/api/public/portal/$token/milestones/signoff'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/changelog'
+    | '/check-email'
+    | '/contact'
+    | '/extension'
+    | '/extension-entry'
     | '/features'
+    | '/for'
     | '/how-it-works'
     | '/login'
     | '/onboarding'
     | '/pricing'
     | '/privacy'
+    | '/security'
     | '/signup'
     | '/terms'
+    | '/use-cases'
+    | '/vs'
+    | '/app/activity'
     | '/app/agent-runs'
+    | '/app/agents'
+    | '/app/ai-artifacts'
+    | '/app/approvals'
+    | '/app/aura'
+    | '/app/chat'
     | '/app/contacts'
     | '/app/crm'
-    | '/app/delivery'
+    | '/app/documents'
     | '/app/escalations'
     | '/app/executive'
+    | '/app/finance'
+    | '/app/forecast'
+    | '/app/inbox'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
+    | '/app/onboarding'
     | '/app/ops'
+    | '/app/pages'
+    | '/app/pipeline-analytics'
+    | '/app/portfolio-status'
     | '/app/profile'
+    | '/app/projects'
+    | '/app/reports'
     | '/app/sales'
     | '/app/search'
+    | '/app/sow-to-project'
+    | '/app/timesheet'
+    | '/app/timesheet-approvals'
+    | '/app/triggers'
     | '/client/$token'
     | '/docs/self-host'
+    | '/features/agents'
+    | '/features/client-portals'
+    | '/features/crm'
+    | '/features/docs-and-notes'
+    | '/features/finance'
+    | '/features/meetings-ai'
+    | '/features/permissions-rbac'
+    | '/features/projects'
+    | '/features/views'
+    | '/for/client-services'
+    | '/for/finance'
+    | '/for/founders'
+    | '/for/operations'
+    | '/for/project-managers'
     | '/invite/$token'
+    | '/r/$token'
+    | '/share/$token'
+    | '/use-cases/agencies'
+    | '/use-cases/client-portals'
+    | '/use-cases/consulting'
+    | '/use-cases/freelancers'
+    | '/use-cases/professional-services'
+    | '/use-cases/software-delivery'
+    | '/vs/hubspot'
+    | '/vs/jira'
+    | '/vs/linear'
+    | '/vs/monday'
+    | '/vs/notion'
     | '/app'
-    | '/app/d/$divisionSlug'
+    | '/app/c/$clientId'
+    | '/app/clients/$accountId'
     | '/app/escalations/$escalationId'
     | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
+    | '/app/objects/$key'
+    | '/app/onboarding/$id'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
+    | '/app/runs/$runId'
     | '/app/settings/ai'
+    | '/app/settings/audit'
     | '/app/settings/automations'
+    | '/app/settings/customization'
     | '/app/settings/danger'
     | '/app/settings/data'
+    | '/app/settings/errors'
+    | '/app/settings/escalations'
     | '/app/settings/fields'
+    | '/app/settings/integrations'
     | '/app/settings/members'
+    | '/app/settings/object-types'
+    | '/app/settings/overview'
+    | '/app/settings/playbooks'
     | '/app/settings/profile'
+    | '/app/settings/rate-cards'
     | '/app/settings/resources'
+    | '/app/settings/roles'
+    | '/app/settings/sales-stages'
+    | '/app/settings/sharing'
+    | '/app/settings/shortcuts'
+    | '/app/settings/templates'
+    | '/app/settings/views'
+    | '/app/settings/vocabulary'
+    | '/app/clients'
     | '/app/resources'
     | '/app/settings'
+    | '/api/public/extension/suggest'
+    | '/api/public/hooks/refresh-overviews'
+    | '/api/public/hooks/weekly-client-briefs'
     | '/api/public/portal/$token'
+    | '/api/public/status-reports/run'
+    | '/app/c/$clientId/sows'
     | '/app/p/$projectId/allocations'
+    | '/app/p/$projectId/approvals'
+    | '/app/p/$projectId/baseline'
+    | '/app/p/$projectId/canvas'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/change-requests'
+    | '/app/p/$projectId/chat'
     | '/app/p/$projectId/clients'
+    | '/app/p/$projectId/dependencies'
     | '/app/p/$projectId/documents'
+    | '/app/p/$projectId/expenses'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
+    | '/app/p/$projectId/intake'
+    | '/app/p/$projectId/invoices'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/overview'
+    | '/app/p/$projectId/pages'
+    | '/app/p/$projectId/phases'
+    | '/app/p/$projectId/raid'
+    | '/app/p/$projectId/requirements'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/app/p/$projectId/status'
+    | '/api/public/hooks/agent-events/dispatch'
+    | '/api/public/hooks/agent-triggers/run'
+    | '/api/public/integrations/google-calendar/callback'
+    | '/api/public/integrations/google-calendar/cron'
+    | '/api/public/portal/$token/change-requests'
+    | '/api/public/portal/$token/comments'
+    | '/api/public/portal/$token/csat'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/documents'
+    | '/api/public/portal/$token/download'
+    | '/api/public/portal/$token/forms'
     | '/api/public/portal/$token/impact'
+    | '/api/public/portal/$token/invoices'
+    | '/api/public/portal/$token/overview'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
+    | '/app/c/$clientId/sow/$sowId'
+    | '/app/clients/$accountId/deal/$dealId'
+    | '/app/p/$projectId/invoices/$invoiceId'
+    | '/api/public/portal/$token/milestones/signoff'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/app'
+    | '/changelog'
+    | '/check-email'
+    | '/contact'
+    | '/extension'
+    | '/extension-entry'
     | '/features'
+    | '/for'
     | '/how-it-works'
     | '/login'
     | '/onboarding'
     | '/pricing'
     | '/privacy'
+    | '/security'
     | '/signup'
     | '/terms'
+    | '/use-cases'
+    | '/vs'
+    | '/app/activity'
     | '/app/agent-runs'
+    | '/app/agents'
+    | '/app/ai-artifacts'
+    | '/app/approvals'
+    | '/app/aura'
+    | '/app/chat'
     | '/app/contacts'
     | '/app/crm'
-    | '/app/delivery'
+    | '/app/documents'
     | '/app/escalations'
     | '/app/executive'
+    | '/app/finance'
+    | '/app/forecast'
+    | '/app/inbox'
     | '/app/meetings'
     | '/app/my-tasks'
     | '/app/notes'
     | '/app/notifications'
+    | '/app/onboarding'
     | '/app/ops'
+    | '/app/pages'
+    | '/app/pipeline-analytics'
+    | '/app/portfolio-status'
     | '/app/profile'
+    | '/app/projects'
+    | '/app/reports'
     | '/app/sales'
     | '/app/search'
     | '/app/settings'
+    | '/app/sow-to-project'
+    | '/app/timesheet'
+    | '/app/timesheet-approvals'
+    | '/app/triggers'
     | '/client/$token'
     | '/docs/self-host'
+    | '/features/agents'
+    | '/features/client-portals'
+    | '/features/crm'
+    | '/features/docs-and-notes'
+    | '/features/finance'
+    | '/features/meetings-ai'
+    | '/features/permissions-rbac'
+    | '/features/projects'
+    | '/features/views'
+    | '/for/client-services'
+    | '/for/finance'
+    | '/for/founders'
+    | '/for/operations'
+    | '/for/project-managers'
     | '/invite/$token'
+    | '/r/$token'
+    | '/share/$token'
+    | '/use-cases/agencies'
+    | '/use-cases/client-portals'
+    | '/use-cases/consulting'
+    | '/use-cases/freelancers'
+    | '/use-cases/professional-services'
+    | '/use-cases/software-delivery'
+    | '/vs/hubspot'
+    | '/vs/jira'
+    | '/vs/linear'
+    | '/vs/monday'
+    | '/vs/notion'
     | '/app/'
-    | '/app/d/$divisionSlug'
+    | '/app/c/$clientId'
+    | '/app/clients/$accountId'
     | '/app/escalations/$escalationId'
     | '/app/f/$folderId'
     | '/app/meetings/$meetingId'
+    | '/app/objects/$key'
+    | '/app/onboarding/$id'
     | '/app/p/$projectId'
     | '/app/resources/capacity'
+    | '/app/runs/$runId'
     | '/app/settings/ai'
+    | '/app/settings/audit'
     | '/app/settings/automations'
+    | '/app/settings/customization'
     | '/app/settings/danger'
     | '/app/settings/data'
+    | '/app/settings/errors'
+    | '/app/settings/escalations'
     | '/app/settings/fields'
+    | '/app/settings/integrations'
     | '/app/settings/members'
+    | '/app/settings/object-types'
+    | '/app/settings/overview'
+    | '/app/settings/playbooks'
     | '/app/settings/profile'
+    | '/app/settings/rate-cards'
     | '/app/settings/resources'
+    | '/app/settings/roles'
+    | '/app/settings/sales-stages'
+    | '/app/settings/sharing'
+    | '/app/settings/shortcuts'
+    | '/app/settings/templates'
+    | '/app/settings/views'
+    | '/app/settings/vocabulary'
+    | '/app/clients/'
     | '/app/resources/'
     | '/app/settings/'
+    | '/api/public/extension/suggest'
+    | '/api/public/hooks/refresh-overviews'
+    | '/api/public/hooks/weekly-client-briefs'
     | '/api/public/portal/$token'
+    | '/api/public/status-reports/run'
+    | '/app/c/$clientId/sows'
     | '/app/p/$projectId/allocations'
+    | '/app/p/$projectId/approvals'
+    | '/app/p/$projectId/baseline'
+    | '/app/p/$projectId/canvas'
     | '/app/p/$projectId/change-orders'
+    | '/app/p/$projectId/change-requests'
+    | '/app/p/$projectId/chat'
     | '/app/p/$projectId/clients'
+    | '/app/p/$projectId/dependencies'
     | '/app/p/$projectId/documents'
+    | '/app/p/$projectId/expenses'
     | '/app/p/$projectId/financials'
     | '/app/p/$projectId/health'
+    | '/app/p/$projectId/intake'
+    | '/app/p/$projectId/invoices'
     | '/app/p/$projectId/milestones'
     | '/app/p/$projectId/overview'
+    | '/app/p/$projectId/pages'
+    | '/app/p/$projectId/phases'
+    | '/app/p/$projectId/raid'
+    | '/app/p/$projectId/requirements'
     | '/app/p/$projectId/settings'
     | '/app/p/$projectId/sprints'
+    | '/app/p/$projectId/status'
+    | '/api/public/hooks/agent-events/dispatch'
+    | '/api/public/hooks/agent-triggers/run'
+    | '/api/public/integrations/google-calendar/callback'
+    | '/api/public/integrations/google-calendar/cron'
+    | '/api/public/portal/$token/change-requests'
+    | '/api/public/portal/$token/comments'
+    | '/api/public/portal/$token/csat'
     | '/api/public/portal/$token/deliverables'
+    | '/api/public/portal/$token/documents'
+    | '/api/public/portal/$token/download'
+    | '/api/public/portal/$token/forms'
     | '/api/public/portal/$token/impact'
+    | '/api/public/portal/$token/invoices'
+    | '/api/public/portal/$token/overview'
     | '/api/public/portal/$token/submit'
     | '/api/public/portal/$token/upload'
+    | '/app/c/$clientId/sow/$sowId'
+    | '/app/clients/$accountId/deal/$dealId'
+    | '/app/p/$projectId/invoices/$invoiceId'
+    | '/api/public/portal/$token/milestones/signoff'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AppRoute: typeof AppRouteWithChildren
-  FeaturesRoute: typeof FeaturesRoute
+  ChangelogRoute: typeof ChangelogRoute
+  CheckEmailRoute: typeof CheckEmailRoute
+  ContactRoute: typeof ContactRoute
+  ExtensionRoute: typeof ExtensionRoute
+  ExtensionEntryRoute: typeof ExtensionEntryRoute
+  FeaturesRoute: typeof FeaturesRouteWithChildren
+  ForRoute: typeof ForRouteWithChildren
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  SecurityRoute: typeof SecurityRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  UseCasesRoute: typeof UseCasesRouteWithChildren
+  VsRoute: typeof VsRouteWithChildren
   ClientTokenRoute: typeof ClientTokenRoute
   DocsSelfHostRoute: typeof DocsSelfHostRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  RTokenRoute: typeof RTokenRoute
+  ShareTokenRoute: typeof ShareTokenRoute
+  ApiPublicExtensionSuggestRoute: typeof ApiPublicExtensionSuggestRoute
+  ApiPublicHooksRefreshOverviewsRoute: typeof ApiPublicHooksRefreshOverviewsRoute
+  ApiPublicHooksWeeklyClientBriefsRoute: typeof ApiPublicHooksWeeklyClientBriefsRoute
   ApiPublicPortalTokenRoute: typeof ApiPublicPortalTokenRouteWithChildren
+  ApiPublicStatusReportsRunRoute: typeof ApiPublicStatusReportsRunRoute
+  ApiPublicHooksAgentEventsDispatchRoute: typeof ApiPublicHooksAgentEventsDispatchRoute
+  ApiPublicHooksAgentTriggersRunRoute: typeof ApiPublicHooksAgentTriggersRunRoute
+  ApiPublicIntegrationsGoogleCalendarCallbackRoute: typeof ApiPublicIntegrationsGoogleCalendarCallbackRoute
+  ApiPublicIntegrationsGoogleCalendarCronRoute: typeof ApiPublicIntegrationsGoogleCalendarCronRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vs': {
+      id: '/vs'
+      path: '/vs'
+      fullPath: '/vs'
+      preLoaderRoute: typeof VsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/use-cases': {
+      id: '/use-cases'
+      path: '/use-cases'
+      fullPath: '/use-cases'
+      preLoaderRoute: typeof UseCasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -781,6 +2184,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -818,6 +2228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/for': {
+      id: '/for'
+      path: '/for'
+      fullPath: '/for'
+      preLoaderRoute: typeof ForRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/features': {
       id: '/features'
       path: '/features'
@@ -825,11 +2242,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/extension-entry': {
+      id: '/extension-entry'
+      path: '/extension-entry'
+      fullPath: '/extension-entry'
+      preLoaderRoute: typeof ExtensionEntryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extension': {
+      id: '/extension'
+      path: '/extension'
+      fullPath: '/extension'
+      preLoaderRoute: typeof ExtensionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -846,12 +2305,201 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/vs/notion': {
+      id: '/vs/notion'
+      path: '/notion'
+      fullPath: '/vs/notion'
+      preLoaderRoute: typeof VsNotionRouteImport
+      parentRoute: typeof VsRoute
+    }
+    '/vs/monday': {
+      id: '/vs/monday'
+      path: '/monday'
+      fullPath: '/vs/monday'
+      preLoaderRoute: typeof VsMondayRouteImport
+      parentRoute: typeof VsRoute
+    }
+    '/vs/linear': {
+      id: '/vs/linear'
+      path: '/linear'
+      fullPath: '/vs/linear'
+      preLoaderRoute: typeof VsLinearRouteImport
+      parentRoute: typeof VsRoute
+    }
+    '/vs/jira': {
+      id: '/vs/jira'
+      path: '/jira'
+      fullPath: '/vs/jira'
+      preLoaderRoute: typeof VsJiraRouteImport
+      parentRoute: typeof VsRoute
+    }
+    '/vs/hubspot': {
+      id: '/vs/hubspot'
+      path: '/hubspot'
+      fullPath: '/vs/hubspot'
+      preLoaderRoute: typeof VsHubspotRouteImport
+      parentRoute: typeof VsRoute
+    }
+    '/use-cases/software-delivery': {
+      id: '/use-cases/software-delivery'
+      path: '/software-delivery'
+      fullPath: '/use-cases/software-delivery'
+      preLoaderRoute: typeof UseCasesSoftwareDeliveryRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/use-cases/professional-services': {
+      id: '/use-cases/professional-services'
+      path: '/professional-services'
+      fullPath: '/use-cases/professional-services'
+      preLoaderRoute: typeof UseCasesProfessionalServicesRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/use-cases/freelancers': {
+      id: '/use-cases/freelancers'
+      path: '/freelancers'
+      fullPath: '/use-cases/freelancers'
+      preLoaderRoute: typeof UseCasesFreelancersRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/use-cases/consulting': {
+      id: '/use-cases/consulting'
+      path: '/consulting'
+      fullPath: '/use-cases/consulting'
+      preLoaderRoute: typeof UseCasesConsultingRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/use-cases/client-portals': {
+      id: '/use-cases/client-portals'
+      path: '/client-portals'
+      fullPath: '/use-cases/client-portals'
+      preLoaderRoute: typeof UseCasesClientPortalsRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/use-cases/agencies': {
+      id: '/use-cases/agencies'
+      path: '/agencies'
+      fullPath: '/use-cases/agencies'
+      preLoaderRoute: typeof UseCasesAgenciesRouteImport
+      parentRoute: typeof UseCasesRoute
+    }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/invite/$token': {
       id: '/invite/$token'
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/for/project-managers': {
+      id: '/for/project-managers'
+      path: '/project-managers'
+      fullPath: '/for/project-managers'
+      preLoaderRoute: typeof ForProjectManagersRouteImport
+      parentRoute: typeof ForRoute
+    }
+    '/for/operations': {
+      id: '/for/operations'
+      path: '/operations'
+      fullPath: '/for/operations'
+      preLoaderRoute: typeof ForOperationsRouteImport
+      parentRoute: typeof ForRoute
+    }
+    '/for/founders': {
+      id: '/for/founders'
+      path: '/founders'
+      fullPath: '/for/founders'
+      preLoaderRoute: typeof ForFoundersRouteImport
+      parentRoute: typeof ForRoute
+    }
+    '/for/finance': {
+      id: '/for/finance'
+      path: '/finance'
+      fullPath: '/for/finance'
+      preLoaderRoute: typeof ForFinanceRouteImport
+      parentRoute: typeof ForRoute
+    }
+    '/for/client-services': {
+      id: '/for/client-services'
+      path: '/client-services'
+      fullPath: '/for/client-services'
+      preLoaderRoute: typeof ForClientServicesRouteImport
+      parentRoute: typeof ForRoute
+    }
+    '/features/views': {
+      id: '/features/views'
+      path: '/views'
+      fullPath: '/features/views'
+      preLoaderRoute: typeof FeaturesViewsRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/projects': {
+      id: '/features/projects'
+      path: '/projects'
+      fullPath: '/features/projects'
+      preLoaderRoute: typeof FeaturesProjectsRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/permissions-rbac': {
+      id: '/features/permissions-rbac'
+      path: '/permissions-rbac'
+      fullPath: '/features/permissions-rbac'
+      preLoaderRoute: typeof FeaturesPermissionsRbacRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/meetings-ai': {
+      id: '/features/meetings-ai'
+      path: '/meetings-ai'
+      fullPath: '/features/meetings-ai'
+      preLoaderRoute: typeof FeaturesMeetingsAiRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/finance': {
+      id: '/features/finance'
+      path: '/finance'
+      fullPath: '/features/finance'
+      preLoaderRoute: typeof FeaturesFinanceRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/docs-and-notes': {
+      id: '/features/docs-and-notes'
+      path: '/docs-and-notes'
+      fullPath: '/features/docs-and-notes'
+      preLoaderRoute: typeof FeaturesDocsAndNotesRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/crm': {
+      id: '/features/crm'
+      path: '/crm'
+      fullPath: '/features/crm'
+      preLoaderRoute: typeof FeaturesCrmRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/client-portals': {
+      id: '/features/client-portals'
+      path: '/client-portals'
+      fullPath: '/features/client-portals'
+      preLoaderRoute: typeof FeaturesClientPortalsRouteImport
+      parentRoute: typeof FeaturesRoute
+    }
+    '/features/agents': {
+      id: '/features/agents'
+      path: '/agents'
+      fullPath: '/features/agents'
+      preLoaderRoute: typeof FeaturesAgentsRouteImport
+      parentRoute: typeof FeaturesRoute
     }
     '/docs/self-host': {
       id: '/docs/self-host'
@@ -866,6 +2514,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/client/$token'
       preLoaderRoute: typeof ClientTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/triggers': {
+      id: '/app/triggers'
+      path: '/triggers'
+      fullPath: '/app/triggers'
+      preLoaderRoute: typeof AppTriggersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/timesheet-approvals': {
+      id: '/app/timesheet-approvals'
+      path: '/timesheet-approvals'
+      fullPath: '/app/timesheet-approvals'
+      preLoaderRoute: typeof AppTimesheetApprovalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/timesheet': {
+      id: '/app/timesheet'
+      path: '/timesheet'
+      fullPath: '/app/timesheet'
+      preLoaderRoute: typeof AppTimesheetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/sow-to-project': {
+      id: '/app/sow-to-project'
+      path: '/sow-to-project'
+      fullPath: '/app/sow-to-project'
+      preLoaderRoute: typeof AppSowToProjectRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/settings': {
       id: '/app/settings'
@@ -888,6 +2564,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSalesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/reports': {
+      id: '/app/reports'
+      path: '/reports'
+      fullPath: '/app/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/projects': {
+      id: '/app/projects'
+      path: '/projects'
+      fullPath: '/app/projects'
+      preLoaderRoute: typeof AppProjectsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -895,11 +2585,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/portfolio-status': {
+      id: '/app/portfolio-status'
+      path: '/portfolio-status'
+      fullPath: '/app/portfolio-status'
+      preLoaderRoute: typeof AppPortfolioStatusRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pipeline-analytics': {
+      id: '/app/pipeline-analytics'
+      path: '/pipeline-analytics'
+      fullPath: '/app/pipeline-analytics'
+      preLoaderRoute: typeof AppPipelineAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pages': {
+      id: '/app/pages'
+      path: '/pages'
+      fullPath: '/app/pages'
+      preLoaderRoute: typeof AppPagesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/ops': {
       id: '/app/ops'
       path: '/ops'
       fullPath: '/app/ops'
       preLoaderRoute: typeof AppOpsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/onboarding': {
+      id: '/app/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/notifications': {
@@ -930,6 +2648,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMeetingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/inbox': {
+      id: '/app/inbox'
+      path: '/inbox'
+      fullPath: '/app/inbox'
+      preLoaderRoute: typeof AppInboxRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/forecast': {
+      id: '/app/forecast'
+      path: '/forecast'
+      fullPath: '/app/forecast'
+      preLoaderRoute: typeof AppForecastRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/finance': {
+      id: '/app/finance'
+      path: '/finance'
+      fullPath: '/app/finance'
+      preLoaderRoute: typeof AppFinanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/executive': {
       id: '/app/executive'
       path: '/executive'
@@ -944,11 +2683,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEscalationsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/delivery': {
-      id: '/app/delivery'
-      path: '/delivery'
-      fullPath: '/app/delivery'
-      preLoaderRoute: typeof AppDeliveryRouteImport
+    '/app/documents': {
+      id: '/app/documents'
+      path: '/documents'
+      fullPath: '/app/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/crm': {
@@ -965,11 +2704,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppContactsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/aura': {
+      id: '/app/aura'
+      path: '/aura'
+      fullPath: '/app/aura'
+      preLoaderRoute: typeof AppAuraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/approvals': {
+      id: '/app/approvals'
+      path: '/approvals'
+      fullPath: '/app/approvals'
+      preLoaderRoute: typeof AppApprovalsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/ai-artifacts': {
+      id: '/app/ai-artifacts'
+      path: '/ai-artifacts'
+      fullPath: '/app/ai-artifacts'
+      preLoaderRoute: typeof AppAiArtifactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/agents': {
+      id: '/app/agents'
+      path: '/agents'
+      fullPath: '/app/agents'
+      preLoaderRoute: typeof AppAgentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/agent-runs': {
       id: '/app/agent-runs'
       path: '/agent-runs'
       fullPath: '/app/agent-runs'
       preLoaderRoute: typeof AppAgentRunsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/activity': {
+      id: '/app/activity'
+      path: '/activity'
+      fullPath: '/app/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/settings/': {
@@ -986,11 +2767,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppResourcesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/clients/': {
+      id: '/app/clients/'
+      path: '/clients'
+      fullPath: '/app/clients/'
+      preLoaderRoute: typeof AppClientsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings/vocabulary': {
+      id: '/app/settings/vocabulary'
+      path: '/vocabulary'
+      fullPath: '/app/settings/vocabulary'
+      preLoaderRoute: typeof AppSettingsVocabularyRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/views': {
+      id: '/app/settings/views'
+      path: '/views'
+      fullPath: '/app/settings/views'
+      preLoaderRoute: typeof AppSettingsViewsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/templates': {
+      id: '/app/settings/templates'
+      path: '/templates'
+      fullPath: '/app/settings/templates'
+      preLoaderRoute: typeof AppSettingsTemplatesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/shortcuts': {
+      id: '/app/settings/shortcuts'
+      path: '/shortcuts'
+      fullPath: '/app/settings/shortcuts'
+      preLoaderRoute: typeof AppSettingsShortcutsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/sharing': {
+      id: '/app/settings/sharing'
+      path: '/sharing'
+      fullPath: '/app/settings/sharing'
+      preLoaderRoute: typeof AppSettingsSharingRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/sales-stages': {
+      id: '/app/settings/sales-stages'
+      path: '/sales-stages'
+      fullPath: '/app/settings/sales-stages'
+      preLoaderRoute: typeof AppSettingsSalesStagesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/roles': {
+      id: '/app/settings/roles'
+      path: '/roles'
+      fullPath: '/app/settings/roles'
+      preLoaderRoute: typeof AppSettingsRolesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/resources': {
       id: '/app/settings/resources'
       path: '/resources'
       fullPath: '/app/settings/resources'
       preLoaderRoute: typeof AppSettingsResourcesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/rate-cards': {
+      id: '/app/settings/rate-cards'
+      path: '/rate-cards'
+      fullPath: '/app/settings/rate-cards'
+      preLoaderRoute: typeof AppSettingsRateCardsRouteImport
       parentRoute: typeof AppSettingsRoute
     }
     '/app/settings/profile': {
@@ -1000,6 +2844,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsProfileRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/playbooks': {
+      id: '/app/settings/playbooks'
+      path: '/playbooks'
+      fullPath: '/app/settings/playbooks'
+      preLoaderRoute: typeof AppSettingsPlaybooksRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/overview': {
+      id: '/app/settings/overview'
+      path: '/overview'
+      fullPath: '/app/settings/overview'
+      preLoaderRoute: typeof AppSettingsOverviewRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/object-types': {
+      id: '/app/settings/object-types'
+      path: '/object-types'
+      fullPath: '/app/settings/object-types'
+      preLoaderRoute: typeof AppSettingsObjectTypesRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/members': {
       id: '/app/settings/members'
       path: '/members'
@@ -1007,11 +2872,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsMembersRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/integrations': {
+      id: '/app/settings/integrations'
+      path: '/integrations'
+      fullPath: '/app/settings/integrations'
+      preLoaderRoute: typeof AppSettingsIntegrationsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/fields': {
       id: '/app/settings/fields'
       path: '/fields'
       fullPath: '/app/settings/fields'
       preLoaderRoute: typeof AppSettingsFieldsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/escalations': {
+      id: '/app/settings/escalations'
+      path: '/escalations'
+      fullPath: '/app/settings/escalations'
+      preLoaderRoute: typeof AppSettingsEscalationsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/errors': {
+      id: '/app/settings/errors'
+      path: '/errors'
+      fullPath: '/app/settings/errors'
+      preLoaderRoute: typeof AppSettingsErrorsRouteImport
       parentRoute: typeof AppSettingsRoute
     }
     '/app/settings/data': {
@@ -1028,11 +2914,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsDangerRouteImport
       parentRoute: typeof AppSettingsRoute
     }
+    '/app/settings/customization': {
+      id: '/app/settings/customization'
+      path: '/customization'
+      fullPath: '/app/settings/customization'
+      preLoaderRoute: typeof AppSettingsCustomizationRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
     '/app/settings/automations': {
       id: '/app/settings/automations'
       path: '/automations'
       fullPath: '/app/settings/automations'
       preLoaderRoute: typeof AppSettingsAutomationsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/app/settings/audit': {
+      id: '/app/settings/audit'
+      path: '/audit'
+      fullPath: '/app/settings/audit'
+      preLoaderRoute: typeof AppSettingsAuditRouteImport
       parentRoute: typeof AppSettingsRoute
     }
     '/app/settings/ai': {
@@ -1041,6 +2941,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/settings/ai'
       preLoaderRoute: typeof AppSettingsAiRouteImport
       parentRoute: typeof AppSettingsRoute
+    }
+    '/app/runs/$runId': {
+      id: '/app/runs/$runId'
+      path: '/runs/$runId'
+      fullPath: '/app/runs/$runId'
+      preLoaderRoute: typeof AppRunsRunIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/resources/capacity': {
       id: '/app/resources/capacity'
@@ -1054,6 +2961,20 @@ declare module '@tanstack/react-router' {
       path: '/p/$projectId'
       fullPath: '/app/p/$projectId'
       preLoaderRoute: typeof AppPProjectIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/onboarding/$id': {
+      id: '/app/onboarding/$id'
+      path: '/$id'
+      fullPath: '/app/onboarding/$id'
+      preLoaderRoute: typeof AppOnboardingIdRouteImport
+      parentRoute: typeof AppOnboardingRoute
+    }
+    '/app/objects/$key': {
+      id: '/app/objects/$key'
+      path: '/objects/$key'
+      fullPath: '/app/objects/$key'
+      preLoaderRoute: typeof AppObjectsKeyRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/meetings/$meetingId': {
@@ -1077,12 +2998,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEscalationsEscalationIdRouteImport
       parentRoute: typeof AppEscalationsRoute
     }
-    '/app/d/$divisionSlug': {
-      id: '/app/d/$divisionSlug'
-      path: '/d/$divisionSlug'
-      fullPath: '/app/d/$divisionSlug'
-      preLoaderRoute: typeof AppDDivisionSlugRouteImport
+    '/app/clients/$accountId': {
+      id: '/app/clients/$accountId'
+      path: '/clients/$accountId'
+      fullPath: '/app/clients/$accountId'
+      preLoaderRoute: typeof AppClientsAccountIdRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app/c/$clientId': {
+      id: '/app/c/$clientId'
+      path: '/c/$clientId'
+      fullPath: '/app/c/$clientId'
+      preLoaderRoute: typeof AppCClientIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/p/$projectId/status': {
+      id: '/app/p/$projectId/status'
+      path: '/status'
+      fullPath: '/app/p/$projectId/status'
+      preLoaderRoute: typeof AppPProjectIdStatusRouteImport
+      parentRoute: typeof AppPProjectIdRoute
     }
     '/app/p/$projectId/sprints': {
       id: '/app/p/$projectId/sprints'
@@ -1096,6 +3031,34 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/app/p/$projectId/settings'
       preLoaderRoute: typeof AppPProjectIdSettingsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/requirements': {
+      id: '/app/p/$projectId/requirements'
+      path: '/requirements'
+      fullPath: '/app/p/$projectId/requirements'
+      preLoaderRoute: typeof AppPProjectIdRequirementsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/raid': {
+      id: '/app/p/$projectId/raid'
+      path: '/raid'
+      fullPath: '/app/p/$projectId/raid'
+      preLoaderRoute: typeof AppPProjectIdRaidRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/phases': {
+      id: '/app/p/$projectId/phases'
+      path: '/phases'
+      fullPath: '/app/p/$projectId/phases'
+      preLoaderRoute: typeof AppPProjectIdPhasesRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/pages': {
+      id: '/app/p/$projectId/pages'
+      path: '/pages'
+      fullPath: '/app/p/$projectId/pages'
+      preLoaderRoute: typeof AppPProjectIdPagesRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
     '/app/p/$projectId/overview': {
@@ -1112,6 +3075,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdMilestonesRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/invoices': {
+      id: '/app/p/$projectId/invoices'
+      path: '/invoices'
+      fullPath: '/app/p/$projectId/invoices'
+      preLoaderRoute: typeof AppPProjectIdInvoicesRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/intake': {
+      id: '/app/p/$projectId/intake'
+      path: '/intake'
+      fullPath: '/app/p/$projectId/intake'
+      preLoaderRoute: typeof AppPProjectIdIntakeRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/health': {
       id: '/app/p/$projectId/health'
       path: '/health'
@@ -1126,11 +3103,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdFinancialsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/expenses': {
+      id: '/app/p/$projectId/expenses'
+      path: '/expenses'
+      fullPath: '/app/p/$projectId/expenses'
+      preLoaderRoute: typeof AppPProjectIdExpensesRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/documents': {
       id: '/app/p/$projectId/documents'
       path: '/documents'
       fullPath: '/app/p/$projectId/documents'
       preLoaderRoute: typeof AppPProjectIdDocumentsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/dependencies': {
+      id: '/app/p/$projectId/dependencies'
+      path: '/dependencies'
+      fullPath: '/app/p/$projectId/dependencies'
+      preLoaderRoute: typeof AppPProjectIdDependenciesRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
     '/app/p/$projectId/clients': {
@@ -1140,11 +3131,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdClientsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/p/$projectId/chat': {
+      id: '/app/p/$projectId/chat'
+      path: '/chat'
+      fullPath: '/app/p/$projectId/chat'
+      preLoaderRoute: typeof AppPProjectIdChatRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/change-requests': {
+      id: '/app/p/$projectId/change-requests'
+      path: '/change-requests'
+      fullPath: '/app/p/$projectId/change-requests'
+      preLoaderRoute: typeof AppPProjectIdChangeRequestsRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
     '/app/p/$projectId/change-orders': {
       id: '/app/p/$projectId/change-orders'
       path: '/change-orders'
       fullPath: '/app/p/$projectId/change-orders'
       preLoaderRoute: typeof AppPProjectIdChangeOrdersRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/canvas': {
+      id: '/app/p/$projectId/canvas'
+      path: '/canvas'
+      fullPath: '/app/p/$projectId/canvas'
+      preLoaderRoute: typeof AppPProjectIdCanvasRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/baseline': {
+      id: '/app/p/$projectId/baseline'
+      path: '/baseline'
+      fullPath: '/app/p/$projectId/baseline'
+      preLoaderRoute: typeof AppPProjectIdBaselineRouteImport
+      parentRoute: typeof AppPProjectIdRoute
+    }
+    '/app/p/$projectId/approvals': {
+      id: '/app/p/$projectId/approvals'
+      path: '/approvals'
+      fullPath: '/app/p/$projectId/approvals'
+      preLoaderRoute: typeof AppPProjectIdApprovalsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
     '/app/p/$projectId/allocations': {
@@ -1154,12 +3180,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPProjectIdAllocationsRouteImport
       parentRoute: typeof AppPProjectIdRoute
     }
+    '/app/c/$clientId/sows': {
+      id: '/app/c/$clientId/sows'
+      path: '/sows'
+      fullPath: '/app/c/$clientId/sows'
+      preLoaderRoute: typeof AppCClientIdSowsRouteImport
+      parentRoute: typeof AppCClientIdRoute
+    }
+    '/api/public/status-reports/run': {
+      id: '/api/public/status-reports/run'
+      path: '/api/public/status-reports/run'
+      fullPath: '/api/public/status-reports/run'
+      preLoaderRoute: typeof ApiPublicStatusReportsRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/portal/$token': {
       id: '/api/public/portal/$token'
       path: '/api/public/portal/$token'
       fullPath: '/api/public/portal/$token'
       preLoaderRoute: typeof ApiPublicPortalTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/weekly-client-briefs': {
+      id: '/api/public/hooks/weekly-client-briefs'
+      path: '/api/public/hooks/weekly-client-briefs'
+      fullPath: '/api/public/hooks/weekly-client-briefs'
+      preLoaderRoute: typeof ApiPublicHooksWeeklyClientBriefsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/refresh-overviews': {
+      id: '/api/public/hooks/refresh-overviews'
+      path: '/api/public/hooks/refresh-overviews'
+      fullPath: '/api/public/hooks/refresh-overviews'
+      preLoaderRoute: typeof ApiPublicHooksRefreshOverviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/extension/suggest': {
+      id: '/api/public/extension/suggest'
+      path: '/api/public/extension/suggest'
+      fullPath: '/api/public/extension/suggest'
+      preLoaderRoute: typeof ApiPublicExtensionSuggestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/p/$projectId/invoices/$invoiceId': {
+      id: '/app/p/$projectId/invoices/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/app/p/$projectId/invoices/$invoiceId'
+      preLoaderRoute: typeof AppPProjectIdInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AppPProjectIdInvoicesRoute
+    }
+    '/app/clients/$accountId/deal/$dealId': {
+      id: '/app/clients/$accountId/deal/$dealId'
+      path: '/deal/$dealId'
+      fullPath: '/app/clients/$accountId/deal/$dealId'
+      preLoaderRoute: typeof AppClientsAccountIdDealDealIdRouteImport
+      parentRoute: typeof AppClientsAccountIdRoute
+    }
+    '/app/c/$clientId/sow/$sowId': {
+      id: '/app/c/$clientId/sow/$sowId'
+      path: '/sow/$sowId'
+      fullPath: '/app/c/$clientId/sow/$sowId'
+      preLoaderRoute: typeof AppCClientIdSowSowIdRouteImport
+      parentRoute: typeof AppCClientIdRoute
     }
     '/api/public/portal/$token/upload': {
       id: '/api/public/portal/$token/upload'
@@ -1175,6 +3257,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPortalTokenSubmitRouteImport
       parentRoute: typeof ApiPublicPortalTokenRoute
     }
+    '/api/public/portal/$token/overview': {
+      id: '/api/public/portal/$token/overview'
+      path: '/overview'
+      fullPath: '/api/public/portal/$token/overview'
+      preLoaderRoute: typeof ApiPublicPortalTokenOverviewRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/invoices': {
+      id: '/api/public/portal/$token/invoices'
+      path: '/invoices'
+      fullPath: '/api/public/portal/$token/invoices'
+      preLoaderRoute: typeof ApiPublicPortalTokenInvoicesRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
     '/api/public/portal/$token/impact': {
       id: '/api/public/portal/$token/impact'
       path: '/impact'
@@ -1182,11 +3278,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPortalTokenImpactRouteImport
       parentRoute: typeof ApiPublicPortalTokenRoute
     }
+    '/api/public/portal/$token/forms': {
+      id: '/api/public/portal/$token/forms'
+      path: '/forms'
+      fullPath: '/api/public/portal/$token/forms'
+      preLoaderRoute: typeof ApiPublicPortalTokenFormsRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/download': {
+      id: '/api/public/portal/$token/download'
+      path: '/download'
+      fullPath: '/api/public/portal/$token/download'
+      preLoaderRoute: typeof ApiPublicPortalTokenDownloadRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/documents': {
+      id: '/api/public/portal/$token/documents'
+      path: '/documents'
+      fullPath: '/api/public/portal/$token/documents'
+      preLoaderRoute: typeof ApiPublicPortalTokenDocumentsRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
     '/api/public/portal/$token/deliverables': {
       id: '/api/public/portal/$token/deliverables'
       path: '/deliverables'
       fullPath: '/api/public/portal/$token/deliverables'
       preLoaderRoute: typeof ApiPublicPortalTokenDeliverablesRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/csat': {
+      id: '/api/public/portal/$token/csat'
+      path: '/csat'
+      fullPath: '/api/public/portal/$token/csat'
+      preLoaderRoute: typeof ApiPublicPortalTokenCsatRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/comments': {
+      id: '/api/public/portal/$token/comments'
+      path: '/comments'
+      fullPath: '/api/public/portal/$token/comments'
+      preLoaderRoute: typeof ApiPublicPortalTokenCommentsRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/portal/$token/change-requests': {
+      id: '/api/public/portal/$token/change-requests'
+      path: '/change-requests'
+      fullPath: '/api/public/portal/$token/change-requests'
+      preLoaderRoute: typeof ApiPublicPortalTokenChangeRequestsRouteImport
+      parentRoute: typeof ApiPublicPortalTokenRoute
+    }
+    '/api/public/integrations/google-calendar/cron': {
+      id: '/api/public/integrations/google-calendar/cron'
+      path: '/api/public/integrations/google-calendar/cron'
+      fullPath: '/api/public/integrations/google-calendar/cron'
+      preLoaderRoute: typeof ApiPublicIntegrationsGoogleCalendarCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/integrations/google-calendar/callback': {
+      id: '/api/public/integrations/google-calendar/callback'
+      path: '/api/public/integrations/google-calendar/callback'
+      fullPath: '/api/public/integrations/google-calendar/callback'
+      preLoaderRoute: typeof ApiPublicIntegrationsGoogleCalendarCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agent-triggers/run': {
+      id: '/api/public/hooks/agent-triggers/run'
+      path: '/api/public/hooks/agent-triggers/run'
+      fullPath: '/api/public/hooks/agent-triggers/run'
+      preLoaderRoute: typeof ApiPublicHooksAgentTriggersRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/agent-events/dispatch': {
+      id: '/api/public/hooks/agent-events/dispatch'
+      path: '/api/public/hooks/agent-events/dispatch'
+      fullPath: '/api/public/hooks/agent-events/dispatch'
+      preLoaderRoute: typeof ApiPublicHooksAgentEventsDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/portal/$token/milestones/signoff': {
+      id: '/api/public/portal/$token/milestones/signoff'
+      path: '/milestones/signoff'
+      fullPath: '/api/public/portal/$token/milestones/signoff'
+      preLoaderRoute: typeof ApiPublicPortalTokenMilestonesSignoffRouteImport
       parentRoute: typeof ApiPublicPortalTokenRoute
     }
   }
@@ -1216,27 +3389,71 @@ const AppMeetingsRouteWithChildren = AppMeetingsRoute._addFileChildren(
   AppMeetingsRouteChildren,
 )
 
+interface AppOnboardingRouteChildren {
+  AppOnboardingIdRoute: typeof AppOnboardingIdRoute
+}
+
+const AppOnboardingRouteChildren: AppOnboardingRouteChildren = {
+  AppOnboardingIdRoute: AppOnboardingIdRoute,
+}
+
+const AppOnboardingRouteWithChildren = AppOnboardingRoute._addFileChildren(
+  AppOnboardingRouteChildren,
+)
+
 interface AppSettingsRouteChildren {
   AppSettingsAiRoute: typeof AppSettingsAiRoute
+  AppSettingsAuditRoute: typeof AppSettingsAuditRoute
   AppSettingsAutomationsRoute: typeof AppSettingsAutomationsRoute
+  AppSettingsCustomizationRoute: typeof AppSettingsCustomizationRoute
   AppSettingsDangerRoute: typeof AppSettingsDangerRoute
   AppSettingsDataRoute: typeof AppSettingsDataRoute
+  AppSettingsErrorsRoute: typeof AppSettingsErrorsRoute
+  AppSettingsEscalationsRoute: typeof AppSettingsEscalationsRoute
   AppSettingsFieldsRoute: typeof AppSettingsFieldsRoute
+  AppSettingsIntegrationsRoute: typeof AppSettingsIntegrationsRoute
   AppSettingsMembersRoute: typeof AppSettingsMembersRoute
+  AppSettingsObjectTypesRoute: typeof AppSettingsObjectTypesRoute
+  AppSettingsOverviewRoute: typeof AppSettingsOverviewRoute
+  AppSettingsPlaybooksRoute: typeof AppSettingsPlaybooksRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
+  AppSettingsRateCardsRoute: typeof AppSettingsRateCardsRoute
   AppSettingsResourcesRoute: typeof AppSettingsResourcesRoute
+  AppSettingsRolesRoute: typeof AppSettingsRolesRoute
+  AppSettingsSalesStagesRoute: typeof AppSettingsSalesStagesRoute
+  AppSettingsSharingRoute: typeof AppSettingsSharingRoute
+  AppSettingsShortcutsRoute: typeof AppSettingsShortcutsRoute
+  AppSettingsTemplatesRoute: typeof AppSettingsTemplatesRoute
+  AppSettingsViewsRoute: typeof AppSettingsViewsRoute
+  AppSettingsVocabularyRoute: typeof AppSettingsVocabularyRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
 const AppSettingsRouteChildren: AppSettingsRouteChildren = {
   AppSettingsAiRoute: AppSettingsAiRoute,
+  AppSettingsAuditRoute: AppSettingsAuditRoute,
   AppSettingsAutomationsRoute: AppSettingsAutomationsRoute,
+  AppSettingsCustomizationRoute: AppSettingsCustomizationRoute,
   AppSettingsDangerRoute: AppSettingsDangerRoute,
   AppSettingsDataRoute: AppSettingsDataRoute,
+  AppSettingsErrorsRoute: AppSettingsErrorsRoute,
+  AppSettingsEscalationsRoute: AppSettingsEscalationsRoute,
   AppSettingsFieldsRoute: AppSettingsFieldsRoute,
+  AppSettingsIntegrationsRoute: AppSettingsIntegrationsRoute,
   AppSettingsMembersRoute: AppSettingsMembersRoute,
+  AppSettingsObjectTypesRoute: AppSettingsObjectTypesRoute,
+  AppSettingsOverviewRoute: AppSettingsOverviewRoute,
+  AppSettingsPlaybooksRoute: AppSettingsPlaybooksRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,
+  AppSettingsRateCardsRoute: AppSettingsRateCardsRoute,
   AppSettingsResourcesRoute: AppSettingsResourcesRoute,
+  AppSettingsRolesRoute: AppSettingsRolesRoute,
+  AppSettingsSalesStagesRoute: AppSettingsSalesStagesRoute,
+  AppSettingsSharingRoute: AppSettingsSharingRoute,
+  AppSettingsShortcutsRoute: AppSettingsShortcutsRoute,
+  AppSettingsTemplatesRoute: AppSettingsTemplatesRoute,
+  AppSettingsViewsRoute: AppSettingsViewsRoute,
+  AppSettingsVocabularyRoute: AppSettingsVocabularyRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
@@ -1244,30 +3461,96 @@ const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
   AppSettingsRouteChildren,
 )
 
+interface AppCClientIdRouteChildren {
+  AppCClientIdSowsRoute: typeof AppCClientIdSowsRoute
+  AppCClientIdSowSowIdRoute: typeof AppCClientIdSowSowIdRoute
+}
+
+const AppCClientIdRouteChildren: AppCClientIdRouteChildren = {
+  AppCClientIdSowsRoute: AppCClientIdSowsRoute,
+  AppCClientIdSowSowIdRoute: AppCClientIdSowSowIdRoute,
+}
+
+const AppCClientIdRouteWithChildren = AppCClientIdRoute._addFileChildren(
+  AppCClientIdRouteChildren,
+)
+
+interface AppClientsAccountIdRouteChildren {
+  AppClientsAccountIdDealDealIdRoute: typeof AppClientsAccountIdDealDealIdRoute
+}
+
+const AppClientsAccountIdRouteChildren: AppClientsAccountIdRouteChildren = {
+  AppClientsAccountIdDealDealIdRoute: AppClientsAccountIdDealDealIdRoute,
+}
+
+const AppClientsAccountIdRouteWithChildren =
+  AppClientsAccountIdRoute._addFileChildren(AppClientsAccountIdRouteChildren)
+
+interface AppPProjectIdInvoicesRouteChildren {
+  AppPProjectIdInvoicesInvoiceIdRoute: typeof AppPProjectIdInvoicesInvoiceIdRoute
+}
+
+const AppPProjectIdInvoicesRouteChildren: AppPProjectIdInvoicesRouteChildren = {
+  AppPProjectIdInvoicesInvoiceIdRoute: AppPProjectIdInvoicesInvoiceIdRoute,
+}
+
+const AppPProjectIdInvoicesRouteWithChildren =
+  AppPProjectIdInvoicesRoute._addFileChildren(
+    AppPProjectIdInvoicesRouteChildren,
+  )
+
 interface AppPProjectIdRouteChildren {
   AppPProjectIdAllocationsRoute: typeof AppPProjectIdAllocationsRoute
+  AppPProjectIdApprovalsRoute: typeof AppPProjectIdApprovalsRoute
+  AppPProjectIdBaselineRoute: typeof AppPProjectIdBaselineRoute
+  AppPProjectIdCanvasRoute: typeof AppPProjectIdCanvasRoute
   AppPProjectIdChangeOrdersRoute: typeof AppPProjectIdChangeOrdersRoute
+  AppPProjectIdChangeRequestsRoute: typeof AppPProjectIdChangeRequestsRoute
+  AppPProjectIdChatRoute: typeof AppPProjectIdChatRoute
   AppPProjectIdClientsRoute: typeof AppPProjectIdClientsRoute
+  AppPProjectIdDependenciesRoute: typeof AppPProjectIdDependenciesRoute
   AppPProjectIdDocumentsRoute: typeof AppPProjectIdDocumentsRoute
+  AppPProjectIdExpensesRoute: typeof AppPProjectIdExpensesRoute
   AppPProjectIdFinancialsRoute: typeof AppPProjectIdFinancialsRoute
   AppPProjectIdHealthRoute: typeof AppPProjectIdHealthRoute
+  AppPProjectIdIntakeRoute: typeof AppPProjectIdIntakeRoute
+  AppPProjectIdInvoicesRoute: typeof AppPProjectIdInvoicesRouteWithChildren
   AppPProjectIdMilestonesRoute: typeof AppPProjectIdMilestonesRoute
   AppPProjectIdOverviewRoute: typeof AppPProjectIdOverviewRoute
+  AppPProjectIdPagesRoute: typeof AppPProjectIdPagesRoute
+  AppPProjectIdPhasesRoute: typeof AppPProjectIdPhasesRoute
+  AppPProjectIdRaidRoute: typeof AppPProjectIdRaidRoute
+  AppPProjectIdRequirementsRoute: typeof AppPProjectIdRequirementsRoute
   AppPProjectIdSettingsRoute: typeof AppPProjectIdSettingsRoute
   AppPProjectIdSprintsRoute: typeof AppPProjectIdSprintsRoute
+  AppPProjectIdStatusRoute: typeof AppPProjectIdStatusRoute
 }
 
 const AppPProjectIdRouteChildren: AppPProjectIdRouteChildren = {
   AppPProjectIdAllocationsRoute: AppPProjectIdAllocationsRoute,
+  AppPProjectIdApprovalsRoute: AppPProjectIdApprovalsRoute,
+  AppPProjectIdBaselineRoute: AppPProjectIdBaselineRoute,
+  AppPProjectIdCanvasRoute: AppPProjectIdCanvasRoute,
   AppPProjectIdChangeOrdersRoute: AppPProjectIdChangeOrdersRoute,
+  AppPProjectIdChangeRequestsRoute: AppPProjectIdChangeRequestsRoute,
+  AppPProjectIdChatRoute: AppPProjectIdChatRoute,
   AppPProjectIdClientsRoute: AppPProjectIdClientsRoute,
+  AppPProjectIdDependenciesRoute: AppPProjectIdDependenciesRoute,
   AppPProjectIdDocumentsRoute: AppPProjectIdDocumentsRoute,
+  AppPProjectIdExpensesRoute: AppPProjectIdExpensesRoute,
   AppPProjectIdFinancialsRoute: AppPProjectIdFinancialsRoute,
   AppPProjectIdHealthRoute: AppPProjectIdHealthRoute,
+  AppPProjectIdIntakeRoute: AppPProjectIdIntakeRoute,
+  AppPProjectIdInvoicesRoute: AppPProjectIdInvoicesRouteWithChildren,
   AppPProjectIdMilestonesRoute: AppPProjectIdMilestonesRoute,
   AppPProjectIdOverviewRoute: AppPProjectIdOverviewRoute,
+  AppPProjectIdPagesRoute: AppPProjectIdPagesRoute,
+  AppPProjectIdPhasesRoute: AppPProjectIdPhasesRoute,
+  AppPProjectIdRaidRoute: AppPProjectIdRaidRoute,
+  AppPProjectIdRequirementsRoute: AppPProjectIdRequirementsRoute,
   AppPProjectIdSettingsRoute: AppPProjectIdSettingsRoute,
   AppPProjectIdSprintsRoute: AppPProjectIdSprintsRoute,
+  AppPProjectIdStatusRoute: AppPProjectIdStatusRoute,
 }
 
 const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
@@ -1275,67 +3558,219 @@ const AppPProjectIdRouteWithChildren = AppPProjectIdRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
   AppAgentRunsRoute: typeof AppAgentRunsRoute
+  AppAgentsRoute: typeof AppAgentsRoute
+  AppAiArtifactsRoute: typeof AppAiArtifactsRoute
+  AppApprovalsRoute: typeof AppApprovalsRoute
+  AppAuraRoute: typeof AppAuraRoute
+  AppChatRoute: typeof AppChatRoute
   AppContactsRoute: typeof AppContactsRoute
   AppCrmRoute: typeof AppCrmRoute
-  AppDeliveryRoute: typeof AppDeliveryRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
   AppEscalationsRoute: typeof AppEscalationsRouteWithChildren
   AppExecutiveRoute: typeof AppExecutiveRoute
+  AppFinanceRoute: typeof AppFinanceRoute
+  AppForecastRoute: typeof AppForecastRoute
+  AppInboxRoute: typeof AppInboxRoute
   AppMeetingsRoute: typeof AppMeetingsRouteWithChildren
   AppMyTasksRoute: typeof AppMyTasksRoute
   AppNotesRoute: typeof AppNotesRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppOnboardingRoute: typeof AppOnboardingRouteWithChildren
   AppOpsRoute: typeof AppOpsRoute
+  AppPagesRoute: typeof AppPagesRoute
+  AppPipelineAnalyticsRoute: typeof AppPipelineAnalyticsRoute
+  AppPortfolioStatusRoute: typeof AppPortfolioStatusRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppProjectsRoute: typeof AppProjectsRoute
+  AppReportsRoute: typeof AppReportsRoute
   AppSalesRoute: typeof AppSalesRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
+  AppSowToProjectRoute: typeof AppSowToProjectRoute
+  AppTimesheetRoute: typeof AppTimesheetRoute
+  AppTimesheetApprovalsRoute: typeof AppTimesheetApprovalsRoute
+  AppTriggersRoute: typeof AppTriggersRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppDDivisionSlugRoute: typeof AppDDivisionSlugRoute
+  AppCClientIdRoute: typeof AppCClientIdRouteWithChildren
+  AppClientsAccountIdRoute: typeof AppClientsAccountIdRouteWithChildren
   AppFFolderIdRoute: typeof AppFFolderIdRoute
+  AppObjectsKeyRoute: typeof AppObjectsKeyRoute
   AppPProjectIdRoute: typeof AppPProjectIdRouteWithChildren
   AppResourcesCapacityRoute: typeof AppResourcesCapacityRoute
+  AppRunsRunIdRoute: typeof AppRunsRunIdRoute
+  AppClientsIndexRoute: typeof AppClientsIndexRoute
   AppResourcesIndexRoute: typeof AppResourcesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
   AppAgentRunsRoute: AppAgentRunsRoute,
+  AppAgentsRoute: AppAgentsRoute,
+  AppAiArtifactsRoute: AppAiArtifactsRoute,
+  AppApprovalsRoute: AppApprovalsRoute,
+  AppAuraRoute: AppAuraRoute,
+  AppChatRoute: AppChatRoute,
   AppContactsRoute: AppContactsRoute,
   AppCrmRoute: AppCrmRoute,
-  AppDeliveryRoute: AppDeliveryRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
   AppEscalationsRoute: AppEscalationsRouteWithChildren,
   AppExecutiveRoute: AppExecutiveRoute,
+  AppFinanceRoute: AppFinanceRoute,
+  AppForecastRoute: AppForecastRoute,
+  AppInboxRoute: AppInboxRoute,
   AppMeetingsRoute: AppMeetingsRouteWithChildren,
   AppMyTasksRoute: AppMyTasksRoute,
   AppNotesRoute: AppNotesRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppOnboardingRoute: AppOnboardingRouteWithChildren,
   AppOpsRoute: AppOpsRoute,
+  AppPagesRoute: AppPagesRoute,
+  AppPipelineAnalyticsRoute: AppPipelineAnalyticsRoute,
+  AppPortfolioStatusRoute: AppPortfolioStatusRoute,
   AppProfileRoute: AppProfileRoute,
+  AppProjectsRoute: AppProjectsRoute,
+  AppReportsRoute: AppReportsRoute,
   AppSalesRoute: AppSalesRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
+  AppSowToProjectRoute: AppSowToProjectRoute,
+  AppTimesheetRoute: AppTimesheetRoute,
+  AppTimesheetApprovalsRoute: AppTimesheetApprovalsRoute,
+  AppTriggersRoute: AppTriggersRoute,
   AppIndexRoute: AppIndexRoute,
-  AppDDivisionSlugRoute: AppDDivisionSlugRoute,
+  AppCClientIdRoute: AppCClientIdRouteWithChildren,
+  AppClientsAccountIdRoute: AppClientsAccountIdRouteWithChildren,
   AppFFolderIdRoute: AppFFolderIdRoute,
+  AppObjectsKeyRoute: AppObjectsKeyRoute,
   AppPProjectIdRoute: AppPProjectIdRouteWithChildren,
   AppResourcesCapacityRoute: AppResourcesCapacityRoute,
+  AppRunsRunIdRoute: AppRunsRunIdRoute,
+  AppClientsIndexRoute: AppClientsIndexRoute,
   AppResourcesIndexRoute: AppResourcesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface FeaturesRouteChildren {
+  FeaturesAgentsRoute: typeof FeaturesAgentsRoute
+  FeaturesClientPortalsRoute: typeof FeaturesClientPortalsRoute
+  FeaturesCrmRoute: typeof FeaturesCrmRoute
+  FeaturesDocsAndNotesRoute: typeof FeaturesDocsAndNotesRoute
+  FeaturesFinanceRoute: typeof FeaturesFinanceRoute
+  FeaturesMeetingsAiRoute: typeof FeaturesMeetingsAiRoute
+  FeaturesPermissionsRbacRoute: typeof FeaturesPermissionsRbacRoute
+  FeaturesProjectsRoute: typeof FeaturesProjectsRoute
+  FeaturesViewsRoute: typeof FeaturesViewsRoute
+}
+
+const FeaturesRouteChildren: FeaturesRouteChildren = {
+  FeaturesAgentsRoute: FeaturesAgentsRoute,
+  FeaturesClientPortalsRoute: FeaturesClientPortalsRoute,
+  FeaturesCrmRoute: FeaturesCrmRoute,
+  FeaturesDocsAndNotesRoute: FeaturesDocsAndNotesRoute,
+  FeaturesFinanceRoute: FeaturesFinanceRoute,
+  FeaturesMeetingsAiRoute: FeaturesMeetingsAiRoute,
+  FeaturesPermissionsRbacRoute: FeaturesPermissionsRbacRoute,
+  FeaturesProjectsRoute: FeaturesProjectsRoute,
+  FeaturesViewsRoute: FeaturesViewsRoute,
+}
+
+const FeaturesRouteWithChildren = FeaturesRoute._addFileChildren(
+  FeaturesRouteChildren,
+)
+
+interface ForRouteChildren {
+  ForClientServicesRoute: typeof ForClientServicesRoute
+  ForFinanceRoute: typeof ForFinanceRoute
+  ForFoundersRoute: typeof ForFoundersRoute
+  ForOperationsRoute: typeof ForOperationsRoute
+  ForProjectManagersRoute: typeof ForProjectManagersRoute
+}
+
+const ForRouteChildren: ForRouteChildren = {
+  ForClientServicesRoute: ForClientServicesRoute,
+  ForFinanceRoute: ForFinanceRoute,
+  ForFoundersRoute: ForFoundersRoute,
+  ForOperationsRoute: ForOperationsRoute,
+  ForProjectManagersRoute: ForProjectManagersRoute,
+}
+
+const ForRouteWithChildren = ForRoute._addFileChildren(ForRouteChildren)
+
+interface UseCasesRouteChildren {
+  UseCasesAgenciesRoute: typeof UseCasesAgenciesRoute
+  UseCasesClientPortalsRoute: typeof UseCasesClientPortalsRoute
+  UseCasesConsultingRoute: typeof UseCasesConsultingRoute
+  UseCasesFreelancersRoute: typeof UseCasesFreelancersRoute
+  UseCasesProfessionalServicesRoute: typeof UseCasesProfessionalServicesRoute
+  UseCasesSoftwareDeliveryRoute: typeof UseCasesSoftwareDeliveryRoute
+}
+
+const UseCasesRouteChildren: UseCasesRouteChildren = {
+  UseCasesAgenciesRoute: UseCasesAgenciesRoute,
+  UseCasesClientPortalsRoute: UseCasesClientPortalsRoute,
+  UseCasesConsultingRoute: UseCasesConsultingRoute,
+  UseCasesFreelancersRoute: UseCasesFreelancersRoute,
+  UseCasesProfessionalServicesRoute: UseCasesProfessionalServicesRoute,
+  UseCasesSoftwareDeliveryRoute: UseCasesSoftwareDeliveryRoute,
+}
+
+const UseCasesRouteWithChildren = UseCasesRoute._addFileChildren(
+  UseCasesRouteChildren,
+)
+
+interface VsRouteChildren {
+  VsHubspotRoute: typeof VsHubspotRoute
+  VsJiraRoute: typeof VsJiraRoute
+  VsLinearRoute: typeof VsLinearRoute
+  VsMondayRoute: typeof VsMondayRoute
+  VsNotionRoute: typeof VsNotionRoute
+}
+
+const VsRouteChildren: VsRouteChildren = {
+  VsHubspotRoute: VsHubspotRoute,
+  VsJiraRoute: VsJiraRoute,
+  VsLinearRoute: VsLinearRoute,
+  VsMondayRoute: VsMondayRoute,
+  VsNotionRoute: VsNotionRoute,
+}
+
+const VsRouteWithChildren = VsRoute._addFileChildren(VsRouteChildren)
+
 interface ApiPublicPortalTokenRouteChildren {
+  ApiPublicPortalTokenChangeRequestsRoute: typeof ApiPublicPortalTokenChangeRequestsRoute
+  ApiPublicPortalTokenCommentsRoute: typeof ApiPublicPortalTokenCommentsRoute
+  ApiPublicPortalTokenCsatRoute: typeof ApiPublicPortalTokenCsatRoute
   ApiPublicPortalTokenDeliverablesRoute: typeof ApiPublicPortalTokenDeliverablesRoute
+  ApiPublicPortalTokenDocumentsRoute: typeof ApiPublicPortalTokenDocumentsRoute
+  ApiPublicPortalTokenDownloadRoute: typeof ApiPublicPortalTokenDownloadRoute
+  ApiPublicPortalTokenFormsRoute: typeof ApiPublicPortalTokenFormsRoute
   ApiPublicPortalTokenImpactRoute: typeof ApiPublicPortalTokenImpactRoute
+  ApiPublicPortalTokenInvoicesRoute: typeof ApiPublicPortalTokenInvoicesRoute
+  ApiPublicPortalTokenOverviewRoute: typeof ApiPublicPortalTokenOverviewRoute
   ApiPublicPortalTokenSubmitRoute: typeof ApiPublicPortalTokenSubmitRoute
   ApiPublicPortalTokenUploadRoute: typeof ApiPublicPortalTokenUploadRoute
+  ApiPublicPortalTokenMilestonesSignoffRoute: typeof ApiPublicPortalTokenMilestonesSignoffRoute
 }
 
 const ApiPublicPortalTokenRouteChildren: ApiPublicPortalTokenRouteChildren = {
+  ApiPublicPortalTokenChangeRequestsRoute:
+    ApiPublicPortalTokenChangeRequestsRoute,
+  ApiPublicPortalTokenCommentsRoute: ApiPublicPortalTokenCommentsRoute,
+  ApiPublicPortalTokenCsatRoute: ApiPublicPortalTokenCsatRoute,
   ApiPublicPortalTokenDeliverablesRoute: ApiPublicPortalTokenDeliverablesRoute,
+  ApiPublicPortalTokenDocumentsRoute: ApiPublicPortalTokenDocumentsRoute,
+  ApiPublicPortalTokenDownloadRoute: ApiPublicPortalTokenDownloadRoute,
+  ApiPublicPortalTokenFormsRoute: ApiPublicPortalTokenFormsRoute,
   ApiPublicPortalTokenImpactRoute: ApiPublicPortalTokenImpactRoute,
+  ApiPublicPortalTokenInvoicesRoute: ApiPublicPortalTokenInvoicesRoute,
+  ApiPublicPortalTokenOverviewRoute: ApiPublicPortalTokenOverviewRoute,
   ApiPublicPortalTokenSubmitRoute: ApiPublicPortalTokenSubmitRoute,
   ApiPublicPortalTokenUploadRoute: ApiPublicPortalTokenUploadRoute,
+  ApiPublicPortalTokenMilestonesSignoffRoute:
+    ApiPublicPortalTokenMilestonesSignoffRoute,
 }
 
 const ApiPublicPortalTokenRouteWithChildren =
@@ -1343,20 +3778,52 @@ const ApiPublicPortalTokenRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AppRoute: AppRouteWithChildren,
-  FeaturesRoute: FeaturesRoute,
+  ChangelogRoute: ChangelogRoute,
+  CheckEmailRoute: CheckEmailRoute,
+  ContactRoute: ContactRoute,
+  ExtensionRoute: ExtensionRoute,
+  ExtensionEntryRoute: ExtensionEntryRoute,
+  FeaturesRoute: FeaturesRouteWithChildren,
+  ForRoute: ForRouteWithChildren,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  SecurityRoute: SecurityRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  UseCasesRoute: UseCasesRouteWithChildren,
+  VsRoute: VsRouteWithChildren,
   ClientTokenRoute: ClientTokenRoute,
   DocsSelfHostRoute: DocsSelfHostRoute,
   InviteTokenRoute: InviteTokenRoute,
+  RTokenRoute: RTokenRoute,
+  ShareTokenRoute: ShareTokenRoute,
+  ApiPublicExtensionSuggestRoute: ApiPublicExtensionSuggestRoute,
+  ApiPublicHooksRefreshOverviewsRoute: ApiPublicHooksRefreshOverviewsRoute,
+  ApiPublicHooksWeeklyClientBriefsRoute: ApiPublicHooksWeeklyClientBriefsRoute,
   ApiPublicPortalTokenRoute: ApiPublicPortalTokenRouteWithChildren,
+  ApiPublicStatusReportsRunRoute: ApiPublicStatusReportsRunRoute,
+  ApiPublicHooksAgentEventsDispatchRoute:
+    ApiPublicHooksAgentEventsDispatchRoute,
+  ApiPublicHooksAgentTriggersRunRoute: ApiPublicHooksAgentTriggersRunRoute,
+  ApiPublicIntegrationsGoogleCalendarCallbackRoute:
+    ApiPublicIntegrationsGoogleCalendarCallbackRoute,
+  ApiPublicIntegrationsGoogleCalendarCronRoute:
+    ApiPublicIntegrationsGoogleCalendarCronRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

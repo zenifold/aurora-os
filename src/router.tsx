@@ -44,7 +44,8 @@ export const getRouter = () => {
       queries: {
         staleTime: 30_000,
         gcTime: 1000 * 60 * 60 * 24, // 24h — keep cache for offline restore
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
       },
     },
   });
@@ -74,6 +75,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    defaultPreload: "intent",
+    defaultPreloadDelay: 50,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
   });

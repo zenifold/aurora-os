@@ -9,6 +9,7 @@ export type FontSizePref = "small" | "default" | "large" | "xlarge";
 export type LandingPref = "dashboard" | "my-tasks" | "last-project";
 export type DefaultViewPref = "table" | "kanban" | "calendar";
 export type ConfirmDeletesPref = "always" | "bulk" | "never";
+export type WorkModePref = "pm" | "ic" | "sales" | "finance" | "exec" | "custom" | null;
 
 export interface UserPreferences {
   id: string;
@@ -22,6 +23,8 @@ export interface UserPreferences {
   default_view_type: DefaultViewPref;
   confirm_deletes: ConfirmDeletesPref;
   accent_preference: string;
+  hidden_nav_items: string[];
+  work_mode: WorkModePref;
 }
 
 const DEFAULTS: Omit<UserPreferences, "id" | "user_id"> = {
@@ -34,6 +37,8 @@ const DEFAULTS: Omit<UserPreferences, "id" | "user_id"> = {
   default_view_type: "table",
   confirm_deletes: "always",
   accent_preference: "workspace",
+  hidden_nav_items: [],
+  work_mode: null,
 };
 
 export function useUserPreferences() {

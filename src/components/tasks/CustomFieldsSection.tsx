@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { Plus, Trash2 } from "lucide-react";
 import type { CustomFieldDef, EffortValue, FieldType, Task } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -81,10 +82,14 @@ export function CustomFieldsSection({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                onClick={() => {
-                  if (confirm(`Remove field "${f.name}" from all tasks?`)) {
-                    remove.mutate(f.id);
-                  }
+                onClick={async () => {
+                  const ok = await confirmDialog({
+                    title: `Remove "${f.name}"?`,
+                    description: "This field and its values will be removed from every task in the project.",
+                    confirmLabel: "Remove field",
+                    tone: "destructive",
+                  });
+                  if (ok) remove.mutate(f.id);
                 }}
               >
                 <Trash2 className="h-3.5 w-3.5" />

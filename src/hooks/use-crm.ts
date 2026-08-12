@@ -13,6 +13,7 @@ export function useDealStages() {
   const query = useQuery({
     queryKey: ["deal_stages", ws?.id],
     enabled: !!ws,
+    staleTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deal_stages" as never)
@@ -113,11 +114,27 @@ export function useUpdateDeal() {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_d, vars) => {
+    onMutate: async ({ id, ...patch }) => {
+      await qc.cancelQueries({ queryKey: ["deals", ws?.id] });
+      const prev = qc.getQueryData<Deal[]>(["deals", ws?.id]);
+      qc.setQueryData<Deal[]>(["deals", ws?.id], (old) =>
+        (old ?? []).map((d) => (d.id === id ? ({ ...d, ...patch } as Deal) : d)),
+      );
+      const prevSingle = qc.getQueryData<Deal>(["deal", id]);
+      if (prevSingle) {
+        qc.setQueryData<Deal>(["deal", id], { ...prevSingle, ...patch } as Deal);
+      }
+      return { prev, prevSingle };
+    },
+    onError: (e: Error, vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["deals", ws?.id], ctx.prev);
+      if (ctx?.prevSingle) qc.setQueryData(["deal", vars.id], ctx.prevSingle);
+      toast.error(e.message);
+    },
+    onSettled: (_d, _e, vars) => {
       qc.invalidateQueries({ queryKey: ["deals", ws?.id] });
       qc.invalidateQueries({ queryKey: ["deal", vars.id] });
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 }
 
@@ -129,11 +146,43 @@ export function useDeleteDeal() {
       const { error } = await supabase.from("deals" as never).delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["deals", ws?.id] });
-      toast.success("Deal deleted");
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ["deals", ws?.id] });
+      const prev = qc.getQueryData<Deal[]>(["deals", ws?.id]);
+      const removed = prev?.find((d) => d.id === id);
+      qc.setQueryData<Deal[]>(["deals", ws?.id], (old) => (old ?? []).filter((d) => d.id !== id));
+      return { prev, removed };
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["deals", ws?.id], ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: (_data, _id, ctx) => {
+      const removed = ctx?.removed;
+      toast.success("Deal deleted", {
+        action: removed
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                const { id, created_at: _c, updated_at: _u, ...rest } = removed as Deal & {
+                  created_at?: string;
+                  updated_at?: string;
+                };
+                const { error } = await supabase
+                  .from("deals" as never)
+                  .insert({ id, ...rest } as never);
+                if (error) {
+                  toast.error("Couldn't restore deal");
+                  return;
+                }
+                qc.invalidateQueries({ queryKey: ["deals", ws?.id] });
+                toast.success("Deal restored");
+              },
+            }
+          : undefined,
+      });
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["deals", ws?.id] }),
   });
 }
 
@@ -190,8 +239,19 @@ export function useUpdateContact() {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["contacts", ws?.id] }),
-    onError: (e: Error) => toast.error(e.message),
+    onMutate: async ({ id, ...patch }) => {
+      await qc.cancelQueries({ queryKey: ["contacts", ws?.id] });
+      const prev = qc.getQueryData<Contact[]>(["contacts", ws?.id]);
+      qc.setQueryData<Contact[]>(["contacts", ws?.id], (old) =>
+        (old ?? []).map((c) => (c.id === id ? ({ ...c, ...patch } as Contact) : c)),
+      );
+      return { prev };
+    },
+    onError: (e: Error, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["contacts", ws?.id], ctx.prev);
+      toast.error(e.message);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["contacts", ws?.id] }),
   });
 }
 
@@ -203,11 +263,43 @@ export function useDeleteContact() {
       const { error } = await supabase.from("contacts" as never).delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["contacts", ws?.id] });
-      toast.success("Contact deleted");
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ["contacts", ws?.id] });
+      const prev = qc.getQueryData<Contact[]>(["contacts", ws?.id]);
+      const removed = prev?.find((c) => c.id === id);
+      qc.setQueryData<Contact[]>(["contacts", ws?.id], (old) => (old ?? []).filter((c) => c.id !== id));
+      return { prev, removed };
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["contacts", ws?.id], ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: (_data, _id, ctx) => {
+      const removed = ctx?.removed;
+      toast.success("Contact deleted", {
+        action: removed
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                const { id, created_at: _c, updated_at: _u, ...rest } = removed as Contact & {
+                  created_at?: string;
+                  updated_at?: string;
+                };
+                const { error } = await supabase
+                  .from("contacts" as never)
+                  .insert({ id, ...rest } as never);
+                if (error) {
+                  toast.error("Couldn't restore contact");
+                  return;
+                }
+                qc.invalidateQueries({ queryKey: ["contacts", ws?.id] });
+                toast.success("Contact restored");
+              },
+            }
+          : undefined,
+      });
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["contacts", ws?.id] }),
   });
 }
 

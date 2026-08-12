@@ -1,21 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useState } from "react";
 import { useProject } from "@/hooks/use-projects";
-import { useTasks } from "@/hooks/use-tasks";
-import { useMilestones } from "@/hooks/use-milestones";
-import { useSprints } from "@/hooks/use-sprints";
-import { useNotes } from "@/hooks/use-notes";
-import { useProjectDocuments } from "@/hooks/use-resources";
-import { useTeamMembers } from "@/hooks/use-team";
-import { useProjectFinancials, useProjectTimeLogs, computeSummary } from "@/hooks/use-project-financials";
-import { formatMoney } from "@/lib/financial-types";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useProjectDecisions } from "@/hooks/use-meetings";
+import {
+  useProjectOverview,
+  useRefreshProjectOverview,
+  useUpdateProjectOverviewSettings,
+} from "@/hooks/use-project-overview";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  ArrowRight,
+  Loader2,
+  RefreshCw,
+  Settings,
+  History,
   ListChecks,
   Target,
   Flag,
@@ -27,93 +34,32 @@ import {
   FileEdit,
   UsersRound,
   Users,
-  Loader2,
-  Settings,
+  Receipt,
+  Wallet,
 } from "lucide-react";
-import { PROJECT_PHASES, PROJECT_HEALTH } from "@/lib/types";
+import { REFRESH_CADENCE_LABELS, type RefreshCadence } from "@/lib/overview-types";
+import {
+  OverviewSectionCard,
+  HealthBadge,
+} from "@/components/overview/OverviewSnapshotCard";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { EntityLinksPanel } from "@/components/entity-links/EntityLinksPanel";
+import { EntityBacklinksPanel } from "@/components/entity-links/EntityBacklinksPanel";
 
 export const Route = createFileRoute("/app/p/$projectId/overview")({
   component: OverviewPage,
 });
 
-function SectionCard({
-  title,
-  description,
-  to,
-  params,
-  search,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  description?: string;
-  to: string;
-  params?: Record<string, string>;
-  search?: Record<string, unknown>;
-  icon: React.ComponentType<{ className?: string }>;
-  children?: React.ReactNode;
-}) {
-  return (
-    <Link
-      to={to as never}
-      params={params as never}
-      search={search as never}
-      className="group block"
-    >
-      <Card className="h-full transition-all hover:border-primary/40 hover:shadow-sm">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <CardTitle className="text-sm">{title}</CardTitle>
-            </div>
-            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </div>
-          {description && (
-            <CardDescription className="pt-1 text-xs">{description}</CardDescription>
-          )}
-        </CardHeader>
-        {children && <CardContent className="pt-0 text-xs">{children}</CardContent>}
-      </Card>
-    </Link>
-  );
-}
-
 function OverviewPage() {
   const { projectId } = Route.useParams();
-  const { data: project, isLoading } = useProject(projectId);
-  const { data: tasks = [] } = useTasks(projectId);
-  const { data: milestones = [] } = useMilestones(projectId);
-  const { data: sprints = [] } = useSprints(projectId);
-  const { data: notes = [] } = useNotes({ projectId });
-  const { data: documents = [] } = useProjectDocuments(projectId);
-  const { data: financials } = useProjectFinancials(projectId);
-  const { data: timeLogs = [] } = useProjectTimeLogs(projectId);
-  const { data: members = [] } = useTeamMembers();
+  const { data: project, isLoading: loadingProject } = useProject(projectId);
+  const { data, isLoading } = useProjectOverview(projectId);
+  const refresh = useRefreshProjectOverview(projectId);
+  const updateSettings = useUpdateProjectOverviewSettings(projectId);
+  const [activeSnapshotId, setActiveSnapshotId] = useState<string | null>(null);
 
-  const summary = useMemo(
-    () => computeSummary(financials ?? null, timeLogs, members, []),
-    [financials, timeLogs, members]
-  );
-
-  const taskStats = useMemo(() => {
-    const total = tasks.length;
-    const done = tasks.filter((t) => t.status === "done").length;
-    const inProgress = tasks.filter((t) => t.status === "in_progress").length;
-    const overdue = tasks.filter(
-      (t) => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done"
-    ).length;
-    return { total, done, inProgress, overdue, pct: total ? Math.round((done / total) * 100) : 0 };
-  }, [tasks]);
-
-  const activeSprint = sprints.find((s) => s.status === "active");
-  const upcomingMilestone = milestones
-    .filter((m) => m.status !== "completed" && m.target_date)
-    .sort((a, b) => (a.target_date! > b.target_date! ? 1 : -1))[0];
-
-  if (isLoading || !project) {
+  if (loadingProject || isLoading || !project || !data) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -121,14 +67,32 @@ function OverviewPage() {
     );
   }
 
-  const phaseMeta = project.phase
-    ? PROJECT_PHASES.find((p) => p.value === project.phase) ?? null
-    : null;
-  const healthMeta = project.health ? PROJECT_HEALTH[project.health] : null;
+  const { overview, snapshots: rawSnaps, template } = data;
+  const snapshots = rawSnaps as unknown as import("@/lib/overview-types").OverviewSnapshot[];
+  const activeSnap =
+    snapshots.find((s) => s.id === activeSnapshotId) ?? snapshots[0] ?? null;
+  const sections =
+    activeSnap?.sections && activeSnap.sections.length > 0
+      ? activeSnap.sections
+      : template.map((t) => ({
+          ...t,
+          content_md: "_No snapshot yet — click Refresh to generate one._",
+          content_text: "",
+        }));
+
+  const onRefresh = async () => {
+    try {
+      const r = await refresh.mutateAsync();
+      if (r && typeof r === "object" && "error" in r) toast.error(String((r as { error: unknown }).error));
+      else toast.success("Overview refreshed");
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <Link
           to="/app/p/$projectId"
           params={{ projectId }}
@@ -138,212 +102,204 @@ function OverviewPage() {
         </Link>
         <Button variant="ghost" size="sm" asChild>
           <Link to="/app/p/$projectId/settings" params={{ projectId }}>
-            <Settings className="mr-1.5 h-4 w-4" /> Settings
+            <Settings className="mr-1.5 h-4 w-4" /> Project settings
           </Link>
         </Button>
       </div>
 
-      <div className="mb-8 flex items-start gap-4">
-        <div
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl font-semibold"
-          style={{ backgroundColor: `${project.color}22`, color: project.color }}
-        >
-          {project.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
+      {/* Header */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">{project.name}</h1>
-            {phaseMeta && <Badge variant="secondary">{phaseMeta.label}</Badge>}
-            {healthMeta && (
-              <Badge variant="outline" style={{ color: healthMeta.color, borderColor: healthMeta.color }}>
-                {healthMeta.label}
-              </Badge>
-            )}
-            {project.is_client_project && (
-              <Badge variant="outline">
-                Client{project.client_name ? ` · ${project.client_name}` : ""}
-              </Badge>
-            )}
+            <Badge variant="secondary">Overview</Badge>
+            <HealthBadge health={activeSnap?.health ?? null} />
           </div>
-          {project.description && (
-            <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
-          )}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {activeSnap?.summary ||
+              "AI-generated TL;DR of this project — refresh to populate."}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {activeSnap
+              ? `Updated ${formatDistanceToNow(new Date(activeSnap.generated_at), { addSuffix: true })}`
+              : "No snapshot yet"}
+            {overview.refresh_status === "running" && " · refreshing…"}
+            {overview.refresh_status === "error" && overview.refresh_error && (
+              <span className="text-destructive"> · {overview.refresh_error}</span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={overview.refresh_cadence}
+            onValueChange={(v) =>
+              updateSettings.mutate({ refresh_cadence: v as RefreshCadence })
+            }
+          >
+            <SelectTrigger className="h-8 w-[160px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(REFRESH_CADENCE_LABELS) as RefreshCadence[]).map((k) => (
+                <SelectItem key={k} value={k} className="text-xs">
+                  {REFRESH_CADENCE_LABELS[k]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            onClick={onRefresh}
+            disabled={refresh.isPending || overview.refresh_status === "running"}
+          >
+            {refresh.isPending || overview.refresh_status === "running" ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Refresh now
+          </Button>
         </div>
       </div>
 
-      {/* KPI strip */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Progress</p>
-            <p className="text-xl font-semibold">{taskStats.pct}%</p>
-            <Progress value={taskStats.pct} className="mt-2 h-1" />
-            <p className="mt-1 text-xs text-muted-foreground">
-              {taskStats.done}/{taskStats.total} tasks
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">In progress</p>
-            <p className="text-xl font-semibold">{taskStats.inProgress}</p>
-            <p className="mt-1 text-xs text-destructive">
-              {taskStats.overdue > 0 ? `${taskStats.overdue} overdue` : "On track"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Budget burn</p>
-            <p className="text-xl font-semibold">
-              {summary.contractValue
-                ? `${Math.round(summary.burnPct)}%`
-                : "—"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {formatMoney(summary.loggedCost, financials?.currency ?? "USD")} cost
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Active sprint</p>
-            <p className="truncate text-xl font-semibold">
-              {activeSprint?.name ?? "None"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {sprints.length} total
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="grid gap-6 lg:grid-cols-[1fr_240px]">
+        {/* Sections */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {sections.map((s) => (
+            <OverviewSectionCard key={s.key} section={s} />
+          ))}
+        </div>
 
-      {/* Work */}
-      <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Work
-      </h2>
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <SectionCard
-          title="Tasks"
-          description="All work, views & filters"
-          to="/app/p/$projectId"
-          params={{ projectId }}
-          icon={ListChecks}
-        >
-          <span className="text-muted-foreground">
-            {taskStats.total} tasks · {taskStats.inProgress} active
-          </span>
-        </SectionCard>
-        <SectionCard
-          title="Sprints"
-          description="Backlog, planning & active sprint"
-          to="/app/p/$projectId/sprints"
-          params={{ projectId }}
-          icon={Target}
-        >
-          <span className="text-muted-foreground">
-            {activeSprint ? `${activeSprint.name} active` : `${sprints.length} sprints`}
-          </span>
-        </SectionCard>
-        <SectionCard
-          title="Milestones"
-          description="Key deliverables & dates"
-          to="/app/p/$projectId/milestones"
-          params={{ projectId }}
-          icon={Flag}
-        >
-          <span className="text-muted-foreground">
-            {upcomingMilestone
-              ? `Next: ${upcomingMilestone.name}`
-              : `${milestones.length} milestones`}
-          </span>
-        </SectionCard>
-      </div>
+        {/* Sidebar: timeline + nav */}
+        <div className="space-y-6">
+          <div>
+            <h3 className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <History className="h-3.5 w-3.5" /> Snapshot timeline
+            </h3>
+            <Card>
+              <CardContent className="p-2">
+                {snapshots.length === 0 && (
+                  <p className="px-2 py-3 text-xs text-muted-foreground">
+                    No snapshots yet.
+                  </p>
+                )}
+                <ul className="space-y-0.5">
+                  {snapshots.map((s) => {
+                    const isActive = (activeSnap?.id ?? null) === s.id;
+                    return (
+                      <li key={s.id}>
+                        <button
+                          onClick={() => setActiveSnapshotId(s.id)}
+                          className={`w-full rounded-md px-2 py-1.5 text-left text-xs transition-colors ${
+                            isActive
+                              ? "bg-accent text-foreground"
+                              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                          }`}
+                        >
+                          <div className="font-medium text-foreground">
+                            {formatDistanceToNow(new Date(s.generated_at), {
+                              addSuffix: true,
+                            })}
+                          </div>
+                          <div className="truncate opacity-80">
+                            {s.summary || "—"}
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Knowledge */}
-      <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Knowledge
-      </h2>
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <SectionCard
-          title="Notes"
-          description="Project notes & docs"
-          to="/app/notes"
-          search={{ project: projectId, archived: false }}
-          icon={StickyNote}
-        >
-          <span className="text-muted-foreground">{notes.length} notes</span>
-        </SectionCard>
-        <SectionCard
-          title="Meetings"
-          description="Recordings & summaries"
-          to="/app/meetings"
-          search={{ project: projectId }}
-          icon={Mic}
-        >
-          <span className="text-muted-foreground">View meetings</span>
-        </SectionCard>
-        <SectionCard
-          title="Documents"
-          description="Files & deliverables"
-          to="/app/p/$projectId/documents"
-          params={{ projectId }}
-          icon={FileText}
-        >
-          <span className="text-muted-foreground">{documents.length} files</span>
-        </SectionCard>
-      </div>
+          <div>
+            <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Drill down
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <NavTile to="/app/p/$projectId" params={{ projectId }} icon={ListChecks} label="Tasks" />
+              <NavTile to="/app/p/$projectId/sprints" params={{ projectId }} icon={Target} label="Sprints" />
+              <NavTile to="/app/p/$projectId/milestones" params={{ projectId }} icon={Flag} label="Milestones" />
+              <NavTile to="/app/p/$projectId/health" params={{ projectId }} icon={Activity} label="Health" />
+              <NavTile to="/app/p/$projectId/financials" params={{ projectId }} icon={DollarSign} label="Financials" />
+              <NavTile to="/app/p/$projectId/invoices" params={{ projectId }} icon={Receipt} label="Invoices" />
+              <NavTile to="/app/p/$projectId/expenses" params={{ projectId }} icon={Wallet} label="Expenses" />
+              <NavTile to="/app/p/$projectId/change-orders" params={{ projectId }} icon={FileEdit} label="Changes" />
+              <NavTile to="/app/p/$projectId/allocations" params={{ projectId }} icon={UsersRound} label="Allocations" />
+              <NavTile to="/app/p/$projectId/clients" params={{ projectId }} icon={Users} label="Clients" />
+              <NavTile to="/app/p/$projectId/documents" params={{ projectId }} icon={FileText} label="Documents" />
+              <NavTile to="/app/p/$projectId/pages" params={{ projectId }} icon={StickyNote} label="Pages" />
+              <NavTile to="/app/notes" search={{ project: projectId, archived: false }} icon={StickyNote} label="Notes" />
+              <NavTile to="/app/meetings" search={{ project: projectId }} icon={Mic} label="Meetings" />
+            </div>
+          </div>
 
-      {/* Delivery */}
-      <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Delivery & client
-      </h2>
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <SectionCard
-          title="Financials"
-          description="Budget, billing & margin"
-          to="/app/p/$projectId/financials"
-          params={{ projectId }}
-          icon={DollarSign}
-        >
-          <span className="text-muted-foreground">
-            {summary.contractValue
-              ? formatMoney(summary.contractValue, financials?.currency ?? "USD")
-              : "Not set up"}
-          </span>
-        </SectionCard>
-        <SectionCard
-          title="Health"
-          description="Risks, status & RAG"
-          to="/app/p/$projectId/health"
-          params={{ projectId }}
-          icon={Activity}
-        >
-          <span className="text-muted-foreground">
-            {healthMeta ? healthMeta.label : "No status"}
-          </span>
-        </SectionCard>
-        <SectionCard
-          title="Change orders"
-          description="Scope changes & approvals"
-          to="/app/p/$projectId/change-orders"
-          params={{ projectId }}
-          icon={FileEdit}
-        />
-        <SectionCard
-          title="Allocations"
-          description="Team capacity & assignments"
-          to="/app/p/$projectId/allocations"
-          params={{ projectId }}
-          icon={UsersRound}
-        />
-        <SectionCard
-          title="Client portal"
-          description="External access & approvals"
-          to="/app/p/$projectId/clients"
-          params={{ projectId }}
-          icon={Users}
-        />
+          <ProjectDecisionsPanel projectId={projectId} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavTile({
+  to,
+  params,
+  search,
+  icon: Icon,
+  label,
+}: {
+  to: string;
+  params?: Record<string, string>;
+  search?: Record<string, unknown>;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}) {
+  return (
+    <Link
+      to={to as never}
+      params={params as never}
+      search={search as never}
+      className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+    >
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </Link>
+  );
+}
+
+function ProjectDecisionsPanel({ projectId }: { projectId: string }) {
+  const { data: rows = [] } = useProjectDecisions(projectId);
+  if (rows.length === 0) return null;
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Recent decisions
+      </h3>
+      <Card>
+        <CardContent className="p-3">
+          <ul className="space-y-2 text-sm">
+            {rows.slice(0, 8).map((r, i) => (
+              <li key={`${r.meetingId}-${i}`} className="flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-foreground">{r.text}</p>
+                  <Link
+                    to="/app/meetings/$meetingId"
+                    params={{ meetingId: r.meetingId }}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {r.meetingTitle} · {formatDistanceToNow(new Date(r.at), { addSuffix: true })}
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <EntityLinksPanel kind="project" id={projectId} title="Related items" />
+        <EntityBacklinksPanel kind="project" id={projectId} hideWhenEmpty />
       </div>
     </div>
   );

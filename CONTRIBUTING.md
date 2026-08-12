@@ -23,7 +23,7 @@ bun dev
 ```
 
 - Node 20+ or Bun 1.1+
-- A Supabase project (free tier is fine) or Lovable Cloud
+- A Supabase project (free tier is fine)
 - Run `supabase db push` to apply migrations from `supabase/migrations/`
 
 ## Project conventions

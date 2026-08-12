@@ -41,6 +41,8 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import type { AiAgent, AiTaskAssignment } from "@/hooks/use-ai";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton } from "@/components/ui/loading-scaffolds";
 
 export const Route = createFileRoute("/app/agent-runs")({
   component: AgentRunsPage,
@@ -248,10 +250,17 @@ function AgentRunsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {filtered.length === 0 && !isLoading ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              No agent runs match your filters.
+          {isLoading ? (
+            <div className="p-3">
+              <ListSkeleton rows={5} />
             </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Bot}
+              title="No agent runs"
+              description="Assign a task to an AI agent to see runs here."
+              className="m-3 border-0 bg-transparent"
+            />
           ) : (
             <ul className="divide-y divide-border">
               {filtered.map((row) => {

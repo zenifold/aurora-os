@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { useProject } from "@/hooks/use-projects";
+import { useProject, useUpdateProject } from "@/hooks/use-projects";
 import { useMilestones } from "@/hooks/use-milestones";
 import { useTeamMembers } from "@/hooks/use-team";
 import {
@@ -9,6 +9,7 @@ import {
   useProjectTimeLogs,
   computeSummary,
 } from "@/hooks/use-project-financials";
+import { useRateCards } from "@/hooks/use-rate-cards";
 import { formatMoney } from "@/lib/financial-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -23,8 +25,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, DollarSign, Save, TrendingUp, Wallet, Clock, Receipt } from "lucide-react";
+import { ArrowLeft, DollarSign, Save, TrendingUp, Wallet, Clock, Receipt, Printer, AlertTriangle } from "lucide-react";
+import { printPage } from "@/lib/exports";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+const BILLING_MODELS = [
+  { value: "time_and_materials", label: "Time & materials" },
+  { value: "fixed_fee", label: "Fixed fee" },
+  { value: "milestone", label: "Milestone-based" },
+  { value: "retainer", label: "Retainer" },
+  { value: "non_billable", label: "Non-billable" },
+] as const;
+type BillingModel = (typeof BILLING_MODELS)[number]["value"];
 
 export const Route = createFileRoute("/app/p/$projectId/financials")({
   component: FinancialsPage,
@@ -37,7 +50,9 @@ function FinancialsPage() {
   const { data: milestones = [] } = useMilestones(projectId);
   const { data: logs = [] } = useProjectTimeLogs(projectId);
   const { data: members = [] } = useTeamMembers();
+  const { data: rateCards = [] } = useRateCards();
   const upsert = useUpsertProjectFinancials(projectId);
+  const updateProject = useUpdateProject();
 
   const paymentMs = useMemo(
     () => milestones.filter((m) => m.milestone_type === "payment"),
@@ -57,6 +72,12 @@ function FinancialsPage() {
   const [costRate, setCostRate] = useState("");
   const [currencyInput, setCurrencyInput] = useState("USD");
   const [notes, setNotes] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState("");
+  const [budgetHours, setBudgetHours] = useState("");
+  const [billingModel, setBillingModel] = useState<BillingModel>("time_and_materials");
+  const [rateCardId, setRateCardId] = useState<string>("none");
+  const [retainerAmount, setRetainerAmount] = useState("");
+  const [retainerPeriod, setRetainerPeriod] = useState("monthly");
 
   useEffect(() => {
     setContractValue(financials?.contract_value?.toString() ?? "");
@@ -64,21 +85,57 @@ function FinancialsPage() {
     setCostRate(financials?.default_cost_rate?.toString() ?? "");
     setCurrencyInput(financials?.currency ?? "USD");
     setNotes(financials?.notes ?? "");
+    const f = financials as unknown as { budget_amount?: number | null; budget_hours?: number | null } | null;
+    setBudgetAmount(f?.budget_amount?.toString() ?? "");
+    setBudgetHours(f?.budget_hours?.toString() ?? "");
   }, [financials]);
 
-  const handleSave = () => {
-    upsert.mutate({
+  useEffect(() => {
+    if (!project) return;
+    const p = project as unknown as {
+      billing_model?: BillingModel;
+      rate_card_id?: string | null;
+      retainer_amount?: number | null;
+      retainer_period?: string | null;
+    };
+    setBillingModel(p.billing_model ?? "time_and_materials");
+    setRateCardId(p.rate_card_id ?? "none");
+    setRetainerAmount(p.retainer_amount?.toString() ?? "");
+    setRetainerPeriod(p.retainer_period ?? "monthly");
+  }, [project]);
+
+  const handleSave = async () => {
+    await upsert.mutateAsync({
       contract_value: contractValue ? Number(contractValue) : null,
       default_bill_rate: billRate ? Number(billRate) : null,
       default_cost_rate: costRate ? Number(costRate) : null,
       currency: currencyInput || "USD",
       notes: notes || null,
-    });
+      budget_amount: budgetAmount ? Number(budgetAmount) : null,
+      budget_hours: budgetHours ? Number(budgetHours) : null,
+    } as never);
+    try {
+      await updateProject.mutateAsync({
+        id: projectId,
+        billing_model: billingModel,
+        rate_card_id: rateCardId === "none" ? null : rateCardId,
+        retainer_amount: billingModel === "retainer" && retainerAmount ? Number(retainerAmount) : null,
+        retainer_period: billingModel === "retainer" ? retainerPeriod : null,
+      } as never);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   };
 
+  const budgetCap = Number(budgetAmount) || 0;
+  const budgetUsedPct = budgetCap > 0 ? (summary.loggedCost / budgetCap) * 100 : 0;
+  const budgetTone: "ok" | "warn" | "neutral" =
+    budgetUsedPct >= 90 ? "warn" : budgetUsedPct >= 75 ? "neutral" : "ok";
+
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/40 backdrop-blur">
+    <div className="min-h-screen bg-background" data-print="true">
+      <header className="border-b border-border bg-card/40 backdrop-blur" data-print-hide="true">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
@@ -93,7 +150,12 @@ function FinancialsPage() {
               <p className="text-xs text-muted-foreground">{project?.name ?? ""}</p>
             </div>
           </div>
-          <Badge variant="outline" className="font-mono">{currency}</Badge>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={printPage}>
+              <Printer className="mr-1 h-4 w-4" /> Print / PDF
+            </Button>
+            <Badge variant="outline" className="font-mono">{currency}</Badge>
+          </div>
         </div>
       </header>
 
@@ -218,6 +280,56 @@ function FinancialsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1">
+                <Label htmlFor="billing-model">Billing model</Label>
+                <Select value={billingModel} onValueChange={(v) => setBillingModel(v as BillingModel)}>
+                  <SelectTrigger id="billing-model"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {BILLING_MODELS.map((b) => (
+                      <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="rate-card">Rate card</Label>
+                <Select value={rateCardId} onValueChange={setRateCardId}>
+                  <SelectTrigger id="rate-card"><SelectValue placeholder="None — use defaults" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None — use defaults</SelectItem>
+                    {rateCards.filter((c) => !c.is_archived).map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name} {c.is_default ? "· default" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  Manage rate cards in <Link to="/app/settings/rate-cards" className="underline">workspace settings</Link>.
+                </p>
+              </div>
+
+              {billingModel === "retainer" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="retainer">Retainer amount</Label>
+                    <Input id="retainer" type="number" inputMode="decimal" value={retainerAmount} onChange={(e) => setRetainerAmount(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="retainer-period">Period</Label>
+                    <Select value={retainerPeriod} onValueChange={setRetainerPeriod}>
+                      <SelectTrigger id="retainer-period"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-1">
                 <Label htmlFor="contract">Contract value</Label>
                 <Input
                   id="contract"
@@ -228,6 +340,36 @@ function FinancialsPage() {
                   placeholder="0"
                 />
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="budget-amount">Budget ($)</Label>
+                  <Input id="budget-amount" type="number" inputMode="decimal" value={budgetAmount} onChange={(e) => setBudgetAmount(e.target.value)} placeholder="0" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="budget-hours">Budget (h)</Label>
+                  <Input id="budget-hours" type="number" inputMode="decimal" value={budgetHours} onChange={(e) => setBudgetHours(e.target.value)} placeholder="0" />
+                </div>
+              </div>
+              {budgetCap > 0 && (
+                <div className="rounded-md border border-border bg-muted/40 p-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Budget used</span>
+                    <span className={cn(
+                      "font-mono font-medium",
+                      budgetTone === "warn" && "text-amber-600 dark:text-amber-400",
+                    )}>
+                      {budgetUsedPct.toFixed(0)}%
+                    </span>
+                  </div>
+                  <Progress value={Math.min(budgetUsedPct, 100)} className="mt-1.5 h-1.5" />
+                  {budgetUsedPct >= 90 && (
+                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400">
+                      <AlertTriangle className="h-3 w-3" /> Approaching budget cap
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label htmlFor="bill">Bill rate /h</Label>

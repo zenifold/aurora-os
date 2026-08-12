@@ -18,7 +18,10 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { useUserPreferences, useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { toast } from "sonner";
-import { Sun, Moon, Monitor, Rows3, Rows2, AlignJustify } from "lucide-react";
+import { Sun, Moon, Monitor, Rows3, Rows2, AlignJustify, Sparkles, Check } from "lucide-react";
+import {
+  WORK_MODES, PRIMARY_NAV_KEYS, PRIMARY_NAV_LABELS,
+} from "@/lib/work-modes";
 
 export const Route = createFileRoute("/app/settings/profile")({
   component: ProfilePage,
@@ -39,11 +42,13 @@ function ProfilePage() {
   const fontSize = useUIStore((s) => s.fontSize);
   const reducedMotion = useUIStore((s) => s.reducedMotion);
   const highContrast = useUIStore((s) => s.highContrast);
+  const accent = useUIStore((s) => s.accent);
   const setTheme = useUIStore((s) => s.setTheme);
   const setDensity = useUIStore((s) => s.setDensity);
   const setFontSize = useUIStore((s) => s.setFontSize);
   const setReducedMotion = useUIStore((s) => s.setReducedMotion);
   const setHighContrast = useUIStore((s) => s.setHighContrast);
+  const setAccent = useUIStore((s) => s.setAccent);
 
   useEffect(() => {
     if (!user) return;
@@ -69,7 +74,7 @@ function ProfilePage() {
   };
 
   // Persist preference + apply live
-  const set = <K extends "theme" | "density" | "font_size" | "reduced_motion" | "high_contrast" | "default_landing" | "default_view_type" | "confirm_deletes">(
+  const set = <K extends "theme" | "density" | "font_size" | "reduced_motion" | "high_contrast" | "default_landing" | "default_view_type" | "confirm_deletes" | "accent_preference">(
     key: K,
     value: NonNullable<typeof prefs>[K],
   ) => {
@@ -84,7 +89,7 @@ function ProfilePage() {
       {/* PROFILE */}
       <section>
         <h1 className="text-2xl font-semibold">Account</h1>
-        <p className="text-sm text-muted-foreground">How you appear in Aura.</p>
+        <p className="text-sm text-muted-foreground">How you appear in Aurora.</p>
         <div className="mt-6 max-w-xl space-y-4 rounded-xl border border-border bg-card p-6">
           <div>
             <Label>Email</Label>
@@ -129,7 +134,39 @@ function ProfilePage() {
             </div>
           </div>
 
-          {/* Density */}
+          {/* Accent color */}
+          <div>
+            <Label className="mb-2 block">Accent color</Label>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+              {([
+                { v: "workspace", label: "Workspace", swatch: "var(--gradient-aura)" },
+                { v: "aurora",    label: "Aurora",    swatch: "linear-gradient(135deg, oklch(0.62 0.13 290), oklch(0.7 0.22 350))" },
+                { v: "indigo",    label: "Indigo",    swatch: "linear-gradient(135deg, oklch(0.55 0.22 270), oklch(0.7 0.2 300))" },
+                { v: "emerald",   label: "Emerald",   swatch: "linear-gradient(135deg, oklch(0.6 0.16 160), oklch(0.78 0.16 95))" },
+                { v: "sunset",    label: "Sunset",    swatch: "linear-gradient(135deg, oklch(0.65 0.2 30), oklch(0.8 0.18 70))" },
+                { v: "ocean",     label: "Ocean",     swatch: "linear-gradient(135deg, oklch(0.58 0.15 230), oklch(0.74 0.14 195))" },
+                { v: "rose",      label: "Rose",      swatch: "linear-gradient(135deg, oklch(0.62 0.2 5), oklch(0.78 0.18 340))" },
+                { v: "mono",      label: "Mono",      swatch: "linear-gradient(135deg, oklch(0.28 0.01 270), oklch(0.7 0.005 270))" },
+              ] as const).map(({ v, label, swatch }) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => { setAccent(v); set("accent_preference", v); }}
+                  title={label}
+                  className={`group press flex flex-col items-center gap-1.5 rounded-lg border p-2 text-[10px] font-medium transition ${
+                    accent === v ? "border-primary shadow-lift" : "border-border hover:bg-accent"
+                  }`}
+                >
+                  <span
+                    className="h-7 w-7 rounded-full ring-1 ring-border transition-transform group-hover:scale-110"
+                    style={{ background: swatch }}
+                  />
+                  <span className="truncate">{label}</span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Tints buttons, links, focus rings, and the aurora gradient. Workspace = inherit org default.</p>
+          </div>
           <div>
             <Label className="mb-2 block">Density</Label>
             <div className="grid grid-cols-3 gap-2">
@@ -252,6 +289,89 @@ function ProfilePage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </section>
+
+      {/* WORK MODE */}
+      <section>
+        <h2 className="text-lg font-medium">Work mode</h2>
+        <p className="text-sm text-muted-foreground">
+          Pick a persona to instantly tune the sidebar and landing page. You can fine-tune below.
+        </p>
+        <div className="mt-4 grid max-w-3xl gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {WORK_MODES.map((m) => {
+            const active = prefs?.work_mode === m.key;
+            return (
+              <button
+                key={m.key}
+                onClick={() => {
+                  update.mutate({
+                    work_mode: m.key,
+                    hidden_nav_items: m.hidden,
+                    default_landing: m.landing,
+                  });
+                  toast.success(`Work mode: ${m.label}`);
+                }}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
+                  active ? "border-primary bg-aura-gradient-subtle" : "border-border hover:bg-accent"
+                }`}
+              >
+                <m.icon className="mt-0.5 h-5 w-5 text-primary" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold">{m.label}</span>
+                    {active && <Check className="h-4 w-4 text-primary" />}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{m.description}</p>
+                </div>
+              </button>
+            );
+          })}
+          <button
+            onClick={() => update.mutate({ work_mode: "custom", hidden_nav_items: [] })}
+            className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
+              !prefs?.work_mode || prefs.work_mode === "custom"
+                ? "border-primary bg-aura-gradient-subtle"
+                : "border-border hover:bg-accent"
+            }`}
+          >
+            <Sparkles className="mt-0.5 h-5 w-5 text-primary" />
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-semibold">Custom</span>
+              <p className="mt-0.5 text-xs text-muted-foreground">Show everything; tune by hand below.</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      {/* SIDEBAR EDITOR */}
+      <section>
+        <h2 className="text-lg font-medium">Sidebar</h2>
+        <p className="text-sm text-muted-foreground">Hide nav items you never use. Workspace-wide gates still apply.</p>
+        <div className="mt-4 max-w-xl divide-y divide-border rounded-xl border border-border bg-card">
+          {PRIMARY_NAV_KEYS.map((key) => {
+            const hidden = (prefs?.hidden_nav_items ?? []).includes(key);
+            return (
+              <div key={key} className="flex items-center justify-between gap-3 px-5 py-3">
+                <div>
+                  <Label className="text-sm">{PRIMARY_NAV_LABELS[key]}</Label>
+                  <p className="text-xs text-muted-foreground">{hidden ? "Hidden from sidebar" : "Visible in sidebar"}</p>
+                </div>
+                <Switch
+                  checked={!hidden}
+                  onCheckedChange={(visible) => {
+                    const set = new Set(prefs?.hidden_nav_items ?? []);
+                    if (visible) set.delete(key); else set.add(key);
+                    update.mutate({
+                      hidden_nav_items: Array.from(set),
+                      // any manual edit moves user out of preset
+                      work_mode: "custom",
+                    });
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

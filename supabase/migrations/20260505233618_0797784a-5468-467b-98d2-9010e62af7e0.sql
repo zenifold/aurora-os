@@ -1,0 +1,1 @@
+alter table public.ai_agents alter column model set default 'xiaomi/mimo-v2-flash';

@@ -22,17 +22,17 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/docs/self-host")({
   head: () => ({
     meta: [
-      { title: "Self-host Aura — 4 commands to your own project OS" },
+      { title: "Self-host Aurora — 4 commands to your own project OS" },
       {
         name: "description",
         content:
-          "Run Aura on your own infrastructure. Clone the repo, point it at Supabase + Cloudflare, and ship in minutes. Your data, your keys, your rules.",
+          "Run Aurora on your own infrastructure. Clone the repo, point it at Supabase + Cloudflare, and ship in minutes. Your data, your keys, your rules.",
       },
-      { property: "og:title", content: "Self-host Aura — your data, your infra" },
+      { property: "og:title", content: "Self-host Aurora — your data, your infra" },
       {
         property: "og:description",
         content:
-          "Step-by-step guide to deploy Aura on Supabase + Cloudflare Workers. MIT licensed, BYO OpenRouter key, no per-seat fees.",
+          "Step-by-step guide to deploy Aurora on Supabase + Cloudflare Workers. MIT licensed, BYO OpenRouter key, no per-seat fees.",
       },
     ],
   }),
@@ -129,7 +129,7 @@ function SelfHostDocsPage() {
             </div>
 
             <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-6xl">
-              Self-host Aura in{" "}
+              Self-host Aurora in{" "}
               <span className="bg-aura-gradient bg-clip-text text-transparent">4 commands</span>.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
@@ -262,9 +262,9 @@ function SelfHostDocsPage() {
                   No magic. Just open standards.
                 </h2>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  Aura is a TanStack Start app on Cloudflare Workers, backed by Supabase
+                  Aurora is a TanStack Start app on Cloudflare Workers, backed by Supabase
                   (Postgres + Auth + Storage). AI calls go directly to OpenRouter using your key —
-                  Aura never proxies prompts or stores them.
+                  Aurora never proxies prompts or stores them.
                 </p>
                 <ul className="mt-5 space-y-2.5 text-sm">
                   {[
@@ -293,7 +293,7 @@ function SelfHostDocsPage() {
                     a="No. The code is MIT — free forever. You only pay your infrastructure bills (Supabase + Cloudflare both have generous free tiers) and your AI provider directly via OpenRouter."
                   />
                   <Faq
-                    q="Can I migrate later from Aura Cloud to self-host?"
+                    q="Can I migrate later from Aurora Cloud to self-host?"
                     a="Yes. Export your data from Settings → Data, spin up your own instance, and import. No lock-in by design."
                   />
                   <Faq
@@ -321,7 +321,7 @@ function SelfHostDocsPage() {
               Ready to own your stack?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Star the repo, clone it, ship it. Or skip the ops and use Aura Cloud — same
+              Star the repo, clone it, ship it. Or skip the ops and use Aurora Cloud — same
               codebase, hosted by us.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">

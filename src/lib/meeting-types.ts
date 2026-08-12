@@ -46,6 +46,7 @@ export interface Meeting {
   organizer_id: string | null;
   participant_emails: string[];
   created_by: string | null;
+  audio_path?: string | null;
   created_at: string;
   updated_at: string;
 }

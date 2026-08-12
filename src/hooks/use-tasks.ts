@@ -58,7 +58,7 @@ export function useCreateTask(projectId: string) {
     mutationFn: async (input: {
       title: string;
       status?: string;
-      task_type?: "initiative" | "epic" | "task" | "subtask";
+      task_type?: "initiative" | "epic" | "task" | "subtask" | "milestone";
       parent_task_id?: string | null;
     }) => {
       if (!ws || !user) throw new Error("No workspace");
@@ -170,11 +170,41 @@ export function useDeleteTask(projectId: string) {
       const { error } = await supabase.from("tasks").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks", projectId] });
-      toast.success("Task deleted");
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ["tasks", projectId] });
+      const prev = qc.getQueryData<Task[]>(["tasks", projectId]);
+      const removed = prev?.find((t) => t.id === id);
+      qc.setQueryData<Task[]>(["tasks", projectId], (old) => (old ?? []).filter((t) => t.id !== id));
+      return { prev, removed };
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error, _id, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["tasks", projectId], ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: (_d, _id, ctx) => {
+      const removed = ctx?.removed;
+      toast.success("Task deleted", {
+        action: removed
+          ? {
+              label: "Undo",
+              onClick: async () => {
+                const { id, created_at: _c, updated_at: _u, ...rest } = removed as Task & {
+                  created_at?: string;
+                  updated_at?: string;
+                };
+                const { error } = await supabase.from("tasks").insert({ id, ...rest } as never);
+                if (error) {
+                  toast.error("Couldn't restore task");
+                  return;
+                }
+                qc.invalidateQueries({ queryKey: ["tasks", projectId] });
+                toast.success("Task restored");
+              },
+            }
+          : undefined,
+      });
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks", projectId] }),
   });
 }
 
@@ -188,6 +218,22 @@ export function useBulkUpdateTasks(projectId: string) {
     onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ["tasks", projectId] });
       toast.success(`Updated ${vars.ids.length} tasks`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useBulkDeleteTasks(projectId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("tasks").delete().in("id", ids);
+      if (error) throw error;
+      return ids.length;
+    },
+    onSuccess: (count) => {
+      qc.invalidateQueries({ queryKey: ["tasks", projectId] });
+      toast.success(`Deleted ${count} task${count === 1 ? "" : "s"}`);
     },
     onError: (e: Error) => toast.error(e.message),
   });

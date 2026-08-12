@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
+import { promptDialog } from "@/lib/dialogs";
 import { useParams } from "@tanstack/react-router";
 import {
   useClientAccess,
   useDeliverables,
   useUpsertDeliverable,
   useReviewDeliverable,
+  useDeliverableComments,
+  useAddTeamDeliverableComment,
 } from "@/hooks/use-client-portal";
+import { useProfile } from "@/hooks/use-profile";
 import {
   DELIVERABLE_TYPE_LABELS,
   REVIEW_STATUS_LABELS,
@@ -112,8 +116,16 @@ export function ClientDeliverableSection({ task }: { task: Task }) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  const note = window.prompt("What needs revising?") ?? "";
+                onClick={async () => {
+                  const note = await promptDialog({
+                    title: "Request revision",
+                    description: "Tell the team what needs to change.",
+                    placeholder: "What needs revising?",
+                    multiline: true,
+                    confirmLabel: "Send request",
+                    required: true,
+                  });
+                  if (note === null) return;
                   review.mutate({
                     id: existing.id,
                     review_status: "needs_revision",
@@ -206,6 +218,82 @@ export function ClientDeliverableSection({ task }: { task: Task }) {
             ` · Revision ${existing.revision_count}/${existing.max_revisions}`}
         </p>
       )}
+
+      {existing && (
+        <TeamDeliverableThread deliverableId={existing.id} projectId={projectId} />
+      )}
+    </div>
+  );
+}
+
+function TeamDeliverableThread({
+  deliverableId,
+  projectId,
+}: {
+  deliverableId: string;
+  projectId: string;
+}) {
+  const { data: comments = [], isLoading } = useDeliverableComments(deliverableId);
+  const { data: profile } = useProfile();
+  const add = useAddTeamDeliverableComment();
+  const [text, setText] = useState("");
+
+  const send = () => {
+    if (!text.trim()) return;
+    add.mutate(
+      {
+        deliverable_id: deliverableId,
+        project_id: projectId,
+        body: text.trim(),
+        author_name: profile?.display_name ?? "Team",
+      },
+      { onSuccess: () => setText("") },
+    );
+  };
+
+  return (
+    <div className="mt-4 rounded-md border border-border bg-card p-3">
+      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Discussion with client
+      </p>
+      <div className="mb-2 max-h-56 space-y-2 overflow-y-auto">
+        {isLoading ? (
+          <p className="text-xs text-muted-foreground">Loading…</p>
+        ) : comments.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No messages yet.</p>
+        ) : (
+          comments.map((c) => (
+            <div
+              key={c.id}
+              className={`rounded-md p-2 text-xs ${
+                c.author_kind === "team"
+                  ? "ml-auto max-w-[85%] bg-primary/10"
+                  : "mr-auto max-w-[85%] bg-muted/40"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium">{c.author_name}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {new Date(c.created_at).toLocaleString()}
+                </span>
+              </div>
+              <p className="mt-1 whitespace-pre-wrap">{c.body}</p>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="flex items-end gap-2">
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={2}
+          placeholder="Reply to client…"
+          className="text-xs"
+        />
+        <Button size="sm" onClick={send} disabled={add.isPending || !text.trim()}>
+          Send
+        </Button>
+      </div>
     </div>
   );
 }

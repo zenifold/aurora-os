@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import {
   Dialog,
   DialogContent,
@@ -188,7 +189,13 @@ export function TransitionEditorDialog({
 
   const onDelete = async () => {
     if (!transition) return;
-    if (!confirm("Remove this transition? Tasks won't be able to move along this path.")) return;
+    const ok = await confirmDialog({
+      title: "Remove this transition?",
+      description: "Tasks won't be able to move along this path anymore.",
+      confirmLabel: "Remove",
+      tone: "destructive",
+    });
+    if (!ok) return;
     await remove.mutateAsync(transition.id);
     onClose();
   };

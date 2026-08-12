@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,12 @@ export function WorkflowTemplatePicker({ projectId }: { projectId: string }) {
 
   const onApply = async () => {
     if (!picked) return;
-    if (!confirm(`Replace this project's workflow with "${picked.name}"? Existing tasks will keep their status name.`)) return;
+    const ok = await confirmDialog({
+      title: `Apply "${picked.name}" workflow?`,
+      description: "This project's statuses will be replaced. Existing tasks keep their current status name.",
+      confirmLabel: "Apply workflow",
+    });
+    if (!ok) return;
     await apply.mutateAsync(picked);
     setOpen(false);
     setPicked(null);

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { NavAccessGuard } from "@/components/app/NavAccessGuard";
 import { useMemo, useState } from "react";
 import { addDays, format, startOfWeek } from "date-fns";
 import { useResources, useAllocations } from "@/hooks/use-resources";
@@ -6,10 +7,11 @@ import { useTeamMembers } from "@/hooks/use-team";
 import { useProjects } from "@/hooks/use-projects";
 import { utilizationColor, utilizationLabel } from "@/lib/resource-types";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { EmptyState } from "@/components/app/EmptyState";
 
 export const Route = createFileRoute("/app/resources/capacity")({
-  component: CapacityPlanner,
+  component: () => <NavAccessGuard navKey="capacity"><CapacityPlanner /></NavAccessGuard>,
 });
 
 function CapacityPlanner() {
@@ -80,9 +82,13 @@ function CapacityPlanner() {
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-4 lg:p-6">
         {rows.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-            Add team members or resources to start planning capacity.
-          </div>
+          <EmptyState
+            icon={Calendar}
+            title="Nothing to plan yet"
+            description="Add team members and resources to see weekly utilization, allocations, and over-capacity warnings."
+            primaryAction={{ label: "Add resources", to: "/app/resources" }}
+            secondaryAction={{ label: "Invite teammates", to: "/app/settings/members" }}
+          />
         ) : (
           <div className="overflow-x-auto rounded-lg border border-border bg-card">
             <table className="w-full min-w-[800px] text-sm">

@@ -91,3 +91,64 @@ export function downloadMarkdown(filename: string, content: string) {
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
+
+// Build a plain-text email recap (subject + body) suitable for mailto: or paste-in.
+export function meetingToEmailRecap(
+  meeting: Meeting,
+  actionItems: MeetingActionItem[],
+  projectName?: string | null,
+): { subject: string; body: string } {
+  const s = meeting.summary;
+  const subject = `Recap: ${meeting.title}${projectName ? ` — ${projectName}` : ""}`;
+  const lines: string[] = [];
+  lines.push(`Hi all,`);
+  lines.push("");
+  lines.push(`Here's a quick recap from "${meeting.title}".`);
+  lines.push("");
+  if (s?.overview) {
+    lines.push("OVERVIEW");
+    lines.push(s.overview);
+    lines.push("");
+  }
+  if (s?.key_points?.length) {
+    lines.push("KEY POINTS");
+    for (const p of s.key_points) lines.push(`• ${p}`);
+    lines.push("");
+  }
+  if (s?.decisions?.length) {
+    lines.push("DECISIONS");
+    for (const d of s.decisions) lines.push(`• ${d}`);
+    lines.push("");
+  }
+  const openItems = actionItems.filter(
+    (a) => a.status !== "dismissed" && a.status !== "completed",
+  );
+  if (openItems.length > 0) {
+    lines.push("ACTION ITEMS");
+    for (const a of openItems) {
+      const tags: string[] = [];
+      if (a.assignee_guess_name) tags.push(`@${a.assignee_guess_name}`);
+      if (a.due_guess) tags.push(`due ${a.due_guess}`);
+      const tail = tags.length ? `  (${tags.join(", ")})` : "";
+      lines.push(`• ${a.summary ?? a.original_text}${tail}`);
+    }
+    lines.push("");
+  }
+  if (s?.questions_unanswered?.length) {
+    lines.push("OPEN QUESTIONS");
+    for (const q of s.questions_unanswered) lines.push(`• ${q}`);
+    lines.push("");
+  }
+  lines.push("Reply with anything I missed.");
+  lines.push("");
+  lines.push("— Sent from Aurora");
+  return { subject, body: lines.join("\n") };
+}
+
+export function openMailto(to: string[], subject: string, body: string) {
+  const params = new URLSearchParams();
+  params.set("subject", subject);
+  params.set("body", body);
+  const href = `mailto:${to.join(",")}?${params.toString().replace(/\+/g, "%20")}`;
+  window.location.href = href;
+}

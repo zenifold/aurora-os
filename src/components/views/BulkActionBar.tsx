@@ -1,6 +1,16 @@
 import { useState } from "react";
-import { useBulkUpdateTasks } from "@/hooks/use-tasks";
+import { useBulkUpdateTasks, useBulkDeleteTasks } from "@/hooks/use-tasks";
 import { useProjectWorkflow, DEFAULT_WORKFLOW } from "@/hooks/use-project-workflow";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useWorkspaceMembers } from "@/hooks/use-comments";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -49,9 +59,11 @@ interface Props {
  */
 export function BulkActionBar({ projectId, selected, onClear }: Props) {
   const bulk = useBulkUpdateTasks(projectId);
+  const bulkDelete = useBulkDeleteTasks(projectId);
   const { data: workflow = DEFAULT_WORKFLOW } = useProjectWorkflow(projectId);
   const { data: members = [] } = useWorkspaceMembers();
   const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (selected.size === 0) return null;
   const ids = Array.from(selected);
@@ -103,14 +115,14 @@ export function BulkActionBar({ projectId, selected, onClear }: Props) {
   };
 
   const remove = () => {
-    if (!confirm(`Delete ${ids.length} task${ids.length === 1 ? "" : "s"}?`)) return;
     setBusy(true);
-    Promise.all(ids.map((id) => supabase.from("tasks").delete().eq("id", id)))
-      .then(() => {
-        toast.success(`Deleted ${ids.length} tasks`);
+    bulkDelete.mutate(ids, {
+      onSuccess: () => {
         onClear();
-      })
-      .finally(() => setBusy(false));
+        setConfirmOpen(false);
+      },
+      onSettled: () => setBusy(false),
+    });
   };
 
   return (
@@ -224,7 +236,7 @@ export function BulkActionBar({ projectId, selected, onClear }: Props) {
           variant="ghost"
           size="sm"
           className="h-8 gap-1 rounded-full px-2.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={remove}
+          onClick={() => setConfirmOpen(true)}
           disabled={busy}
         >
           <Trash2 className="h-3.5 w-3.5" /> Delete
@@ -240,6 +252,34 @@ export function BulkActionBar({ projectId, selected, onClear }: Props) {
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
         </Button>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {ids.length} task{ids.length === 1 ? "" : "s"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the selected tasks along with their subtasks, comments, and
+              attachments. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                remove();
+              }}
+              disabled={busy}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Trash2 className="mr-1.5 h-3.5 w-3.5" />}
+              Delete {ids.length}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

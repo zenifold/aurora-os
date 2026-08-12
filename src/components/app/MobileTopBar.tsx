@@ -48,7 +48,7 @@ export function MobileTopBar({ title, showBack = false }: Props) {
           ? "Notes"
           : path.startsWith("/app/settings")
             ? "Settings"
-            : path.startsWith("/app/notifications")
+            : path.startsWith("/app/inbox")
               ? "Notifications"
               : "");
 
@@ -97,7 +97,7 @@ export function MobileTopBar({ title, showBack = false }: Props) {
         variant="ghost"
         size="icon"
         aria-label="Notifications"
-        onClick={() => navigate({ to: "/app/notifications" })}
+        onClick={() => navigate({ to: "/app/inbox" })}
         className="h-10 w-10"
       >
         <Bell className="h-5 w-5" />

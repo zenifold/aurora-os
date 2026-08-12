@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import { Pin, MoreHorizontal, Archive, Trash2, ListChecks, List as ListIcon, FileText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -110,8 +111,13 @@ export function NoteCard({ note, onClick }: NoteCardProps) {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={() => {
-                if (confirm("Delete this note?")) del.mutate(note.id);
+              onClick={async () => {
+                const ok = await confirmDialog({
+                  title: "Delete this note?",
+                  confirmLabel: "Delete",
+                  tone: "destructive",
+                });
+                if (ok) del.mutate(note.id);
               }}
             >
               <Trash2 className="mr-2 h-3.5 w-3.5" />

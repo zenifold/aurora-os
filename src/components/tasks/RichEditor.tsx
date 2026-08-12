@@ -1,4 +1,5 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import { promptDialog } from "@/lib/dialogs";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
@@ -89,9 +90,15 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Btn
         label="Link"
         active={editor.isActive("link")}
-        onClick={() => {
+        onClick={async () => {
           const prev = editor.getAttributes("link").href as string | undefined;
-          const url = window.prompt("URL", prev ?? "https://");
+          const url = await promptDialog({
+            title: prev ? "Edit link" : "Add link",
+            description: "Leave empty to remove the link.",
+            defaultValue: prev ?? "https://",
+            placeholder: "https://example.com",
+            confirmLabel: "Save link",
+          });
           if (url === null) return;
           if (url === "") editor.chain().focus().extendMarkRange("link").unsetLink().run();
           else editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();

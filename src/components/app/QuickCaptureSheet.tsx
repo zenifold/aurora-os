@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useUIStore } from "@/stores/ui-store";
 import { useProjects } from "@/hooks/use-projects";
+import { useSidebarFavorites } from "@/hooks/use-sidebar-favorites";
 import { useTasks } from "@/hooks/use-tasks";
 import {
   Drawer,
@@ -31,6 +32,7 @@ import {
   Sparkles,
   Loader2,
   X,
+  Star,
 } from "lucide-react";
 import { addDays, format } from "date-fns";
 import { haptic } from "@/lib/haptics";
@@ -98,6 +100,28 @@ export function QuickCaptureSheet() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const { data: projects = [] } = useProjects();
+  const { data: favorites = [] } = useSidebarFavorites();
+
+  const favProjectIds = useMemo(
+    () =>
+      new Set(
+        favorites.filter((f) => f.item_type === "project").map((f) => f.item_id),
+      ),
+    [favorites],
+  );
+
+  // Order: favorites first (in their pinned order), then the rest.
+  const orderedProjects = useMemo(() => {
+    const favOrder = favorites
+      .filter((f) => f.item_type === "project")
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((f) => f.item_id);
+    const favList = favOrder
+      .map((id) => projects.find((p) => p.id === id))
+      .filter((p): p is (typeof projects)[number] => !!p);
+    const rest = projects.filter((p) => !favProjectIds.has(p.id));
+    return [...favList, ...rest];
+  }, [projects, favorites, favProjectIds]);
 
   const [text, setText] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -108,14 +132,15 @@ export function QuickCaptureSheet() {
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Default to "Personal" project, else first project.
+  // Default: first favorite project, then "Personal", then first project.
   useEffect(() => {
     if (!open) return;
     if (selectedProjectId) return;
+    const firstFav = orderedProjects.find((p) => favProjectIds.has(p.id));
     const personal = projects.find((p) => p.name.toLowerCase() === "personal");
-    const fallback = personal ?? projects[0];
+    const fallback = firstFav ?? personal ?? projects[0];
     if (fallback) setSelectedProjectId(fallback.id);
-  }, [open, projects, selectedProjectId]);
+  }, [open, orderedProjects, projects, selectedProjectId, favProjectIds]);
 
   useEffect(() => {
     if (open) {
@@ -178,11 +203,11 @@ export function QuickCaptureSheet() {
       const nextPos =
         existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0;
 
-      const { error } = await supabase.from("tasks").insert({
+      const payload = {
         workspace_id: ws!.id,
         project_id: effectiveProject.id,
         title: parsed.title,
-        status: "todo",
+        status: "todo" as const,
         position: nextPos,
         created_by: user!.id,
         tags: parsed.tags,
@@ -190,7 +215,22 @@ export function QuickCaptureSheet() {
         task_type: taskType,
         parent_task_id: parentTaskId,
         assignee_ids: assigneeIds,
-      } as never);
+      };
+
+      // Offline path: queue and bail
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        const { enqueueTask } = await import("@/lib/offline-queue");
+        await enqueueTask(payload);
+        haptic("success");
+        toast.success("Saved offline — will sync when reconnected");
+        setText("");
+        setOverrideDate(null);
+        if (!keepOpen) setOpen(false);
+        else setTimeout(() => inputRef.current?.focus(), 50);
+        return;
+      }
+
+      const { error } = await supabase.from("tasks").insert(payload as never);
       if (error) throw error;
       haptic("success");
       toast.success(`${TASK_TYPE_META[taskType].label} added`);
@@ -201,7 +241,40 @@ export function QuickCaptureSheet() {
       if (!keepOpen) setOpen(false);
       else setTimeout(() => inputRef.current?.focus(), 50);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to add task");
+      // Network failure → queue
+      const msg = e instanceof Error ? e.message : "Failed to add task";
+      if (/network|fetch|failed to fetch/i.test(msg)) {
+        try {
+          const { enqueueTask } = await import("@/lib/offline-queue");
+          const { data: existing } = await supabase
+            .from("tasks")
+            .select("position")
+            .eq("project_id", effectiveProject.id)
+            .order("position", { ascending: false })
+            .limit(1)
+            .throwOnError();
+          await enqueueTask({
+            workspace_id: ws!.id,
+            project_id: effectiveProject.id,
+            title: parsed.title,
+            status: "todo",
+            position: existing && existing.length > 0 ? Number(existing[0].position) + 1000 : 0,
+            created_by: user!.id,
+            tags: parsed.tags,
+            due_date: effectiveDate,
+            task_type: taskType,
+            parent_task_id: parentTaskId,
+            assignee_ids: assigneeIds,
+          });
+          toast.success("Saved offline — will sync when reconnected");
+          setText("");
+          if (!keepOpen) setOpen(false);
+          return;
+        } catch {
+          // fall through
+        }
+      }
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -354,13 +427,23 @@ export function QuickCaptureSheet() {
             )}
           </div>
 
-          {/* Recent projects rail */}
-          {!parsed.projectName && projects.length > 0 && (
+          {/* Project rail — pinned/favorite projects first */}
+          {!parsed.projectName && orderedProjects.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-xs text-muted-foreground">Project</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Project {favProjectIds.size > 0 && <span className="opacity-60">· starred shown first</span>}
+                </p>
+                {favProjectIds.size === 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    Star projects in the sidebar to pin them here
+                  </p>
+                )}
+              </div>
               <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-                {projects.slice(0, 8).map((p) => {
+                {orderedProjects.slice(0, 12).map((p) => {
                   const active = selectedProjectId === p.id;
+                  const fav = favProjectIds.has(p.id);
                   return (
                     <button
                       key={p.id}
@@ -368,16 +451,20 @@ export function QuickCaptureSheet() {
                         haptic("tap");
                         setSelectedProjectId(p.id);
                       }}
-                      className={`shrink-0 rounded-full border px-3 py-1.5 text-xs transition ${
+                      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
                         active
                           ? "border-primary bg-aura-gradient-subtle text-foreground"
                           : "border-border text-muted-foreground hover:border-primary/40"
                       }`}
                     >
-                      <span
-                        className="mr-1.5 inline-block h-2 w-2 rounded-sm align-middle"
-                        style={{ backgroundColor: p.color }}
-                      />
+                      {fav ? (
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      ) : (
+                        <span
+                          className="inline-block h-2 w-2 rounded-sm"
+                          style={{ backgroundColor: p.color }}
+                        />
+                      )}
                       {p.name}
                     </button>
                   );

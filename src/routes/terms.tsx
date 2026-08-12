@@ -4,10 +4,10 @@ import { MarketingHeader, MarketingFooter } from "@/components/marketing/Marketi
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms — Aura" },
+      { title: "Terms — Aurora" },
       {
         name: "description",
-        content: "Terms of service for the hosted Aura product. The source code is MIT licensed.",
+        content: "Terms of service for the hosted Aurora product. The source code is MIT licensed.",
       },
     ],
   }),
@@ -28,7 +28,7 @@ function TermsPage() {
         <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert">
           <h2>The deal</h2>
           <p>
-            By using the hosted version of Aura, you agree to these terms. The Aura source code
+            By using the hosted version of Aurora, you agree to these terms. The Aurora source code
             itself is MIT licensed — see the LICENSE file in the repo for that.
           </p>
 
@@ -66,7 +66,7 @@ function TermsPage() {
 
           <h2>Liability</h2>
           <p>
-            Aura is provided as is. To the extent permitted by law, our liability is capped at
+            Aurora is provided as is. To the extent permitted by law, our liability is capped at
             the amount you paid us in the previous 12 months.
           </p>
 

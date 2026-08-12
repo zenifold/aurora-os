@@ -41,6 +41,17 @@ export interface AiTaskAssignment {
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
+  parent_assignment_id?: string | null;
+  depth?: number;
+  tool_calls?: ToolCallLog[];
+}
+
+export interface ToolCallLog {
+  iteration: number;
+  name: string;
+  arguments: Record<string, unknown>;
+  result: { ok: boolean; data?: unknown; error?: string };
+  at: string;
 }
 
 export function useAiAgents() {
@@ -114,7 +125,7 @@ export function useTaskAiAssignments(taskId: string | null) {
         .eq("task_id", taskId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as AiTaskAssignment[];
+      return (data ?? []) as unknown as AiTaskAssignment[];
     },
   });
 

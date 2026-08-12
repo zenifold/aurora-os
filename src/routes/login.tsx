@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import logoUrl from "@/assets/logo.png";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -19,6 +19,7 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
 
@@ -41,26 +42,24 @@ function Login() {
 
   const handleGoogle = async () => {
     setOauthLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+    // Supabase redirects the browser to Google itself; on success this call
+    // never returns control, so there is no post-success navigation here.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/app` },
     });
-    if (result.error) {
+    if (error) {
       setOauthLoading(false);
-      toast.error("Google sign-in failed");
-      return;
+      toast.error(error.message || "Google sign-in failed");
     }
-    if (result.redirected) return;
-    navigate({ to: "/app" });
   };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="hidden aura-mesh lg:flex lg:flex-col lg:justify-between lg:p-12">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-aura-gradient shadow-pop">
-            <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
-          </div>
-          <span className="text-xl font-semibold">Aura</span>
+          <img src={logoUrl} alt="Aurora logo" className="h-9 w-9 rounded-xl shadow-pop" />
+          <span className="text-xl font-semibold">Aurora</span>
         </Link>
         <div>
           <h2 className="text-3xl font-semibold tracking-tight">Where whiteboards meet workflows.</h2>
@@ -75,10 +74,8 @@ function Login() {
         <div className="absolute right-4 top-4"><ThemeToggle /></div>
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-semibold">Aura</span>
+            <img src={logoUrl} alt="Aurora logo" className="h-8 w-8 rounded-lg" />
+            <span className="font-semibold">Aurora</span>
           </Link>
 
           <h1 className="text-2xl font-semibold">Welcome back</h1>
@@ -108,7 +105,25 @@ function Login() {
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5" />
+              <div className="relative mt-1.5">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <Button type="submit" disabled={submitting} className="w-full bg-aura-gradient text-primary-foreground shadow-pop hover:opacity-90">
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -117,7 +132,7 @@ function Login() {
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            New to Aura?{" "}
+            New to Aurora?{" "}
             <Link to="/signup" className="font-medium text-foreground hover:text-aura-gradient">
               Create an account
             </Link>

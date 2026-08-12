@@ -11,12 +11,21 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Camera, Check, Loader2, Pencil, X, KeyRound } from "lucide-react";
+import { Camera, Check, Loader2, Pencil, X, KeyRound, ImagePlus, MapPin, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { toast } from "sonner";
+import {
+  useRichProfile,
+  type RichProfile,
+  ProfileStatsGrid,
+  BadgeShelf,
+  PinnedBadges,
+  AccomplishmentsList,
+  ProfileEditor,
+} from "@/components/profile/ProfileBlocks";
 
 interface ProfileSearch {
-  tab?: "overview" | "activity" | "preferences" | "security";
+  tab?: "overview" | "stats" | "badges" | "edit" | "activity" | "preferences" | "security";
 }
 
 export const Route = createFileRoute("/app/profile")({
@@ -26,29 +35,13 @@ export const Route = createFileRoute("/app/profile")({
   component: ProfilePage,
 });
 
-interface Profile {
-  id: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  timezone: string | null;
-  created_at: string;
-}
-
 function ProfilePage() {
   const { user } = useAuth();
   const { tab } = useSearch({ from: "/app/profile" });
   const navigate = Route.useNavigate();
   const qc = useQueryClient();
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", user!.id).single();
-      if (error) throw error;
-      return data as Profile;
-    },
-  });
+  const { data: profile } = useRichProfile(user?.id);
 
   if (!user || !profile) {
     return (
@@ -58,24 +51,42 @@ function ProfilePage() {
     );
   }
 
+  const refresh = () => qc.invalidateQueries({ queryKey: ["rich-profile", user.id] });
+
   return (
-    <div className="mx-auto w-full max-w-4xl px-8 py-10">
-      <ProfileHeader profile={profile} email={user.email ?? ""} onUpdate={() => qc.invalidateQueries({ queryKey: ["profile", user.id] })} />
+    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+      <ProfileHeader profile={profile} email={user.email ?? ""} onUpdate={refresh} />
 
       <Tabs
         value={tab}
         onValueChange={(v) => navigate({ search: { tab: v as ProfileSearch["tab"] } })}
-        className="mt-8"
+        className="mt-6"
       >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="badges">Badges</TabsTrigger>
+          <TabsTrigger value="edit">Edit profile</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6 space-y-6">
-          <OverviewTab profile={profile} email={user.email ?? ""} />
+          <OverviewTab profile={profile} userId={user.id} onUpdated={refresh} />
+        </TabsContent>
+
+        <TabsContent value="stats" className="mt-6 space-y-4">
+          <h2 className="text-base font-semibold">Your work in numbers</h2>
+          <ProfileStatsGrid userId={user.id} />
+        </TabsContent>
+
+        <TabsContent value="badges" className="mt-6">
+          <BadgeShelf userId={user.id} editable />
+        </TabsContent>
+
+        <TabsContent value="edit" className="mt-6">
+          <ProfileEditor profile={profile} onUpdated={refresh} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
@@ -94,13 +105,23 @@ function ProfilePage() {
   );
 }
 
-/* ─── Header w/ avatar + inline name ──────────────── */
+/* ─── Header w/ cover, avatar, identity ──────────── */
 
-function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: string; onUpdate: () => void }) {
+function ProfileHeader({
+  profile,
+  email,
+  onUpdate,
+}: {
+  profile: RichProfile;
+  email: string;
+  onUpdate: () => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile.display_name ?? "");
   const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setName(profile.display_name ?? ""), [profile.display_name]);
 
@@ -113,34 +134,37 @@ function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: 
     onUpdate();
   };
 
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("Image must be under 4MB");
-      return;
-    }
-    setUploading(true);
+  const uploadImage = async (
+    file: File,
+    column: "avatar_url" | "cover_url",
+    setBusy: (v: boolean) => void,
+  ) => {
+    if (file.size > 6 * 1024 * 1024) return toast.error("Image must be under 6MB");
+    setBusy(true);
     try {
       const ext = file.name.split(".").pop() ?? "png";
-      const path = `${profile.id}/avatar-${Date.now()}.${ext}`;
+      const prefix = column === "avatar_url" ? "avatar" : "cover";
+      const path = `${profile.id}/${prefix}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const update = column === "avatar_url"
+        ? { avatar_url: data.publicUrl }
+        : { cover_url: data.publicUrl };
       const { error: updErr } = await supabase
         .from("profiles")
-        .update({ avatar_url: data.publicUrl })
+        .update(update)
         .eq("id", profile.id);
+
       if (updErr) throw updErr;
-      toast.success("Avatar updated");
+      toast.success(column === "avatar_url" ? "Avatar updated" : "Cover updated");
       onUpdate();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
-      setUploading(false);
+      setBusy(false);
     }
   };
 
@@ -148,9 +172,40 @@ function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: 
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="aura-mesh h-24 opacity-50" />
+      {/* Cover */}
+      <div className="group relative h-36 sm:h-44">
+        {profile.cover_url ? (
+          <img src={profile.cover_url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="aura-mesh h-full w-full opacity-70" />
+        )}
+        <button
+          onClick={() => coverRef.current?.click()}
+          disabled={uploadingCover}
+          className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white opacity-0 transition hover:bg-black/70 group-hover:opacity-100"
+        >
+          {uploadingCover ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <ImagePlus className="h-3 w-3" />
+          )}
+          {profile.cover_url ? "Change cover" : "Add cover"}
+        </button>
+        <input
+          ref={coverRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (f) void uploadImage(f, "cover_url", setUploadingCover);
+          }}
+        />
+      </div>
+
       <div className="flex flex-wrap items-end gap-6 px-6 pb-6 -mt-12">
-        <div className="relative">
+        <div className="group/avatar relative">
           <Avatar className="h-24 w-24 border-4 border-card shadow-pop">
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.display_name ?? ""} />}
             <AvatarFallback className="bg-aura-gradient text-2xl text-primary-foreground">{initials}</AvatarFallback>
@@ -158,12 +213,22 @@ function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: 
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition hover:opacity-100 disabled:opacity-50"
+            className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition hover:opacity-100 group-hover/avatar:opacity-100 disabled:opacity-50"
             aria-label="Change avatar"
           >
             {uploading ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <Camera className="h-5 w-5 text-white" />}
           </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) void uploadImage(f, "avatar_url", setUploading);
+            }}
+          />
         </div>
 
         <div className="flex-1 pt-12">
@@ -174,26 +239,45 @@ function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") saveName();
+                  if (e.key === "Enter") void saveName();
                   if (e.key === "Escape") { setEditing(false); setName(profile.display_name ?? ""); }
                 }}
                 className="h-9 max-w-xs text-xl font-semibold"
               />
-              <Button size="icon" variant="ghost" onClick={saveName}><Check className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" onClick={() => void saveName()}><Check className="h-4 w-4" /></Button>
               <Button size="icon" variant="ghost" onClick={() => { setEditing(false); setName(profile.display_name ?? ""); }}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <button onClick={() => setEditing(true)} className="group flex items-center gap-2 text-2xl font-semibold">
-              {profile.display_name ?? "Set your name"}
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setEditing(true)} className="group flex items-center gap-2 text-2xl font-semibold">
+                {profile.display_name ?? "Set your name"}
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
+              </button>
+              {profile.pronouns && (
+                <span className="text-xs text-muted-foreground">({profile.pronouns})</span>
+              )}
+            </div>
           )}
-          <p className="mt-1 text-sm text-muted-foreground">{email}</p>
-          <p className="text-xs text-muted-foreground">
-            Joined {format(parseISO(profile.created_at), "MMMM yyyy")}
-          </p>
+
+          {profile.headline && (
+            <p className="mt-0.5 text-sm font-medium text-foreground/80">{profile.headline}</p>
+          )}
+
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+            <span>{email}</span>
+            {profile.location && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> {profile.location}
+              </span>
+            )}
+            <span>Joined {format(parseISO(profile.created_at), "MMMM yyyy")}</span>
+          </div>
+
+          <div className="mt-2">
+            <PinnedBadges userId={profile.id} />
+          </div>
         </div>
       </div>
     </div>
@@ -202,32 +286,72 @@ function ProfileHeader({ profile, email, onUpdate }: { profile: Profile; email: 
 
 /* ─── Overview ──────────────────────────────────── */
 
-function OverviewTab({ profile, email }: { profile: Profile; email: string }) {
+function OverviewTab({
+  profile,
+  userId,
+  onUpdated,
+}: {
+  profile: RichProfile;
+  userId: string;
+  onUpdated: () => void;
+}) {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <section className="rounded-xl border border-border bg-card p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">About</h3>
-        <dl className="mt-4 space-y-3 text-sm">
-          <Row label="Display name" value={profile.display_name ?? "—"} />
-          <Row label="Email" value={email} />
-          <Row label="Timezone" value={profile.timezone ?? "UTC"} />
-        </dl>
-      </section>
-      <section className="rounded-xl border border-border bg-card p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Tip</h3>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Click your name above to rename yourself. Hover over your avatar to upload a new one.
-        </p>
-      </section>
-    </div>
-  );
-}
+    <div className="grid gap-6 lg:grid-cols-3">
+      <div className="space-y-6 lg:col-span-2">
+        <section className="rounded-xl border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">About</h3>
+          {profile.bio ? (
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+              {profile.bio}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Add a bio so teammates know what you work on. Head to <b>Edit profile</b>.
+            </p>
+          )}
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="truncate font-medium">{value}</dd>
+          {profile.skills.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {profile.skills.map((s) => (
+                <span
+                  key={s}
+                  className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {profile.links.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {profile.links.map((l, i) => (
+                <a
+                  key={i}
+                  href={l.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background/60 px-2 py-1 text-xs text-foreground hover:bg-accent"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  {l.label || new URL(l.url).hostname.replace("www.", "")}
+                </a>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <AccomplishmentsList profile={profile} editable onUpdated={onUpdated} />
+      </div>
+
+      <div className="space-y-6">
+        <section className="rounded-xl border border-border bg-card p-5">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Stats</h3>
+          <div className="mt-3">
+            <ProfileStatsGrid userId={userId} />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

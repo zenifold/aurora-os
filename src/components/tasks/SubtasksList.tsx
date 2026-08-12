@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { confirmDialog } from "@/lib/dialogs";
 import {
   useSubtasks,
   useCreateSubtask,
@@ -180,8 +181,14 @@ export function SubtasksList({ parent }: { parent: Task }) {
               onOutdent={outdent}
               onMoveUp={moveUp}
               onMoveDown={moveDown}
-              onDelete={(id) => {
-                if (confirm("Delete this subtask and all its descendants?")) remove.mutate(id);
+              onDelete={async (id) => {
+                const ok = await confirmDialog({
+                  title: "Delete subtask?",
+                  description: "All nested subtasks under it will also be deleted.",
+                  confirmLabel: "Delete",
+                  tone: "destructive",
+                });
+                if (ok) remove.mutate(id);
               }}
             />
           ))}

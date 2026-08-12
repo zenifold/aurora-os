@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Tooltip,
@@ -36,14 +37,26 @@ export function PresenceStack({
                     {u.display_name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span
-                  className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-2 ring-background"
-                  style={{ backgroundColor: u.color }}
-                />
+                {u.is_editing ? (
+                  <span
+                    className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full ring-2 ring-background"
+                    style={{ backgroundColor: u.color }}
+                    aria-label="editing"
+                  >
+                    <Pencil className="h-2 w-2 text-white" />
+                  </span>
+                ) : (
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-2 ring-background"
+                    style={{ backgroundColor: u.color }}
+                  />
+                )}
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <span className="text-xs">{u.display_name} is here</span>
+              <span className="text-xs">
+                {u.display_name} {u.is_editing ? "is editing" : "is here"}
+              </span>
             </TooltipContent>
           </Tooltip>
         ))}

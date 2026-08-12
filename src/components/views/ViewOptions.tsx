@@ -30,6 +30,8 @@ const TABLE_COLUMNS = [
   { key: "due", label: "Due" },
   { key: "assignees", label: "Assignees" },
   { key: "tags", label: "Tags" },
+  { key: "estimate", label: "Estimate (h)", optIn: true },
+  { key: "logged", label: "Logged (h)", optIn: true },
 ];
 
 const KANBAN_FIELDS: Array<{ key: "priority" | "due_date" | "assignees" | "tags"; label: string }> = [
@@ -52,8 +54,9 @@ export function ViewOptions({ view, fields, onChange }: Props) {
     onChange({ ...config, columns: next });
   };
 
-  const isVisible = (key: string) => {
+  const isVisible = (key: string, optIn = false) => {
     const c = (config.columns ?? []).find((c) => c.key === key);
+    if (optIn) return c?.visible === true;
     return c?.visible !== false;
   };
 
@@ -84,7 +87,7 @@ export function ViewOptions({ view, fields, onChange }: Props) {
                 {TABLE_COLUMNS.map((col) => (
                   <label key={col.key} className="flex items-center gap-2">
                     <Checkbox
-                      checked={col.locked || isVisible(col.key)}
+                      checked={col.locked || isVisible(col.key, col.optIn)}
                       disabled={col.locked}
                       onCheckedChange={(c) => setColumnVisible(col.key, !!c)}
                     />

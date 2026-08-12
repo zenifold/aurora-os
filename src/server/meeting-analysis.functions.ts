@@ -60,13 +60,31 @@ export const analyzeMeetingTranscript = createServerFn({ method: "POST" })
       .update({ ai_status: "processing", ai_error: null } as never)
       .eq("id", meeting.id);
 
-    const model = data.model ?? "openai/gpt-4o-mini";
+    const model = data.model ?? "xiaomi/mimo-v2-flash";
     const transcript = meeting.transcript_raw_text.slice(0, 60000);
 
-    const systemPrompt = `You are a senior executive assistant analyzing a meeting transcript. Always respond with strict JSON only.`;
+    // Load workspace members so the AI can match assignee names to real users
+    const { data: roleRows = [] } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("workspace_id", meeting.workspace_id);
+    const memberIds = (roleRows ?? []).map((r) => r.user_id as string);
+    const { data: profileRows = [] } = memberIds.length
+      ? await supabaseAdmin.from("profiles").select("id, display_name").in("id", memberIds)
+      : { data: [] as { id: string; display_name: string | null }[] };
+    const memberRows = (profileRows ?? []).map((p) => ({
+      user_id: p.id as string,
+      profiles: { display_name: p.display_name },
+    }));
+    const memberList = memberRows
+      .map((m) => m.profiles?.display_name)
+      .filter((n): n is string => !!n);
+    const todayIso = new Date().toISOString().slice(0, 10);
+
+    const systemPrompt = `You are a senior executive assistant analyzing a meeting transcript. Always respond with strict JSON only. Today's date is ${todayIso}.`;
     const userMessage = `Analyze this meeting transcript titled "${meeting.title}" and respond with ONLY a JSON object matching this schema:
 
-{
+${memberList.length > 0 ? `Known workspace members (use these EXACT names when matching assignees): ${memberList.join(", ")}\n\n` : ""}{
   "summary": {
     "overview": "2-3 sentence overview",
     "key_points": ["..."],
@@ -78,8 +96,8 @@ export const analyzeMeetingTranscript = createServerFn({ method: "POST" })
   "action_items": [
     {
       "text": "cleaned action item",
-      "assignee": "person name or null",
-      "due": "YYYY-MM-DD or null",
+      "assignee": "exact name from member list, or null if unclear",
+      "due": "YYYY-MM-DD (resolve relative dates like 'next Monday' to actual date) or null",
       "priority": "low|medium|high|urgent",
       "context_quote": "exact supporting quote from transcript"
     }
@@ -98,8 +116,8 @@ ${transcript}`;
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://lovable.dev",
-          "X-Title": "Aura Meetings",
+          "HTTP-Referer": "https://github.com/zenifold/aurora-os",
+          "X-Title": "Aurora Meetings",
         },
         body: JSON.stringify({
           model,
@@ -181,15 +199,24 @@ ${transcript}`;
       await supabaseAdmin.from("meeting_action_items").delete().eq("meeting_id", meeting.id);
 
       if (actionItems.length > 0) {
+        // Build name -> user_id lookup (case-insensitive) from already-loaded members
+        const nameToId = new Map<string, string>();
+        for (const m of memberRows) {
+          const n = m.profiles?.display_name?.trim().toLowerCase();
+          if (n) nameToId.set(n, m.user_id);
+        }
         const rows = actionItems.map((a, i) => {
           const dueValid = a.due && /^\d{4}-\d{2}-\d{2}$/.test(a.due) ? a.due : null;
+          const guessName = a.assignee?.trim() ?? null;
+          const guessId = guessName ? nameToId.get(guessName.toLowerCase()) ?? null : null;
           return {
             workspace_id: meeting.workspace_id,
             meeting_id: meeting.id,
             original_text: a.text,
             summary: a.text,
             context_quote: a.context_quote ?? null,
-            assignee_guess_name: a.assignee ?? null,
+            assignee_guess_name: guessName,
+            assignee_guess_user_id: guessId,
             due_guess: dueValid,
             priority_guess: a.priority ?? "medium",
             position: i,

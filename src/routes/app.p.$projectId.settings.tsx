@@ -5,6 +5,8 @@ import { StatusWorkflowBuilder } from "@/components/projects/StatusWorkflowBuild
 import { TransitionMatrix } from "@/components/projects/TransitionMatrix";
 import { WorkflowTemplatePicker } from "@/components/projects/WorkflowTemplatePicker";
 import { ClientEngagementSettings } from "@/components/projects/ClientEngagementSettings";
+import { ProjectGeneralSettings } from "@/components/projects/ProjectGeneralSettings";
+import { ProjectTabsSettings } from "@/components/projects/ProjectTabsSettings";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/app/p/$projectId/settings")({
@@ -32,12 +34,30 @@ function ProjectSettingsPage() {
         <WorkflowTemplatePicker projectId={projectId} />
       </div>
 
-      <Tabs defaultValue="engagement" className="mt-6">
+      <Tabs defaultValue="general" className="mt-6">
         <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="tabs">Tabs</TabsTrigger>
           <TabsTrigger value="statuses">Statuses</TabsTrigger>
           <TabsTrigger value="transitions">Transitions</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="general" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
+            {project ? <ProjectGeneralSettings project={project} /> : <p className="text-sm text-muted-foreground">Loading…</p>}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="tabs" className="mt-4">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
+            <h3 className="text-base font-medium">Mini-app tabs</h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Choose which buttons appear in the project header. Hiding a tab does not delete its data.
+            </p>
+            {project ? <ProjectTabsSettings project={project} /> : <p className="text-sm text-muted-foreground">Loading…</p>}
+          </div>
+        </TabsContent>
 
         <TabsContent value="engagement" className="mt-4">
           <div className="rounded-xl border border-border bg-card p-4 sm:p-6">

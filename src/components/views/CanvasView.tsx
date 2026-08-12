@@ -1,20 +1,45 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { CanvasLink, CanvasNote, Task, ViewConfig } from "@/lib/types";
+import type { CanvasLink, CanvasNote, Task, TaskStatus, ViewConfig } from "@/lib/types";
 import { PRIORITY_OPTIONS, STATUS_OPTIONS } from "@/lib/types";
 import { getTaskTypeMeta } from "@/lib/task-types";
 import { useUpdateView } from "@/hooks/use-views";
-import { Maximize2, Minus, Plus, StickyNote, Trash2, Link2, X } from "lucide-react";
+import { useUpdateTask } from "@/hooks/use-tasks";
+import { applyLayout, computeFrames, type CanvasFrame, type CanvasLayoutMode, type Positions } from "@/lib/canvas-layouts";
+import {
+  Maximize2,
+  Minus,
+  Plus,
+  StickyNote,
+  Trash2,
+  Link2,
+  X,
+  LayoutGrid,
+  Network,
+  Columns3,
+  Rows3,
+  Square,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { CanvasMinimap } from "./CanvasMinimap";
+import { Link } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
+
 
 type Pos = { x: number; y: number };
-type Positions = Record<string, Pos>;
 
 const CARD_W = 220;
 const CARD_H = 120;
-const GAP_X = 32;
-const GAP_Y = 32;
-const COLS = 4;
+
 
 const NOTE_COLORS: Record<NonNullable<CanvasNote["color"]>, { bg: string; border: string }> = {
   yellow: { bg: "#fef3c7", border: "#fcd34d" },
@@ -26,6 +51,7 @@ const NOTE_COLORS: Record<NonNullable<CanvasNote["color"]>, { bg: string; border
 
 function autoLayout(tasks: Task[], existing: Positions): Positions {
   const next: Positions = { ...existing };
+  const GAP_X = 32, GAP_Y = 32, COLS = 4;
   let i = 0;
   for (const t of tasks) {
     if (next[t.id]) continue;
@@ -36,6 +62,7 @@ function autoLayout(tasks: Task[], existing: Positions): Positions {
   }
   return next;
 }
+
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -55,6 +82,19 @@ export function CanvasView({
   onTaskClick?: (id: string) => void;
 }) {
   const updateView = useUpdateView(projectId);
+  const updateTask = useUpdateTask(projectId);
+
+  type CanvasCfg = ViewConfig & {
+    canvasDensity?: "card" | "chip";
+    canvasLayout?: CanvasLayoutMode;
+  };
+
+  const [density, setDensity] = useState<"card" | "chip">(
+    (viewConfig as CanvasCfg).canvasDensity ?? "card",
+  );
+  const [layoutMode, setLayoutMode] = useState<CanvasLayoutMode>(
+    (viewConfig as CanvasCfg).canvasLayout ?? "grid",
+  );
 
   const [positions, setPositions] = useState<Positions>(() =>
     autoLayout(tasks, viewConfig.canvasPositions ?? {}),
@@ -66,6 +106,8 @@ export function CanvasView({
   const [hoverTarget, setHoverTarget] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState<Pos>({ x: 0, y: 0 });
   const [selectedLink, setSelectedLink] = useState<string | null>(null);
+  const [openChipId, setOpenChipId] = useState<string | null>(null);
+
 
   useEffect(() => {
     setPositions((prev) => autoLayout(tasks, prev));
@@ -81,7 +123,13 @@ export function CanvasView({
   const panning = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
 
   const persist = useCallback(
-    (next: { positions?: Positions; notes?: CanvasNote[]; links?: CanvasLink[] }) => {
+    (next: {
+      positions?: Positions;
+      notes?: CanvasNote[];
+      links?: CanvasLink[];
+      density?: "card" | "chip";
+      layout?: CanvasLayoutMode;
+    }) => {
       if (!viewId) return;
       updateView.mutate({
         id: viewId,
@@ -90,11 +138,38 @@ export function CanvasView({
           canvasPositions: next.positions ?? positions,
           canvasNotes: next.notes ?? notes,
           canvasLinks: next.links ?? links,
-        },
+          canvasDensity: next.density ?? density,
+          canvasLayout: next.layout ?? layoutMode,
+        } as CanvasCfg,
       });
     },
-    [viewId, viewConfig, updateView, positions, notes, links],
+    [viewId, viewConfig, updateView, positions, notes, links, density, layoutMode],
   );
+
+  /** Apply a layout algorithm and persist the resulting positions + mode. */
+  const relayout = useCallback(
+    (mode: CanvasLayoutMode) => {
+      const next = applyLayout(mode, tasks);
+      setPositions(next);
+      setLayoutMode(mode);
+      persist({ positions: next, layout: mode });
+    },
+    [tasks, persist],
+  );
+
+  const frames: CanvasFrame[] = useMemo(
+    () => computeFrames(layoutMode, tasks, positions),
+    [layoutMode, tasks, positions],
+  );
+
+  const toggleDensity = useCallback(() => {
+    setDensity((d) => {
+      const next = d === "card" ? "chip" : "card";
+      persist({ density: next });
+      return next;
+    });
+  }, [persist]);
+
 
   // ---- Coordinate helpers ----
   const screenToCanvas = (clientX: number, clientY: number): Pos => {
@@ -206,6 +281,27 @@ export function CanvasView({
     setZoom(1);
   };
 
+  // Track visible viewport size for the minimap.
+  const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setViewportSize({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const centerOn = useCallback(
+    (cx: number, cy: number) => {
+      const w = containerRef.current?.clientWidth ?? 0;
+      const h = containerRef.current?.clientHeight ?? 0;
+      setPan({ x: w / 2 - cx * zoom, y: h / 2 - cy * zoom });
+    },
+    [zoom],
+  );
+
   const taskMap = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
   // ---- Notes ops ----
@@ -297,8 +393,49 @@ export function CanvasView({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-muted/20">
+      <DeprecationBanner projectId={projectId} viewId={viewId} />
       {/* Controls */}
       <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" title="Auto-layout">
+              <Network className="h-3.5 w-3.5" />
+              Layout
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Arrange tasks</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => relayout("mindmap")}>
+              <Network className="mr-2 h-3.5 w-3.5" />
+              Mind-map (by hierarchy){layoutMode === "mindmap" && " ✓"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => relayout("by_status")}>
+              <Columns3 className="mr-2 h-3.5 w-3.5" />
+              Cluster by status{layoutMode === "by_status" && " ✓"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => relayout("by_type")}>
+              <Rows3 className="mr-2 h-3.5 w-3.5" />
+              Cluster by type{layoutMode === "by_type" && " ✓"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => relayout("grid")}>
+              <LayoutGrid className="mr-2 h-3.5 w-3.5" />
+              Grid{layoutMode === "grid" && " ✓"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              Density
+            </DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => density !== "card" && toggleDensity()}>
+              <Square className="mr-2 h-3.5 w-3.5" />
+              Cards{density === "card" && " ✓"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => density !== "chip" && toggleDensity()}>
+              <Rows3 className="mr-2 h-3.5 w-3.5" />
+              Chips (compact){density === "chip" && " ✓"}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <div className="mx-1 h-4 w-px bg-border" />
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={addNote} aria-label="Add sticky note" title="Add sticky note">
           <StickyNote className="h-3.5 w-3.5" />
         </Button>
@@ -317,6 +454,7 @@ export function CanvasView({
           <Maximize2 className="h-3.5 w-3.5" />
         </Button>
       </div>
+
 
       {linkSource && (
         <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary shadow-sm">
@@ -353,6 +491,19 @@ export function CanvasView({
             height: 1,
           }}
         >
+          {/* Group frames (rendered behind everything) */}
+          {frames.map((f) => (
+            <div
+              key={f.id}
+              className="pointer-events-none absolute rounded-2xl border border-dashed border-border/70 bg-muted/30"
+              style={{ left: f.x, top: f.y, width: f.w, height: f.h }}
+            >
+              <div className="px-3 pt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {f.label}
+              </div>
+            </div>
+          ))}
+
           {/* Links SVG layer */}
           <svg
             className="pointer-events-none absolute"
@@ -503,7 +654,7 @@ export function CanvasView({
             );
           })}
 
-          {/* Task cards */}
+          {/* Task nodes — render as full card or compact chip based on density */}
           {tasks.map((task) => {
             const pos = positions[task.id];
             if (!pos) return null;
@@ -512,6 +663,103 @@ export function CanvasView({
             const priority = PRIORITY_OPTIONS.find((p) => p.value === t.priority);
             const meta = getTaskTypeMeta(t.task_type);
             const isLinkTarget = !!linkSource && hoverTarget === task.id && linkSource !== task.id;
+
+            if (density === "chip") {
+              return (
+                <div
+                  key={task.id}
+                  onPointerDown={(e) => onCardPointerDown(e, task.id)}
+                  onMouseEnter={() => setHoverTarget(task.id)}
+                  onMouseLeave={() => setHoverTarget((h) => (h === task.id ? null : h))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (linkSource) { completeLink(task.id); return; }
+                    if (draggingTask.current?.moved) return;
+                    onTaskClick?.(task.id);
+                  }}
+                  className={cn(
+                    "group absolute flex select-none items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs shadow-sm transition hover:border-primary/40 hover:shadow",
+                    linkSource ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing",
+                    isLinkTarget && "ring-2 ring-primary ring-offset-2",
+                  )}
+                  style={{
+                    left: pos.x,
+                    top: pos.y,
+                    maxWidth: 220,
+                    borderColor: meta.color,
+                    borderWidth: t.task_type === "initiative" ? 2 : 1,
+                  }}
+                >
+                  {/* Quick-status dot → popover with status picker */}
+                  <Popover
+                    open={openChipId === task.id}
+                    onOpenChange={(o) => setOpenChipId(o ? task.id : null)}
+                  >
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Change status"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); setOpenChipId(task.id); }}
+                        className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-border"
+                        style={{ backgroundColor: status?.color ?? "var(--status-todo)" }}
+                        title={status?.label ?? "Status"}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-44 p-1"
+                      align="start"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Set status
+                      </div>
+                      {STATUS_OPTIONS.map((s) => (
+                        <button
+                          key={s.value}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateTask.mutate({ id: task.id, status: s.value as TaskStatus });
+                            setOpenChipId(null);
+                          }}
+                          className={cn(
+                            "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs hover:bg-muted",
+                            t.status === s.value && "bg-muted",
+                          )}
+                        >
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                          {s.label}
+                        </button>
+                      ))}
+                    </PopoverContent>
+                  </Popover>
+
+                  <span className="truncate font-medium">{t.title}</span>
+
+                  {priority && (priority.value === "high" || priority.value === "urgent") && (
+                    <span
+                      className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: priority.color }}
+                      title={priority.label}
+                    />
+                  )}
+
+                  {/* Link handle */}
+                  <button
+                    type="button"
+                    aria-label="Link from task"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); startLink(task.id); }}
+                    className="ml-1 hidden rounded-full border border-primary/40 bg-card p-0.5 hover:bg-primary hover:text-primary-foreground group-hover:inline-flex"
+                    title="Drag to link"
+                  >
+                    <Link2 className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={task.id}
@@ -585,6 +833,7 @@ export function CanvasView({
               </div>
             );
           })}
+
         </div>
       </div>
 
@@ -600,9 +849,64 @@ export function CanvasView({
         </div>
       )}
 
+      {(tasks.length > 0 || notes.length > 0) && (
+        <CanvasMinimap
+          tasks={tasks}
+          positions={positions}
+          notes={notes}
+          bounds={bounds}
+          pan={pan}
+          zoom={zoom}
+          viewport={viewportSize}
+          centerOn={centerOn}
+        />
+      )}
+
       <p className="pointer-events-none absolute bottom-3 left-4 text-[10px] text-muted-foreground">
         Drag cards to arrange · Hover a card and click <Link2 className="inline h-2.5 w-2.5" /> to link · Add sticky notes from toolbar · ⌘/Ctrl + scroll to zoom
       </p>
+    </div>
+  );
+}
+
+const DEPRECATION_DISMISS_KEY = "canvas-view-deprecation-dismissed";
+
+function DeprecationBanner({ projectId, viewId }: { projectId: string; viewId: string | null }) {
+  const storageKey = `${DEPRECATION_DISMISS_KEY}:${viewId ?? "default"}`;
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(storageKey) === "1";
+  });
+  if (dismissed) return null;
+  return (
+    <div className="absolute left-4 right-4 top-4 z-30 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 shadow-sm backdrop-blur dark:text-amber-100 sm:left-4 sm:right-[260px]">
+      <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+      <div className="flex-1 leading-snug">
+        <span className="font-medium">Canvas view is moving.</span>{" "}
+        The new <strong>Strategy Canvas</strong> at the project level is a richer brainstorming surface
+        (mind maps, RACI, risk grids, dependency sketches) with live task chips. This task-card canvas
+        will keep working, but new views won't offer it.{" "}
+        <Link
+          to="/app/p/$projectId/canvas"
+          params={{ projectId }}
+          className="font-semibold underline underline-offset-2"
+        >
+          Open Strategy Canvas →
+        </Link>
+      </div>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={() => {
+          setDismissed(true);
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(storageKey, "1");
+          }
+        }}
+        className="rounded-md p-1 text-amber-900/60 hover:bg-amber-500/20 hover:text-amber-900 dark:text-amber-100/60 dark:hover:text-amber-100"
+      >
+        <X className="h-3 w-3" />
+      </button>
     </div>
   );
 }

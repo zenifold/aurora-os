@@ -81,11 +81,14 @@ export interface Task {
   completed_at: string | null;
   recurrence?: RecurrenceRule | null;
   recurrence_parent_id?: string | null;
-  task_type?: "initiative" | "epic" | "task" | "subtask";
+  task_type?: "initiative" | "epic" | "task" | "subtask" | "milestone";
   hierarchy_path?: string[];
   child_count?: number;
   completed_child_count?: number;
   rollup_progress?: number | null;
+  workflow_status_id?: string | null;
+  task_number?: number | null;
+  estimated_hours?: number | null;
 }
 
 export type NoteType = "freeform" | "bullet_list" | "check_list" | "sketch";
@@ -165,8 +168,11 @@ export interface Project {
   start_date?: string | null;
   target_end_date?: string | null;
   target_margin_pct?: number | null;
-  division_id?: string | null;
+  
   folder_id?: string | null;
+  client_account_id?: string | null;
+  key?: string | null;
+  enabled_tabs?: string[] | null;
 }
 
 export interface View {
@@ -180,6 +186,7 @@ export interface View {
   sorts: Sort[];
   group_by: string | null;
   is_default: boolean;
+  position?: number;
 }
 
 export interface ViewColumnConfig {

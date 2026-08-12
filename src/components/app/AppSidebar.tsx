@@ -14,9 +14,16 @@ import { useUIStore } from "@/stores/ui-store";
 import { useAuth } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
 import { useProjects, useCreateProject, useUpdateProject } from "@/hooks/use-projects";
-import { useDivisions, useFolders, useCreateFolder, useUpdateFolder } from "@/hooks/use-folders";
+import { useFolders, useUpdateFolder } from "@/hooks/use-folders";
 import { useSidebarFavorites, useToggleFavorite } from "@/hooks/use-sidebar-favorites";
+import { useObjectTypes } from "@/hooks/use-object-types";
 import { useTreeState } from "@/hooks/use-tree-state";
+
+import { useInboxCounts } from "@/hooks/use-inbox";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getUnseenActivityCounts } from "@/lib/portal-activity.functions";
+import { useVocabulary } from "@/hooks/use-vocabulary";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -27,42 +34,115 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Sparkles, Plus, Folder, Settings, Inbox, ChevronsUpDown, Check, ChevronRight, ChevronDown,
   StickyNote, Mic, Briefcase, Users, UsersRound, CalendarRange, FolderOpen,
   TrendingUp, Settings2, LineChart, AlertTriangle, Search, Star, X, GripVertical,
+  Bot, Box, ShieldCheck, Zap, Pencil, ArrowUp, ArrowDown, Eye, EyeOff, RotateCcw, Building2, Rocket,
+  Home, Layers, BarChart3,
+  type LucideIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import type { Division, Folder as FolderRow } from "@/lib/folder-types";
+import type { Folder as FolderRow } from "@/lib/folder-types";
 import type { Project } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const divisionIcon = (slug: string) => {
-  if (slug === "delivery") return Briefcase;
-  if (slug === "ops") return Settings2;
-  if (slug === "sales") return TrendingUp;
+import { getSectionIcon } from "@/lib/section-icons";
+import { UniversalCreateMenu } from "@/components/app/UniversalCreateMenu";
+import { ContainerTree } from "@/components/app/ContainerTree";
+import { useNavVisibility } from "@/hooks/use-nav-visibility";
+import { isNavHiddenByMode } from "@/lib/workspace-mode-nav";
+import { isRoleHidden } from "@/lib/role-nav";
+import { useClientContainers } from "@/hooks/use-containers";
+
+
+const divisionIcon = (d: { icon?: string | null; slug: string }) => {
+  if (d.icon) return getSectionIcon(d.icon);
+  // Legacy fallbacks for workspaces created before sections were neutralized.
+  if (d.slug === "delivery") return Briefcase;
+  if (d.slug === "ops") return Settings2;
+  if (d.slug === "sales") return TrendingUp;
   return Folder;
 };
 
+
 type DragId = `folder:${string}` | `project:${string}`;
 type DropId = `division:${string}` | `folder:${string}` | "root:none";
+
+type NavSection = "me" | "work" | "intelligence";
+
+type NavDef = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  to: string;
+  section: NavSection;
+  visibilityKey?: string;
+  isActive: (path: string) => boolean;
+  badgeKey?: "inbox" | "clients-unseen";
+};
+
+// Sidebar grouping (per spec): Pinned · Me · Work · Intelligence.
+// Pinned is rendered from favorites. Settings + workspace switcher live in
+// the footer. Me is always visible; other sections can be hidden per user.
+const NAV_DEFS: NavDef[] = [
+  // Me
+  { id: "home", label: "Home", icon: Home, to: "/app", section: "me", visibilityKey: "dashboard", isActive: (p) => p === "/app" },
+  { id: "inbox", label: "Inbox", icon: Inbox, to: "/app/inbox", section: "me", visibilityKey: "inbox", isActive: (p) => p.startsWith("/app/inbox"), badgeKey: "inbox" },
+  { id: "my-tasks", label: "My Work", icon: Check, to: "/app/my-tasks", section: "me", visibilityKey: "my-tasks", isActive: (p) => p === "/app/my-tasks" },
+  { id: "approvals", label: "Approvals", icon: ShieldCheck, to: "/app/approvals", section: "me", isActive: (p) => p.startsWith("/app/approvals") },
+  // Work
+  { id: "clients", label: "Clients", icon: Building2, to: "/app/clients", section: "work", isActive: (p) => p.startsWith("/app/clients") || p.startsWith("/app/onboarding"), badgeKey: "clients-unseen" },
+  // Intelligence
+  { id: "ai-artifacts", label: "AI & Artifacts", icon: Sparkles, to: "/app/ai-artifacts", section: "intelligence", isActive: (p) => p.startsWith("/app/ai-artifacts") },
+  { id: "automations", label: "Automations", icon: Zap, to: "/app/settings/automations", section: "intelligence", isActive: (p) => p.startsWith("/app/settings/automations") || p.startsWith("/app/triggers") },
+  { id: "reports", label: "Reports", icon: BarChart3, to: "/app/reports", section: "intelligence", isActive: (p) => p.startsWith("/app/reports") || p.startsWith("/app/executive") || p.startsWith("/app/forecast") || p.startsWith("/app/pipeline-analytics") || p.startsWith("/app/portfolio-status") },
+];
+
+const SECTION_META: Record<NavSection, { label: string; key: string; alwaysOn?: boolean }> = {
+  me: { label: "Me", key: "section:me", alwaysOn: true },
+  work: { label: "Work", key: "section:work" },
+  intelligence: { label: "Intelligence", key: "section:intelligence" },
+};
 
 export function AppSidebar() {
   const ws = useWorkspaceStore((s) => s.current);
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const setCurrent = useWorkspaceStore((s) => s.setCurrent);
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
+  const editMode = useUIStore((s) => s.sidebarEditMode);
+  const setEditMode = useUIStore((s) => s.setSidebarEditMode);
+  const navOrder = useUIStore((s) => s.navOrder);
+  const setNavOrder = useUIStore((s) => s.setNavOrder);
+  const navHidden = useUIStore((s) => s.navHidden);
+  const toggleNavHidden = useUIStore((s) => s.toggleNavHidden);
+  const resetNavLayout = useUIStore((s) => s.resetNavLayout);
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { data: divisions = [] } = useDivisions();
+  const divisions: Array<{ id: string; name: string; slug: string; color?: string; icon?: string | null; is_default?: boolean }> = [];
   const { data: folders = [] } = useFolders();
   const { data: projects = [] } = useProjects();
   const { data: favorites = [] } = useSidebarFavorites();
+  const { data: objectTypes = [] } = useObjectTypes();
   const updateFolder = useUpdateFolder();
   const updateProject = useUpdateProject();
   const tree = useTreeState();
+  const { unread: inboxUnread } = useInboxCounts();
+  const unseenClientsFn = useServerFn(getUnseenActivityCounts);
+  const { data: unseenClientCounts = {} } = useQuery({
+    queryKey: ["sidebar-unseen-clients", ws?.id],
+    queryFn: () => unseenClientsFn({ data: { workspaceId: ws!.id } }),
+    enabled: !!ws?.id,
+    staleTime: 60_000,
+  });
+  const clientsUnseenTotal = Object.values(unseenClientCounts).reduce(
+    (acc: number, c) => acc + ((c as { total?: number }).total ?? 0),
+    0,
+  );
+  const { isHidden } = useNavVisibility();
   const [query, setQuery] = useState("");
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
@@ -70,6 +150,39 @@ export function AppSidebar() {
   const initials = (ws?.name ?? "A").slice(0, 2).toUpperCase();
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "You";
   const userInitials = (profile?.display_name || user?.email || "?").slice(0, 2).toUpperCase();
+
+  const vocab = useVocabulary();
+
+  const clientContainers = useClientContainers();
+  const hasAnyClient = clientContainers.length > 0;
+
+  // Compute ordered nav list, honouring custom order then defaults, then re-label with workspace vocabulary.
+  const orderedNav = useMemo(() => {
+    const byId = new Map(NAV_DEFS.map((n) => [n.id, n]));
+    const seen = new Set<string>();
+    const out: NavDef[] = [];
+    for (const id of navOrder) {
+      const n = byId.get(id);
+      if (n && !seen.has(id)) { out.push(n); seen.add(id); }
+    }
+    for (const n of NAV_DEFS) if (!seen.has(n.id)) out.push(n);
+    return out
+      .filter((n) => !isNavHiddenByMode(n.id, ws?.workspace_mode, hasAnyClient))
+      .filter((n) => !isRoleHidden(profile?.primary_role ?? null, n.id))
+      .map((n) => {
+        if (n.id === "clients") return { ...n, label: vocab.customer.plural };
+        return n;
+      });
+  }, [navOrder, vocab, ws?.workspace_mode, hasAnyClient, profile?.primary_role]);
+
+  const moveNav = (id: string, dir: -1 | 1) => {
+    const ids = orderedNav.map((n) => n.id);
+    const i = ids.indexOf(id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    setNavOrder(ids);
+  };
 
   const q = query.trim().toLowerCase();
   const matches = (name: string) => !q || name.toLowerCase().includes(q);
@@ -115,12 +228,8 @@ export function AppSidebar() {
     if (aType === "folder") {
       const f = folders.find((x) => x.id === aId);
       if (!f) return;
-      if (oType === "division") {
-        if (f.division_id === oId && f.parent_id === null) return;
-        await updateFolder.mutateAsync({ id: f.id, division_id: oId, parent_id: null });
-      } else if (oType === "folder") {
+      if (oType === "folder") {
         if (oId === f.id) return;
-        // prevent moving into own descendant
         const isDescendant = (parent: string, target: string): boolean => {
           let cur: string | null = parent;
           const map = new Map(folders.map((x) => [x.id, x.parent_id] as const));
@@ -131,19 +240,17 @@ export function AppSidebar() {
           return false;
         };
         if (isDescendant(oId, f.id)) return;
-        const target = folders.find((x) => x.id === oId);
-        if (!target) return;
-        await updateFolder.mutateAsync({ id: f.id, parent_id: oId, division_id: target.division_id });
+        await updateFolder.mutateAsync({ id: f.id, parent_id: oId });
+      } else if (oType === "root") {
+        await updateFolder.mutateAsync({ id: f.id, parent_id: null });
       }
     } else if (aType === "project") {
       const p = projects.find((x) => x.id === aId);
       if (!p) return;
-      if (oType === "division") {
-        await updateProject.mutateAsync({ id: p.id, division_id: oId, folder_id: null });
-      } else if (oType === "folder") {
-        const target = folders.find((x) => x.id === oId);
-        if (!target) return;
-        await updateProject.mutateAsync({ id: p.id, folder_id: oId, division_id: target.division_id });
+      if (oType === "folder") {
+        await updateProject.mutateAsync({ id: p.id, folder_id: oId });
+      } else if (oType === "root") {
+        await updateProject.mutateAsync({ id: p.id, folder_id: null });
       }
     }
   };
@@ -154,47 +261,49 @@ export function AppSidebar() {
         <aside className="flex h-full w-14 shrink-0 flex-col items-center border-r border-sidebar-border bg-sidebar py-2">
           <button
             onClick={() => navigate({ to: "/app" })}
-            className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground"
+            className="mb-2 flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground"
             title={ws?.name}
           >
-            {initials}
+            {ws?.logo_url ? (
+              <img src={ws.logo_url} alt={ws.name} className="h-full w-full object-cover" />
+            ) : (
+              initials
+            )}
           </button>
           <nav className="flex flex-col items-center gap-1">
-            <IconNav to="/app" icon={Folder} active={path === "/app"} label="Dashboard" />
-            <IconNav to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"} label="My tasks" />
+            {orderedNav
+              .filter((n) => (n.id === "clients" || !navHidden.includes(n.id)) && !(n.visibilityKey && isHidden(n.visibilityKey)))
+              .map((n) => (
+                <IconNav
+                  key={n.id}
+                  to={n.to}
+                  icon={n.icon}
+                  active={n.isActive(path)}
+                  label={n.label}
+                  badge={n.badgeKey === "inbox" ? inboxUnread : n.badgeKey === "clients-unseen" ? clientsUnseenTotal : undefined}
+                />
+              ))}
             {divisions.map((d) => {
-              const Icon = divisionIcon(d.slug);
+              const Icon = divisionIcon(d);
               return (
                 <Tooltip key={d.id}>
                   <TooltipTrigger asChild>
-                    <Link
-                      to="/app/d/$divisionSlug"
-                      params={{ divisionSlug: d.slug }}
+                    <a
+                      href={`/app/d/${d.slug}`}
                       className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
                         path.startsWith(`/app/d/${d.slug}`) ? "bg-aura-gradient-subtle" : "hover:bg-sidebar-accent/50"
                       }`}
                       style={{ color: d.color }}
                     >
                       <Icon className="h-4 w-4" />
-                    </Link>
+                    </a>
                   </TooltipTrigger>
                   <TooltipContent side="right">{d.name}</TooltipContent>
                 </Tooltip>
               );
             })}
-            <IconNav to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")} label="Notes" />
-            <IconNav to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")} label="Meetings" />
             <IconNav to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")} label="Settings" />
           </nav>
-          <button
-            onClick={() => navigate({ to: "/app/profile" })}
-            className="mt-auto flex h-9 w-9 items-center justify-center rounded-md hover:bg-sidebar-accent/50"
-          >
-            <Avatar className="h-7 w-7">
-              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
-              <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
-            </Avatar>
-          </button>
         </aside>
       </TooltipProvider>
     );
@@ -209,45 +318,69 @@ export function AppSidebar() {
     .map((f) => folders.find((x) => x.id === f.item_id))
     .filter(Boolean) as FolderRow[];
 
+  // Group nav items by section, honouring custom order and role/mode hiding.
+  const sectionedNav = useMemo(() => {
+    const bySection: Record<NavSection, NavDef[]> = { me: [], work: [], intelligence: [] };
+    for (const n of orderedNav) bySection[n.section].push(n);
+    return bySection;
+  }, [orderedNav]);
+
+  const sectionHidden = (key: string) => navHidden.includes(key);
+  const toggleSection = (key: string) => toggleNavHidden(key);
+
+  const renderNavItem = (n: NavDef, idx: number, total: number) => {
+    const hiddenByRole = n.visibilityKey && isHidden(n.visibilityKey);
+    const userHidden = n.id !== "clients" && navHidden.includes(n.id);
+    if (hiddenByRole) return null;
+    if (!editMode && userHidden) return null;
+    return (
+      <EditableNavRow
+        key={n.id}
+        def={n}
+        editMode={editMode}
+        isFirst={idx === 0}
+        isLast={idx === total - 1}
+        userHidden={userHidden}
+        active={n.isActive(path)}
+        badge={n.badgeKey === "inbox" ? inboxUnread : n.badgeKey === "clients-unseen" ? clientsUnseenTotal : undefined}
+        onMove={moveNav}
+        onToggleHidden={toggleNavHidden}
+      />
+    );
+  };
+
+  const renderSection = (sectionKey: NavSection, children?: React.ReactNode) => {
+    const meta = SECTION_META[sectionKey];
+    const items = sectionedNav[sectionKey];
+    const collapsed = !meta.alwaysOn && sectionHidden(meta.key);
+    if (!editMode && items.length === 0 && !children) return null;
+    return (
+      <div key={sectionKey} className="px-2 pt-2">
+        <div className="flex items-center justify-between px-1 pb-1">
+          <button
+            onClick={() => !meta.alwaysOn && toggleSection(meta.key)}
+            disabled={meta.alwaysOn}
+            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground disabled:cursor-default disabled:hover:text-muted-foreground"
+          >
+            {!meta.alwaysOn && (collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />)}
+            {meta.label}
+          </button>
+        </div>
+        {!collapsed && (
+          <div className="space-y-0.5">
+            {items.map((n, i) => renderNavItem(n, i, items.length))}
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <aside className="flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-        {/* Workspace switcher */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 border-b border-sidebar-border px-3 py-3 text-left transition-colors hover:bg-sidebar-accent/50">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient text-xs font-semibold text-primary-foreground">
-                {initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{ws?.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{displayName}</p>
-              </div>
-              <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-60">
-            {workspaces.map((w) => (
-              <DropdownMenuItem key={w.id} onClick={() => setCurrent(w)}>
-                <div className="flex h-6 w-6 items-center justify-center rounded bg-aura-gradient text-[10px] text-primary-foreground">
-                  {w.name.slice(0, 2).toUpperCase()}
-                </div>
-                <span className="ml-2 flex-1 truncate">{w.name}</span>
-                {w.id === ws?.id && <Check className="h-4 w-4" />}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/app/profile" })}>
-              <Settings className="mr-2 h-4 w-4" /> Profile & preferences
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: "/onboarding" })}>
-              <Plus className="mr-2 h-4 w-4" /> New workspace
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+      <aside className="group/sb flex h-full w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
         {/* Search */}
-        <div className="px-2 pt-2">
+        <div className="px-2 pt-3">
           <div className="relative">
             <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -267,230 +400,222 @@ export function AppSidebar() {
           </div>
         </div>
 
-        {/* Top nav */}
-        <nav className="space-y-0.5 px-2 py-2">
-          <NavItem to="/app" icon={Folder} active={path === "/app"}>Dashboard</NavItem>
-          <NavItem to="/app/my-tasks" icon={Inbox} active={path === "/app/my-tasks"}>My tasks</NavItem>
-          <NavItem to="/app/executive" icon={LineChart} active={path.startsWith("/app/executive")}>Executive</NavItem>
-          <NavItem to="/app/escalations" icon={AlertTriangle} active={path.startsWith("/app/escalations")}>Escalations</NavItem>
-          <NavItem to="/app/agent-runs" icon={Sparkles} active={path.startsWith("/app/agent-runs")}>Agent runs</NavItem>
-        </nav>
-
-        {/* Favorites */}
-        {(favProjects.length > 0 || favFolders.length > 0) && !q && (
-          <div className="px-2 pb-1">
-            <div className="px-1 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Favorites
+        <div className="min-h-0 flex-1 overflow-y-auto pb-2">
+          {/* Pinned */}
+          {(favProjects.length > 0 || favFolders.length > 0) && !q && (
+            <div className="px-2 pt-3">
+              <div className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Pinned
+              </div>
+              <div className="space-y-0.5">
+                {favFolders.map((f) => (
+                  <Link
+                    key={f.id}
+                    to="/app/f/$folderId"
+                    params={{ folderId: f.id }}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-md px-2 py-1 text-sm",
+                      path.includes(`/app/f/${f.id}`)
+                        ? "bg-aura-gradient-subtle font-medium"
+                        : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground"
+                    )}
+                  >
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <Folder className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="truncate">{f.name}</span>
+                  </Link>
+                ))}
+                {favProjects.map((p) => (
+                  <Link
+                    key={p.id}
+                    to="/app/p/$projectId"
+                    params={{ projectId: p.id }}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-md px-2 py-1 text-sm",
+                      path.startsWith(`/app/p/${p.id}`)
+                        ? "bg-aura-gradient-subtle font-medium"
+                        : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground"
+                    )}
+                  >
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: p.color }} />
+                    <span className="truncate">{p.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-            {favFolders.map((f) => (
-              <Link
-                key={f.id}
-                to="/app/f/$folderId"
-                params={{ folderId: f.id }}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2 py-1 text-sm",
-                  path.includes(`/app/f/${f.id}`)
-                    ? "bg-aura-gradient-subtle font-medium"
-                    : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground"
-                )}
-              >
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                <Folder className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="truncate">{f.name}</span>
-              </Link>
-            ))}
-            {favProjects.map((p) => (
-              <Link
-                key={p.id}
-                to="/app/p/$projectId"
-                params={{ projectId: p.id }}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-md px-2 py-1 text-sm",
-                  path.startsWith(`/app/p/${p.id}`)
-                    ? "bg-aura-gradient-subtle font-medium"
-                    : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground"
-                )}
-              >
-                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                <span className="h-2 w-2 rounded-sm" style={{ backgroundColor: p.color }} />
-                <span className="truncate">{p.name}</span>
-              </Link>
-            ))}
-          </div>
-        )}
+          )}
 
-        {/* Divisions tree */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
-          {divisions.map((d) => (
-            <DivisionSection
-              key={d.id}
-              division={d}
-              folders={folders.filter((f) => f.division_id === d.id && visibleFolder(f))}
-              projects={projects.filter((p) => p.division_id === d.id && visibleProject(p))}
-              currentPath={path}
-              tree={tree}
-              forceOpen={!!q}
-              favoriteSet={new Set(favorites.map((x) => `${x.item_type}:${x.item_id}`))}
-            />
-          ))}
+          {/* Me — always present */}
+          {renderSection("me")}
+
+          {/* Work — Clients link + Spaces tree */}
+          {renderSection(
+            "work",
+            !sectionHidden(SECTION_META.work.key) ? (
+              <div data-tour="sections" className="pt-1">
+                <div className="px-2 pb-1 pt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+                  <span className="inline-flex items-center gap-1">
+                    <Layers className="h-3 w-3" /> Spaces
+                  </span>
+                </div>
+                <ContainerTree currentPath={path} />
+              </div>
+            ) : null,
+          )}
+
+          {/* Intelligence */}
+          {renderSection("intelligence")}
         </div>
 
-        {/* Bottom utility nav */}
-        <nav className="space-y-0.5 border-t border-sidebar-border px-2 py-2">
-          <NavItem to="/app/notes" icon={StickyNote} active={path.startsWith("/app/notes")}>Notes</NavItem>
-          <NavItem to="/app/meetings" icon={Mic} active={path.startsWith("/app/meetings")}>Meetings</NavItem>
-          {(ws?.kind === "sales" || ws?.kind === "hybrid") && (
-            <>
-              <NavItem to="/app/crm" icon={Briefcase} active={path.startsWith("/app/crm")}>CRM</NavItem>
-              <NavItem to="/app/contacts" icon={Users} active={path.startsWith("/app/contacts")}>Contacts</NavItem>
-            </>
-          )}
-          <NavItem to="/app/resources" icon={UsersRound} active={path === "/app/resources"}>Resources</NavItem>
-          <NavItem to="/app/resources/capacity" icon={CalendarRange} active={path.startsWith("/app/resources/capacity")}>Capacity</NavItem>
-          <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
-        </nav>
+        {/* Footer: workspace switcher + Settings */}
+        <div className="border-t border-sidebar-border">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent/50">
+                <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-md bg-aura-gradient text-[10px] font-semibold text-primary-foreground">
+                  {ws?.logo_url ? (
+                    <img src={ws.logo_url} alt={ws.name} className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{ws?.name}</p>
+                </div>
+                <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60">
+              {workspaces.map((w) => (
+                <DropdownMenuItem key={w.id} onClick={() => setCurrent(w)}>
+                  <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded bg-aura-gradient text-[10px] text-primary-foreground">
+                    {w.logo_url ? (
+                      <img src={w.logo_url} alt={w.name} className="h-full w-full object-cover" />
+                    ) : (
+                      w.name.slice(0, 2).toUpperCase()
+                    )}
+                  </div>
+                  <span className="ml-2 flex-1 truncate">{w.name}</span>
+                  {w.id === ws?.id && <Check className="h-4 w-4" />}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate({ to: "/app/profile" })}>
+                <Settings className="mr-2 h-4 w-4" /> Profile & preferences
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/onboarding" })}>
+                <Plus className="mr-2 h-4 w-4" /> New workspace
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* User chip */}
-        <button
-          onClick={() => navigate({ to: "/app/profile" })}
-          className="flex items-center gap-2 border-t border-sidebar-border px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/50"
-        >
-          <Avatar className="h-7 w-7">
-            {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={displayName} />}
-            <AvatarFallback className="bg-aura-gradient text-[10px] text-primary-foreground">{userInitials}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium">{displayName}</p>
-            <p className="truncate text-[10px] text-muted-foreground">{user?.email}</p>
-          </div>
-          <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
+          <nav className="space-y-0.5 border-t border-sidebar-border px-2 py-2">
+            {editMode ? (
+              <>
+                <button
+                  onClick={() => resetNavLayout()}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-sidebar-accent/40 hover:text-foreground"
+                >
+                  <RotateCcw className="h-4 w-4" /> Reset layout
+                </button>
+                <button
+                  onClick={() => setEditMode(false)}
+                  className="flex w-full items-center gap-2 rounded-md bg-aura-gradient-subtle px-2 py-1.5 text-sm font-medium"
+                >
+                  <Check className="h-4 w-4" /> Done editing
+                </button>
+              </>
+            ) : (
+              <div className="group/row relative flex items-center">
+                <div className="min-w-0 flex-1">
+                  <NavItem to="/app/settings" icon={Settings} active={path.startsWith("/app/settings")}>Settings</NavItem>
+                </div>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-sidebar-accent/60 hover:text-foreground focus-visible:opacity-100 group-hover/sb:opacity-100"
+                  title="Customize sidebar"
+                  aria-label="Customize sidebar"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </nav>
+        </div>
       </aside>
     </DndContext>
   );
 }
 
-type Tree = ReturnType<typeof useTreeState>;
-
-function DivisionSection({
-  division, folders, projects, currentPath, tree, forceOpen, favoriteSet,
+function EditableNavRow({
+  def,
+  editMode,
+  isFirst,
+  isLast,
+  userHidden,
+  active,
+  badge,
+  onMove,
+  onToggleHidden,
 }: {
-  division: Division;
-  folders: FolderRow[];
-  projects: Project[];
-  currentPath: string;
-  tree: Tree;
-  forceOpen: boolean;
-  favoriteSet: Set<string>;
+  def: NavDef;
+  editMode: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  userHidden: boolean;
+  active: boolean;
+  badge?: number;
+  onMove: (id: string, dir: -1 | 1) => void;
+  onToggleHidden: (id: string) => void;
 }) {
-  const isActive = currentPath.startsWith(`/app/d/${division.slug}`)
-    || folders.some((f) => currentPath.includes(`/app/f/${f.id}`))
-    || projects.some((p) => currentPath.includes(`/app/p/${p.id}`));
-  const treeKey = `division:${division.id}`;
-  const open = forceOpen || tree.isOpen(treeKey, division.is_default || isActive);
-  const Icon = divisionIcon(division.slug);
-  const createFolder = useCreateFolder();
-  const createProject = useCreateProject();
-  const [adding, setAdding] = useState<null | "folder" | "project">(null);
-  const [name, setName] = useState("");
-
-  const { setNodeRef, isOver } = useDroppable({ id: `division:${division.id}` as DropId });
-
-  const byParent = useMemo(() => {
-    const m = new Map<string | null, FolderRow[]>();
-    for (const f of folders) {
-      const k = f.parent_id ?? null;
-      if (!m.has(k)) m.set(k, []);
-      m.get(k)!.push(f);
-    }
-    return m;
-  }, [folders]);
-
-  const submit = async () => {
-    if (!name.trim()) { setAdding(null); setName(""); return; }
-    if (adding === "folder") {
-      await createFolder.mutateAsync({ division_id: division.id, name: name.trim() });
-    } else if (adding === "project") {
-      await createProject.mutateAsync({ name: name.trim(), division_id: division.id });
-    }
-    setAdding(null);
-    setName("");
-  };
-
+  const Icon = def.icon;
+  if (!editMode) {
+    return (
+      <NavItem to={def.to} icon={Icon} active={active} badge={badge}>
+        {def.label}
+      </NavItem>
+    );
+  }
   return (
-    <div className="mt-1" ref={setNodeRef}>
-      <div
-        className={cn(
-          "group flex items-center gap-1 rounded-md px-1 py-1 hover:bg-sidebar-accent/40",
-          isOver && "ring-1 ring-primary/50 bg-primary/5"
-        )}
-      >
-        <button
-          onClick={() => tree.toggle(treeKey, division.is_default || isActive)}
-          className="flex flex-1 items-center gap-1.5 text-left"
-        >
-          {open ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
-          <Icon className="h-3.5 w-3.5" style={{ color: division.color }} />
-          <Link
-            to="/app/d/$divisionSlug"
-            params={{ divisionSlug: division.slug }}
-            className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {division.name}
-          </Link>
-        </button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100">
-              <Plus className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => setAdding("folder")}>New folder</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setAdding("project")}>New project</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      {open && (
-        <div className="ml-3 border-l border-sidebar-border pl-1">
-          {(byParent.get(null) ?? []).map((f) => (
-            <FolderNode
-              key={f.id}
-              folder={f}
-              byParent={byParent}
-              projects={projects.filter((p) => p.folder_id === f.id)}
-              currentPath={currentPath}
-              depth={0}
-              tree={tree}
-              forceOpen={forceOpen}
-              favoriteSet={favoriteSet}
-            />
-          ))}
-          {projects.filter((p) => !p.folder_id && !p.parent_id).map((p) => (
-            <ProjectLeaf key={p.id} project={p} currentPath={currentPath} favoriteSet={favoriteSet} />
-          ))}
-          {adding && (
-            <div className="px-1 py-1">
-              <Input
-                autoFocus
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={submit}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submit();
-                  if (e.key === "Escape") { setAdding(null); setName(""); }
-                }}
-                placeholder={adding === "folder" ? "Folder name" : "Project name"}
-                className="h-7 text-sm"
-              />
-            </div>
-          )}
-        </div>
+    <div
+      className={cn(
+        "group flex items-center gap-1 rounded-md border border-dashed border-sidebar-border/70 px-1.5 py-1",
+        userHidden && "opacity-50",
       )}
+    >
+      <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+      <span className="flex-1 truncate text-xs">{def.label}</span>
+      <button
+        onClick={() => onMove(def.id, -1)}
+        disabled={isFirst}
+        className="rounded p-0.5 text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground disabled:opacity-30"
+        title="Move up"
+      >
+        <ArrowUp className="h-3 w-3" />
+      </button>
+      <button
+        onClick={() => onMove(def.id, 1)}
+        disabled={isLast}
+        className="rounded p-0.5 text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground disabled:opacity-30"
+        title="Move down"
+      >
+        <ArrowDown className="h-3 w-3" />
+      </button>
+      <button
+        onClick={() => onToggleHidden(def.id)}
+        className="rounded p-0.5 text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
+        title={userHidden ? "Show" : "Hide"}
+      >
+        {userHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+      </button>
     </div>
   );
 }
+
+type Tree = ReturnType<typeof useTreeState>;
+
 
 function FolderNode({
   folder, byParent, projects, currentPath, depth, tree, forceOpen, favoriteSet,
@@ -553,6 +678,17 @@ function FolderNode({
         >
           {folder.name}
         </Link>
+        {folder.client_account_id && (
+          <Link
+            to="/app/clients/$accountId"
+            params={{ accountId: folder.client_account_id }}
+            onClick={(e) => e.stopPropagation()}
+            title="Open CRM record"
+            className="rounded p-0.5 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground"
+          >
+            <Building2 className="h-3 w-3" />
+          </Link>
+        )}
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -567,6 +703,15 @@ function FolderNode({
         >
           <Star className={cn("h-3 w-3", pinned ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
         </button>
+        <div className="opacity-0 group-hover:opacity-100">
+          <UniversalCreateMenu
+            folderId={folder.id}
+            divisionId=""
+            variant="ghost"
+            iconOnly
+            className="h-5 w-5"
+          />
+        </div>
       </div>
       {open && (
         <div className="ml-3 border-l border-sidebar-border pl-1">
@@ -637,38 +782,151 @@ function ProjectLeaf({ project, currentPath, favoriteSet }: { project: Project; 
       >
         <Star className={cn("h-3 w-3", pinned ? "fill-amber-400 text-amber-400" : "text-muted-foreground")} />
       </button>
+      <div className="opacity-0 group-hover:opacity-100">
+        <UniversalCreateMenu
+          folderId={project.folder_id ?? null}
+          divisionId=""
+          projectId={project.id}
+          variant="ghost"
+          iconOnly
+          className="h-5 w-5"
+        />
+      </div>
     </div>
   );
 }
 
-function NavItem({ to, icon: Icon, active, children }: { to: string; icon: typeof Folder; active: boolean; children: React.ReactNode }) {
+function NavItem({ to, icon: Icon, active, badge, children }: { to: string; icon: typeof Folder; active: boolean; badge?: number | null; children: React.ReactNode }) {
   return (
-    <Link
-      to={to}
+    <a
+      href={to}
       className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors ${
         active ? "bg-aura-gradient-subtle font-medium text-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
       }`}
     >
       <Icon className="h-4 w-4" />
-      {children}
-    </Link>
+      <span className="flex-1">{children}</span>
+      {badge && badge > 0 ? (
+        <span className="ml-auto inline-flex min-w-[18px] items-center justify-center rounded-full bg-primary/20 px-1 text-[10px] font-semibold text-primary">
+          {badge > 99 ? "99+" : badge}
+        </span>
+      ) : null}
+    </a>
   );
 }
 
-function IconNav({ to, icon: Icon, active, label }: { to: string; icon: typeof Folder; active: boolean; label: string }) {
+function IconNav({ to, icon: Icon, active, label, badge }: { to: string; icon: typeof Folder; active: boolean; label: string; badge?: number | null }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link
-          to={to}
-          className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+        <a
+          href={to}
+          className={`relative flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
             active ? "bg-aura-gradient-subtle text-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
           }`}
         >
           <Icon className="h-4 w-4" />
-        </Link>
+          {badge && badge > 0 ? (
+            <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground">
+              {badge > 9 ? "9+" : badge}
+            </span>
+          ) : null}
+        </a>
       </TooltipTrigger>
       <TooltipContent side="right">{label}</TooltipContent>
     </Tooltip>
   );
 }
+
+
+function ObjectsPopover({
+  objectTypes,
+  currentPath,
+}: {
+  objectTypes: Array<{ id: string; key: string; color: string | null; label: string; plural_label: string }>;
+  currentPath: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  const active = currentPath.startsWith("/app/objects");
+  const filtered = objectTypes.filter(
+    (ot) => !q || ot.plural_label.toLowerCase().includes(q.toLowerCase()) || ot.key.includes(q.toLowerCase()),
+  );
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+            active
+              ? "bg-aura-gradient-subtle font-medium"
+              : "text-foreground/80 hover:bg-sidebar-accent/40 hover:text-foreground",
+          )}
+        >
+          <Box className="h-4 w-4" />
+          <span className="flex-1 text-left">Objects</span>
+          {objectTypes.length > 0 && (
+            <span className="rounded bg-muted px-1.5 text-[10px] text-muted-foreground">
+              {objectTypes.length}
+            </span>
+          )}
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="right" align="start" sideOffset={8} className="w-64 p-2">
+        <div className="mb-2 flex items-center gap-1">
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Find object…"
+            className="h-7 text-xs"
+            autoFocus
+          />
+        </div>
+        <div className="max-h-72 overflow-y-auto">
+          {filtered.length === 0 && (
+            <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+              No matching objects
+            </p>
+          )}
+          {filtered.map((ot) => (
+            <button
+              key={ot.id}
+              onClick={() => {
+                setOpen(false);
+                navigate({ to: "/app/objects/$key", params: { key: ot.key } });
+              }}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+                currentPath === `/app/objects/${ot.key}`
+                  ? "bg-aura-gradient-subtle font-medium"
+                  : "hover:bg-accent",
+              )}
+            >
+              <span
+                className="h-2 w-2 shrink-0 rounded-sm"
+                style={{ backgroundColor: ot.color ?? "#8b5cf6" }}
+              />
+              <span className="flex-1 truncate text-left">{ot.plural_label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-2 border-t pt-2">
+          <button
+            onClick={() => {
+              setOpen(false);
+              navigate({ to: "/app/settings/object-types" });
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            Manage object types
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+

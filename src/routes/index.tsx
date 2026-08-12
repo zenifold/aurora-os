@@ -33,20 +33,27 @@ import {
   LineChart,
   FileText,
   Receipt,
+  Calendar,
+  Chrome,
+  Search,
+  Camera,
+  Star,
+  Quote as QuoteIcon,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aura — The company OS for agencies & software delivery teams" },
+      { title: "Aurora — The company OS for agencies & software delivery teams" },
       {
         name: "description",
         content:
-          "From sales to fulfillment in one place. Aura replaces Jira, Notion, Linear, HubSpot, and Fathom for agencies and software delivery teams — pipeline, projects, sprints, meetings, financials, and client portals.",
+          "From sales to fulfillment in one place. Aurora replaces Jira, Notion, Linear, HubSpot, and Fathom for agencies and software delivery teams — pipeline, projects, sprints, meetings, financials, and client portals.",
       },
       {
         property: "og:title",
-        content: "Aura — Company OS: Sales → Delivery → Ops",
+        content: "Aurora — Company OS: Sales → Delivery → Ops",
       },
       {
         property: "og:description",
@@ -71,19 +78,21 @@ function Landing() {
       <MarketingHeader />
       <main>
         <Hero />
-        <LifecycleStrip />
-        <ReplacesBar />
         <LifecycleShowcase />
-        <ViewsShowcase />
+
         <CapabilitiesShowcase />
+        <MeetingsExtensionSpotlight />
+        <Testimonials />
         <Manifesto />
         <PricingTeaser />
+        <FAQTeaser />
         <FinalCTA />
       </main>
       <MarketingFooter />
     </div>
   );
 }
+
 
 /* ─── Hero ──────────────────────────────────────────── */
 
@@ -106,7 +115,7 @@ function Hero() {
           From <span className="text-aura-gradient">first pitch</span> to final invoice.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-          Aura is the open-source operating system for agencies and software delivery teams.
+          Aurora is the open-source operating system for agencies and software delivery teams.
           Pipeline, projects, sprints, meetings AI, financials, and client portals — one
           platform replacing Jira, Notion, Linear, HubSpot, and Fathom.
         </p>
@@ -129,10 +138,12 @@ function Hero() {
         <p className="mt-4 text-xs text-muted-foreground">
           MIT licensed · No credit card · Sales → Delivery → Ops in one workspace
         </p>
+        <ProductPreview />
       </div>
     </section>
   );
 }
+
 
 function ProductPreview() {
   return (
@@ -298,37 +309,6 @@ function MiniCanvas() {
 
 /* ─── Lifecycle strip ───────────────────────────────── */
 
-function LifecycleStrip() {
-  const stages = [
-    { icon: Target, label: "Sales", sub: "Pipeline & deals", tint: "from-violet-500/20 to-fuchsia-500/10", iconBg: "bg-violet-500/15 text-violet-500 ring-violet-500/30" },
-    { icon: Briefcase, label: "Projects", sub: "Scope & SOWs", tint: "from-sky-500/20 to-cyan-500/10", iconBg: "bg-sky-500/15 text-sky-500 ring-sky-500/30" },
-    { icon: Rocket, label: "Delivery", sub: "Sprints & tasks", tint: "from-emerald-500/20 to-teal-500/10", iconBg: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30" },
-    { icon: LineChart, label: "Ops", sub: "Health & financials", tint: "from-amber-500/20 to-rose-500/10", iconBg: "bg-amber-500/15 text-amber-500 ring-amber-500/30" },
-  ];
-  return (
-    <section className="relative border-y border-border/60 bg-muted/30 py-10">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 px-6 md:grid-cols-4">
-        {stages.map((s, i) => (
-          <div key={s.label} className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/60 p-4 backdrop-blur transition hover:-translate-y-0.5 hover:border-border hover:shadow-elegant">
-            <div className={`pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br opacity-50 blur-2xl transition group-hover:opacity-90 ${s.tint}`} />
-            <div className="relative flex items-center gap-3">
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${s.iconBg}`}>
-                <s.icon className="h-4 w-4" strokeWidth={2.25} />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
-                  <span className="mr-1.5 font-mono text-[10px] text-muted-foreground">0{i + 1}</span>
-                  {s.label}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{s.sub}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 /* ─── Replaces bar ──────────────────────────────────── */
 
@@ -351,7 +331,7 @@ function ReplacesBar() {
         Replaces <span className="text-aura-gradient">your whole stack.</span>
       </h2>
       <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-        Stop paying seven vendors to do one job. Aura unifies the tools agencies and delivery teams already glue together.
+        Stop paying seven vendors to do one job. Aurora unifies the tools agencies and delivery teams already glue together.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
         {tools.map((t) => (
@@ -361,7 +341,7 @@ function ReplacesBar() {
           </span>
         ))}
         <span className="inline-flex items-center gap-1.5 rounded-full bg-aura-gradient px-3 py-1 text-xs font-semibold text-primary-foreground shadow-pop">
-          <Sparkles className="h-3 w-3" /> Aura · all of it
+          <Sparkles className="h-3 w-3" /> Aurora · all of it
         </span>
       </div>
     </section>
@@ -374,28 +354,57 @@ function LifecycleShowcase() {
   const lanes = [
     {
       icon: Target,
-      eyebrow: "Sales",
-      title: "Pipeline that flows into delivery",
-      body: "Track deals, proposals, and SOWs. When a deal closes, the project, scope, and budget spin up automatically — no copy-paste between CRM and PM.",
-      bullets: ["Deal stages & forecasting", "Proposal → SOW → Project", "Account & contact CRM"],
+      eyebrow: "01 — Sales",
+      title: "A real CRM that knows your delivery team",
+      body: "Accounts, contacts, deals, pipelines and forecasting — purpose-built for service businesses. Sellers see real delivery capacity before they promise a date, and every won deal carries scope, rates and stakeholders straight into the project.",
+      bullets: [
+        "Accounts, contacts, multi-pipeline deals",
+        "Proposals, SOWs & e-signature",
+        "Quote-to-cash with rate cards & approvals",
+        "Forecasting tied to actual delivery capacity",
+      ],
       iconClass: "bg-violet-500/15 text-violet-500 ring-violet-500/30",
       tint: "from-violet-500/20 to-fuchsia-500/5",
     },
     {
+      icon: Briefcase,
+      eyebrow: "02 — Projects",
+      title: "Engagements that spin up from the deal",
+      body: "When a deal closes, the engagement is born — scope, milestones, RAID log, stakeholders, billing model and the right playbook applied. No more re-keying the SOW into a PM tool while the kickoff clock ticks.",
+      bullets: [
+        "Playbooks per service line",
+        "Milestones, RAID & status reports",
+        "Stakeholder map carried over from CRM",
+        "Budget & rate card inherited from the deal",
+      ],
+      iconClass: "bg-sky-500/15 text-sky-500 ring-sky-500/30",
+      tint: "from-sky-500/20 to-cyan-500/5",
+    },
+    {
       icon: Rocket,
-      eyebrow: "Delivery",
-      title: "Sprints, milestones, and the work itself",
-      body: "Backlog grooming, sprint planning with capacity, milestones, and every view your team needs — table, board, timeline, canvas, and a real Sprint view.",
-      bullets: ["Sprint planning & capacity", "Milestones & timelines", "Tasks · docs · meetings"],
+      eyebrow: "03 — Delivery",
+      title: "Where the work actually happens",
+      body: "Sprints with capacity, backlog grooming, tasks across table, board, timeline and canvas, threaded docs, meeting AI and approvals. Engineers, designers, PMs and clients all working in one place — with row-level security keeping every audience on the right side of the wall.",
+      bullets: [
+        "Sprints, capacity & velocity",
+        "Tasks · docs · meetings · approvals",
+        "Real-time presence with RLS-scoped access",
+        "Time tracking that feeds invoices",
+      ],
       iconClass: "bg-emerald-500/15 text-emerald-500 ring-emerald-500/30",
       tint: "from-emerald-500/20 to-teal-500/5",
     },
     {
       icon: LineChart,
-      eyebrow: "Ops",
-      title: "Financials, health, and client portals",
-      body: "Budget burn, margin, and project health on a single dashboard. Share scoped portals with clients for status, change orders, and approvals — without giving up the keys.",
-      bullets: ["Budget burn & margin", "Project health scoring", "Client portals & change orders"],
+      eyebrow: "04 — Ops & Finance",
+      title: "The org-wide view leadership has been begging for",
+      body: "Portfolio health, margin by client and service line, utilization, retention risk, invoiced vs. recognized revenue — all in one place. People, finance and the C-suite finally see the same numbers as delivery.",
+      bullets: [
+        "Portfolio dashboards & burn",
+        "Margin, utilization & forecast revenue",
+        "Invoicing, expenses & accounting sync",
+        "Client portals, CSAT & renewal signals",
+      ],
       iconClass: "bg-amber-500/15 text-amber-500 ring-amber-500/30",
       tint: "from-amber-500/20 to-rose-500/5",
     },
@@ -405,46 +414,172 @@ function LifecycleShowcase() {
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            <Workflow className="h-3 w-3" /> Sales → Delivery → Ops
+            <Workflow className="h-3 w-3" /> Sales → Projects → Delivery → Ops
           </span>
           <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
             One workspace.{" "}
-            <span className="text-aura-gradient">The whole lifecycle.</span>
+            <span className="text-aura-gradient">The whole company.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
-            Built for agencies and software delivery teams who are tired of stitching CRM, PM, docs, meetings, and finance together.
+            Sellers, PMs, delivery teams, finance and leadership working off the same data — from
+            the first discovery call to the final invoice. No more lossy hand-offs between tools.
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-14 grid gap-6 md:grid-cols-2">
           {lanes.map((l) => (
-            <article key={l.title} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop">
-              <div className={`pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br opacity-60 blur-3xl transition group-hover:opacity-100 ${l.tint}`} />
+            <article key={l.title} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-7 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop">
+              <div className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br opacity-60 blur-3xl transition group-hover:opacity-100 ${l.tint}`} />
               <div className="relative flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ring-1 ${l.iconClass}`}>
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ${l.iconClass}`}>
                   <l.icon className="h-5 w-5" strokeWidth={2.25} />
                 </div>
                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   {l.eyebrow}
                 </span>
               </div>
-              <h3 className="relative mt-4 text-xl font-semibold tracking-tight">{l.title}</h3>
-              <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
-              <ul className="relative mt-4 space-y-1.5">
+              <h3 className="relative mt-4 text-xl font-semibold tracking-tight md:text-2xl">{l.title}</h3>
+              <p className="relative mt-2.5 text-sm leading-relaxed text-muted-foreground">{l.body}</p>
+              <ul className="relative mt-5 grid gap-2 sm:grid-cols-2">
                 {l.bullets.map((b) => (
-                  <li key={b} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    {b}
+                  <li key={b} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    <span>{b}</span>
                   </li>
                 ))}
               </ul>
             </article>
           ))}
         </div>
+
+        {/* CRM → Delivery handover spotlight */}
+        <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-elegant md:p-10">
+          <div className="pointer-events-none absolute inset-0 bg-aura-gradient opacity-[0.06]" aria-hidden />
+          <div className="relative grid items-center gap-10 md:grid-cols-[1.1fr_1fr]">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+                <GitBranch className="h-3 w-3" /> The handover problem, solved
+              </span>
+              <h3 className="mt-4 text-balance text-2xl font-semibold tracking-tight md:text-3xl">
+                The deal becomes the engagement.{" "}
+                <span className="text-aura-gradient">In one click.</span>
+              </h3>
+              <p className="mt-3 text-pretty text-sm leading-relaxed text-muted-foreground md:text-base">
+                Most agencies lose a week — and a lot of context — translating a closed-won deal
+                into a real project. Aurora carries scope, stakeholders, rates, success criteria and
+                discovery notes across the wall automatically, then applies the right delivery
+                playbook so kickoff is a meeting, not a scavenger hunt.
+              </p>
+              <ul className="mt-5 grid gap-2 sm:grid-cols-2">
+                {[
+                  "Scope & deliverables → milestones",
+                  "Rate card & budget → project financials",
+                  "Stakeholders → project access",
+                  "Discovery notes → kickoff doc",
+                  "Success criteria → status report KPIs",
+                  "AE & CSM → engagement roles",
+                ].map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <HandoverVisual />
+          </div>
+        </div>
+
+        {/* Org-wide capability strip */}
+        <div className="mt-10 grid gap-4 md:grid-cols-4">
+          {[
+            { icon: Users, t: "People & teams", s: "Roles, utilization, skills, capacity" },
+            { icon: Receipt, t: "Finance", s: "Invoices, expenses, AR & forecasting" },
+            { icon: FileText, t: "Knowledge", s: "Docs, playbooks, decisions" },
+            { icon: Shield, t: "Governance", s: "RLS, audit log, SSO-ready" },
+          ].map((it) => (
+            <div key={it.t} className="rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aura-gradient text-primary-foreground shadow-pop">
+                  <it.icon className="h-4 w-4" />
+                </div>
+                <p className="text-sm font-semibold">{it.t}</p>
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{it.s}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
+function HandoverVisual() {
+  return (
+    <div className="relative rounded-xl border border-border bg-background/70 p-5 shadow-elegant backdrop-blur">
+      {/* Deal card */}
+      <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-3">
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-violet-500">
+            <Target className="h-3 w-3" /> CRM · Deal
+          </span>
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+            Closed-won
+          </span>
+        </div>
+        <p className="mt-1.5 text-sm font-semibold">Northwind · Brand refresh + Q3 site</p>
+        <div className="mt-2 grid grid-cols-3 gap-2 text-[10px]">
+          <div className="rounded bg-background/80 px-2 py-1">
+            <div className="text-muted-foreground">Value</div>
+            <div className="font-semibold">$84,000</div>
+          </div>
+          <div className="rounded bg-background/80 px-2 py-1">
+            <div className="text-muted-foreground">Rate card</div>
+            <div className="font-semibold">Studio · 2025</div>
+          </div>
+          <div className="rounded bg-background/80 px-2 py-1">
+            <div className="text-muted-foreground">Owner</div>
+            <div className="font-semibold">M. Reyes</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Connector */}
+      <div className="relative my-3 flex items-center justify-center">
+        <div className="absolute inset-x-1/2 -translate-x-px h-full w-px bg-gradient-to-b from-violet-500/40 to-emerald-500/40" />
+        <span className="relative z-10 inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-semibold text-muted-foreground shadow-sm">
+          <ArrowRight className="h-3 w-3 rotate-90" />
+          Auto-handover
+        </span>
+      </div>
+
+      {/* Engagement card */}
+      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-emerald-600">
+            <Rocket className="h-3 w-3" /> Delivery · Engagement
+          </span>
+          <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-600">
+            Kickoff scheduled
+          </span>
+        </div>
+        <p className="mt-1.5 text-sm font-semibold">Northwind brand + site · Engagement</p>
+        <ul className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+          <li className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3 w-3 text-emerald-500" /> 4 milestones from SOW
+          </li>
+          <li className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Budget · margin target set
+          </li>
+          <li className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3 w-3 text-emerald-500" /> 3 stakeholders invited
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 
 function ValueBar() {
   const items = [
@@ -905,7 +1040,7 @@ function Manifesto() {
               </span>
             ))}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-aura-gradient px-3 py-1 text-xs font-semibold text-primary-foreground shadow-pop">
-              <Sparkles className="h-3 w-3" /> Aura · open & yours
+              <Sparkles className="h-3 w-3" /> Aurora · open & yours
             </span>
           </div>
         </div>
@@ -1071,6 +1206,247 @@ function FinalCTA() {
             <a href={GITHUB_URL} target="_blank" rel="noreferrer">
               <Github className="mr-1.5 h-4 w-4" /> View on GitHub
             </a>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Meetings + Extension spotlight ────────────────── */
+
+function MeetingsExtensionSpotlight() {
+  return (
+    <section className="relative border-t border-border/60">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        <div className="text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <Sparkles className="h-3 w-3" /> New this quarter
+          </span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
+            Aurora <span className="text-aura-gradient">follows you</span> across the workday.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-muted-foreground">
+            A browser extension that captures work the moment it happens, and meeting AI that turns
+            calls into action items — automatically.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-6 lg:grid-cols-2">
+          {/* Meetings card */}
+          <article className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-sky-500/30 to-cyan-500/10 opacity-60 blur-3xl transition group-hover:opacity-100" />
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/15 text-sky-500 ring-1 ring-sky-500/30">
+                  <Mic className="h-5 w-5" strokeWidth={2.25} />
+                </div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Meeting auto-capture
+                </span>
+              </div>
+              <h3 className="mt-4 text-2xl font-semibold tracking-tight">
+                Joins your calls. Files the notes. Assigns the work.
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Connect Google Calendar once. Aurora detects Meet, Zoom and Teams links, joins on
+                cue, transcribes the call, and posts a summary with assigned action items to the
+                right project inbox.
+              </p>
+              <ul className="mt-5 space-y-2 text-sm">
+                {[
+                  { i: Calendar, t: "Reads your calendar — no manual triggers" },
+                  { i: Bot, t: "Live transcription with speaker diarization" },
+                  { i: CheckCircle2, t: "Action items routed to the right project" },
+                ].map((it) => (
+                  <li key={it.t} className="flex items-center gap-2 text-muted-foreground">
+                    <it.i className="h-4 w-4 text-sky-500" />
+                    {it.t}
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="outline" className="mt-6 group/btn">
+                <Link to="/features">
+                  Explore meetings
+                  <ArrowRight className="ml-1.5 h-4 w-4 transition group-hover/btn:translate-x-0.5" />
+                </Link>
+              </Button>
+            </div>
+          </article>
+
+          {/* Extension card */}
+          <article className="group relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-elegant transition hover:-translate-y-1 hover:shadow-pop">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-violet-500/30 to-fuchsia-500/10 opacity-60 blur-3xl transition group-hover:opacity-100" />
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/15 text-violet-500 ring-1 ring-violet-500/30">
+                  <Chrome className="h-5 w-5" strokeWidth={2.25} />
+                </div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Browser extension
+                </span>
+              </div>
+              <h3 className="mt-4 text-2xl font-semibold tracking-tight">
+                Capture work from anywhere on the web.
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Quick-add tasks from any tab, search your workspace from the omnibox, run agents on
+                selected text, and replace your new-tab with your inbox & today's calendar.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-2 text-sm">
+                {[
+                  { i: Zap, t: "⌘+Shift+A quick capture" },
+                  { i: Search, t: "Omnibox search" },
+                  { i: Sparkles, t: "Context lens agents" },
+                  { i: Camera, t: "Annotated screenshots" },
+                ].map((it) => (
+                  <div
+                    key={it.t}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-background/60 px-2.5 py-2 text-xs text-muted-foreground"
+                  >
+                    <it.i className="h-3.5 w-3.5 text-violet-500" />
+                    {it.t}
+                  </div>
+                ))}
+              </div>
+              <Button asChild variant="outline" className="mt-6 group/btn">
+                <Link to="/features">
+                  Get the extension
+                  <ArrowRight className="ml-1.5 h-4 w-4 transition group-hover/btn:translate-x-0.5" />
+                </Link>
+              </Button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ──────────────────────────────────── */
+
+function Testimonials() {
+  const quotes = [
+    {
+      quote:
+        "We killed Jira, Notion and HubSpot in the same week. Nobody asked to bring them back.",
+      author: "Maya Reyes",
+      role: "Founder, Northwind Studio",
+      avatar: "MR",
+      tone: "bg-violet-500",
+    },
+    {
+      quote:
+        "Status reports used to take me a full afternoon. Aurora drafts them while I'm in standup.",
+      author: "Daniel Ortega",
+      role: "Delivery lead, Helix Consulting",
+      avatar: "DO",
+      tone: "bg-sky-500",
+    },
+    {
+      quote:
+        "Clients log into our portal and just… get it. No more 'where do I find that?' emails.",
+      author: "Priya Shah",
+      role: "Head of CS, Loomwork",
+      avatar: "PS",
+      tone: "bg-emerald-500",
+    },
+  ];
+  return (
+    <section className="relative border-t border-border/60 bg-muted/20 py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <Star className="h-3 w-3 text-amber-500" /> Loved by teams that ship
+          </span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight md:text-5xl">
+            What teams say <span className="text-aura-gradient">after a month.</span>
+          </h2>
+        </div>
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
+          {quotes.map((q) => (
+            <figure
+              key={q.author}
+              className="relative flex flex-col rounded-2xl border border-border bg-card p-6 shadow-elegant"
+            >
+              <QuoteIcon className="absolute right-5 top-5 h-6 w-6 text-muted-foreground/20" />
+              <div className="flex gap-0.5 text-amber-500">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-3.5 w-3.5 fill-current" />
+                ))}
+              </div>
+              <blockquote className="mt-4 flex-1 text-pretty text-base leading-relaxed">
+                &ldquo;{q.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-5 flex items-center gap-3 border-t border-border/60 pt-4">
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white ${q.tone}`}
+                >
+                  {q.avatar}
+                </span>
+                <div className="text-xs">
+                  <div className="font-semibold text-foreground">{q.author}</div>
+                  <div className="text-muted-foreground">{q.role}</div>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── FAQ teaser ────────────────────────────────────── */
+
+function FAQTeaser() {
+  const items = [
+    {
+      q: "How is Aurora different from Notion, ClickUp, or Linear?",
+      a: "Aurora is open source, self-hostable, and covers the full sales-to-delivery-to-ops lifecycle in one workspace — not a wiki, not a tracker, not a CRM. AI is BYO key, so you pay providers directly with no markup.",
+    },
+    {
+      q: "Do I have to self-host?",
+      a: "No. Hosted plans start at $5/user/month. Self-hosting is free forever — four commands and you're up on Supabase + Cloudflare.",
+    },
+    {
+      q: "How does the meeting AI work?",
+      a: "Connect Google Calendar, and Aurora joins your Meet/Zoom/Teams calls automatically. It transcribes, summarizes, and assigns action items to the right project — using your own AI key.",
+    },
+    {
+      q: "Is my data really mine?",
+      a: "Yes. Self-host on your own infra, or use hosted with workspace-scoped row-level security. We never train on your data, ever.",
+    },
+    {
+      q: "Can my clients log in too?",
+      a: "Yes. Client portals are first-class — scoped views, change orders, approvals, and invoices without giving up the keys to your workspace.",
+    },
+  ];
+  return (
+    <section className="border-t border-border/60 py-24">
+      <div className="mx-auto max-w-3xl px-6">
+        <div className="text-center">
+          <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
+            Questions, <span className="text-aura-gradient">answered.</span>
+          </h2>
+          <p className="mt-3 text-muted-foreground">The short version. Longer ones live in the docs.</p>
+        </div>
+        <div className="mt-10 divide-y divide-border rounded-xl border border-border bg-card">
+          {items.map((it) => (
+            <details key={it.q} className="group p-5">
+              <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-base font-medium">
+                <span>{it.q}</span>
+                <span className="mt-1 text-muted-foreground transition group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{it.a}</p>
+            </details>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Button asChild variant="outline">
+            <Link to="/how-it-works">
+              How it works <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </div>

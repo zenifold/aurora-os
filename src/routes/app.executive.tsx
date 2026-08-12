@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { NavAccessGuard } from "@/components/app/NavAccessGuard";
 import { useMemo } from "react";
 import { useDeliverySnapshot } from "@/hooks/use-delivery";
 import { useDeals, useDealStages } from "@/hooks/use-crm";
 import { useEscalations } from "@/hooks/use-escalations";
 import { useProjects } from "@/hooks/use-projects";
+import { useDeliveryMetrics } from "@/hooks/use-delivery-metrics";
 import { Badge } from "@/components/ui/badge";
 import { TIER_COLORS, TIER_LABELS } from "@/lib/escalation-types";
 import {
@@ -17,7 +19,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/app/executive")({
-  component: ExecutiveDashboard,
+  component: () => <NavAccessGuard navKey="executive"><ExecutiveDashboard /></NavAccessGuard>,
 });
 
 function fmtMoney(n: number) {
@@ -32,6 +34,7 @@ function ExecutiveDashboard() {
   const { data: stages = [] } = useDealStages();
   const { data: projects = [] } = useProjects();
   const { data: openEscalations = [] } = useEscalations({ status: "open" });
+  const { data: metrics } = useDeliveryMetrics();
 
   
 
@@ -99,28 +102,28 @@ function ExecutiveDashboard() {
       {/* KPI Strip */}
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <Kpi
-          to="/app/delivery"
+          to="/app/projects"
           label="Revenue (contracts)"
           value={fmtMoney(kpis?.totalContract ?? 0)}
           trend="+ active"
           icon={<TrendingUp className="h-3.5 w-3.5" />}
         />
         <Kpi
-          to="/app/crm"
+          to="/app/clients"
           label="Pipeline (weighted)"
           value={fmtMoney(sales.weighted)}
           trend={`${fmtMoney(sales.pipelineValue)} open`}
           icon={<Target className="h-3.5 w-3.5" />}
         />
         <Kpi
-          to="/app/delivery"
+          to="/app/projects"
           label="Margin (blended)"
           value={blendedMargin == null ? "—" : `${blendedMargin.toFixed(0)}%`}
           trend="across active"
           icon={<TrendingUp className="h-3.5 w-3.5" />}
         />
         <Kpi
-          to="/app/delivery"
+          to="/app/projects"
           label="Active projects"
           value={String((kpis?.activeCount ?? 0) + ops.internalCount)}
           trend={`${ops.clientCount} client · ${ops.internalCount} internal`}
@@ -135,10 +138,10 @@ function ExecutiveDashboard() {
           accent={openEscalations.length > 0 ? "danger" : undefined}
         />
         <Kpi
-          to="/app/delivery"
+          to="/app/projects"
           label="On-time delivery"
-          value={`${kpis?.onTimePct ?? 0}%`}
-          trend="approved deliverables"
+          value={metrics?.onTimePct != null ? `${metrics.onTimePct.toFixed(0)}%` : `${kpis?.onTimePct ?? 0}%`}
+          trend={metrics?.completedRecent ? `${metrics.completedRecent} done · 30d` : "approved deliverables"}
           icon={<CheckCircle2 className="h-3.5 w-3.5" />}
         />
       </div>
@@ -268,7 +271,7 @@ function ExecutiveDashboard() {
               </div>
             </div>
             <Link
-              to="/app/crm"
+              to="/app/clients"
               className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm hover:bg-muted/70"
             >
               <span>Open pipeline board</span>
@@ -278,11 +281,29 @@ function ExecutiveDashboard() {
         </Section>
       </div>
 
-      {/* AI briefing placeholder */}
+      {/* Delivery metrics */}
+      <Section title="Delivery throughput" className="mt-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <Stat label="WIP (in progress)" value={String(metrics?.wip ?? "—")} />
+          <Stat label="Throughput · 7d" value={String(metrics?.throughput7d ?? "—")} />
+          <Stat label="Throughput · 30d" value={String(metrics?.throughput30d ?? "—")} />
+          <Stat
+            label="Cycle time (avg)"
+            value={metrics?.cycleTimeDays != null ? `${metrics.cycleTimeDays.toFixed(1)}d` : "—"}
+          />
+          <Stat
+            label="Overdue (open)"
+            value={String(metrics?.overdue ?? "—")}
+          />
+        </div>
+      </Section>
+
+      {/* AI briefing */}
       <Section title="Today's briefing" className="mt-4">
         <p className="text-sm text-muted-foreground">
           {kpis?.activeCount ?? 0} active client projects, {openEscalations.length} open escalation
           {openEscalations.length === 1 ? "" : "s"}, {fmtMoney(sales.weighted)} weighted pipeline.
+          {metrics?.throughput7d ? ` ${metrics.throughput7d} task${metrics.throughput7d === 1 ? "" : "s"} shipped this week.` : ""}
           {kpis?.atRiskCount ? ` ${kpis.atRiskCount} project${kpis.atRiskCount === 1 ? "" : "s"} flagged at risk.` : ""}
           {openEscalations[0] ? ` Highest priority: ${TIER_LABELS[openEscalations[0].tier as 1 | 2 | 3 | 4 | 5]} on ${openEscalations[0].title}.` : ""}
         </p>

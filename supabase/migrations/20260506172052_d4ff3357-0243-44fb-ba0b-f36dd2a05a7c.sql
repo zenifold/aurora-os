@@ -1,0 +1,2 @@
+ALTER TABLE public.workspaces ADD COLUMN IF NOT EXISTS branding jsonb NOT NULL DEFAULT '{}'::jsonb;
+COMMENT ON COLUMN public.workspaces.branding IS 'White-label branding overrides: app_name, logo_url, primary_color, support_email, marketing_url';

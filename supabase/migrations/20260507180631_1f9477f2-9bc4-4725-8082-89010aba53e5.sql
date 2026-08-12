@@ -1,0 +1,3 @@
+
+ALTER TABLE public.projects ALTER COLUMN key DROP NOT NULL;
+ALTER TABLE public.tasks ALTER COLUMN task_number DROP NOT NULL;

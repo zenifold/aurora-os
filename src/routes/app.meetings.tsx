@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { confirmDialog } from "@/lib/dialogs";
 import { useMemo, useState } from "react";
 import { useMeetings, useCreateMeeting, useDeleteMeeting } from "@/hooks/use-meetings";
+import { useAutoSyncCalendar } from "@/hooks/use-calendar";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { CardGridSkeleton } from "@/components/ui/loading-scaffolds";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Plus,
   Mic,
@@ -35,6 +38,9 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { MeetingRecorder } from "@/components/meetings/MeetingRecorder";
+import { UpcomingCalendar } from "@/components/meetings/UpcomingCalendar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type SearchParams = { project?: string; status?: string; q?: string };
 
@@ -50,11 +56,13 @@ export const Route = createFileRoute("/app/meetings")({
 function MeetingsPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  useAutoSyncCalendar();
   const { data: meetings = [], isLoading } = useMeetings();
   const { data: projects = [] } = useProjects();
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
   const [open, setOpen] = useState(false);
+  const [recorderOpen, setRecorderOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [projectId, setProjectId] = useState<string>(search.project ?? "none");
   const [transcript, setTranscript] = useState("");
@@ -134,10 +142,25 @@ function MeetingsPage() {
               : "Paste a transcript and let AI extract summaries and action items."}
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="w-full bg-aura-gradient text-primary-foreground sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" /> New meeting
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button
+            onClick={() => setRecorderOpen(true)}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            <Mic className="mr-2 h-4 w-4" /> Record
+          </Button>
+          <Button onClick={() => setOpen(true)} className="w-full bg-aura-gradient text-primary-foreground sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" /> New meeting
+          </Button>
+        </div>
       </div>
+
+      <MeetingRecorder
+        open={recorderOpen}
+        onOpenChange={setRecorderOpen}
+        defaultProjectId={search.project ?? null}
+      />
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -195,25 +218,34 @@ function MeetingsPage() {
         )}
       </div>
 
+      <Tabs defaultValue="library" className="w-full">
+        <TabsList>
+          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+          <TabsTrigger value="library">Library</TabsTrigger>
+        </TabsList>
+        <TabsContent value="upcoming" className="mt-4">
+          <UpcomingCalendar daysAhead={21} onStartRecording={() => setRecorderOpen(true)} />
+        </TabsContent>
+        <TabsContent value="library" className="mt-4">
       {isLoading ? (
         <CardGridSkeleton count={6} />
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-          <Mic className="mb-3 h-10 w-10 text-muted-foreground" />
-          <p className="font-medium">
-            {meetings.length === 0 ? "No meetings yet" : "No meetings match your filters"}
-          </p>
-          <p className="mb-4 text-sm text-muted-foreground">
-            {meetings.length === 0
+        <EmptyState
+          icon={Mic}
+          title={meetings.length === 0 ? "No meetings yet" : "No meetings match your filters"}
+          description={
+            meetings.length === 0
               ? "Create your first meeting and paste a transcript to get started."
-              : "Try adjusting search or filters."}
-          </p>
-          {meetings.length === 0 && (
-            <Button onClick={() => setOpen(true)} variant="outline">
-              <Plus className="mr-2 h-4 w-4" /> New meeting
-            </Button>
-          )}
-        </div>
+              : "Try adjusting search or filters."
+          }
+          action={
+            meetings.length === 0 ? (
+              <Button onClick={() => setOpen(true)} variant="outline">
+                <Plus className="mr-2 h-4 w-4" /> New meeting
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m) => {
@@ -251,7 +283,13 @@ function MeetingsPage() {
                   className="absolute right-2 top-2 h-7 w-7 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                   onClick={async (e) => {
                     e.preventDefault();
-                    if (!confirm("Delete this meeting?")) return;
+                    const ok = await confirmDialog({
+                      title: "Delete this meeting?",
+                      description: "Notes, transcripts and action items linked to it will be removed.",
+                      confirmLabel: "Delete",
+                      tone: "destructive",
+                    });
+                    if (!ok) return;
                     await deleteMeeting.mutateAsync(m.id);
                     toast.success("Meeting deleted");
                   }}
@@ -263,6 +301,8 @@ function MeetingsPage() {
           })}
         </div>
       )}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">

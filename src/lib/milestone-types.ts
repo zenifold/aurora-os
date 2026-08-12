@@ -1,8 +1,19 @@
 export type MilestoneType = "delivery" | "payment" | "gate" | "review";
 export type MilestoneStatus = "upcoming" | "at_risk" | "completed" | "missed" | "cancelled";
+export type SignoffStatus = "not_required" | "pending" | "requested" | "approved" | "rejected";
 
 export interface Milestone {
   id: string;
+  requires_signoff?: boolean;
+  signoff_status?: SignoffStatus;
+  signoff_requested_at?: string | null;
+  signoff_requested_by?: string | null;
+  signoff_signed_at?: string | null;
+  signoff_signed_by_portal_access_id?: string | null;
+  signoff_signed_name?: string | null;
+  signoff_signature_text?: string | null;
+  signoff_notes?: string | null;
+  signoff_rejection_reason?: string | null;
   workspace_id: string;
   project_id: string;
   name: string;
@@ -35,4 +46,12 @@ export const MILESTONE_STATUS_META: Record<MilestoneStatus, { label: string; ton
   completed: { label: "Completed", tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
   missed: { label: "Missed", tone: "bg-rose-500/15 text-rose-600 dark:text-rose-400" },
   cancelled: { label: "Cancelled", tone: "bg-muted text-muted-foreground line-through" },
+};
+
+export const SIGNOFF_STATUS_META: Record<SignoffStatus, { label: string; tone: string }> = {
+  not_required: { label: "Sign-off not required", tone: "bg-muted text-muted-foreground" },
+  pending: { label: "Sign-off pending", tone: "bg-muted text-muted-foreground" },
+  requested: { label: "Awaiting client sign-off", tone: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
+  approved: { label: "Client approved", tone: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
+  rejected: { label: "Changes requested", tone: "bg-rose-500/15 text-rose-600 dark:text-rose-400" },
 };

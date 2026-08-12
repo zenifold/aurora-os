@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Aura — Workspace Companion",
+  "version": "0.8.0",
+  "description": "Capture tasks, screenshots, and meetings; run AI agents on any selection; search your workspace from the URL bar.",
+  "externally_connectable": {
+    "matches": ["http://localhost:8080/*"]
+  },
+  "permissions": ["activeTab", "contextMenus", "storage", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Aura Quick Capture",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "omnibox": {
+    "keyword": "aura"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
+      },
+      "description": "Open Aura Quick Capture"
+    },
+    "toggle-sidebar": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Toggle Aura Context Lens sidebar"
+    }
+  }
+}

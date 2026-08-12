@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { promptDialog } from "@/lib/dialogs";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -193,7 +194,14 @@ function ChangeOrderDialog({
       client_approved_at: new Date().toISOString(),
     });
   const reject = async () => {
-    const reason = window.prompt("Rejection reason?") ?? "";
+    const reason = await promptDialog({
+      title: "Reject change order",
+      description: "Add a short reason so the team knows why this was rejected.",
+      placeholder: "Reason for rejection",
+      multiline: true,
+      confirmLabel: "Reject",
+    });
+    if (reason === null) return;
     await setStatus("rejected", { rejected_at: new Date().toISOString(), rejection_reason: reason });
   };
   const apply = async () => {

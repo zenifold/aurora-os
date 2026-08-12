@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { RoleGuard } from "@/components/app/RoleGuard";
 import { useState } from "react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
@@ -10,7 +11,11 @@ import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/settings/danger")({
-  component: DangerPage,
+  component: () => (
+    <RoleGuard min="owner">
+      <DangerPage />
+    </RoleGuard>
+  ),
 });
 
 function DangerPage() {

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGuard } from "@/components/app/RoleGuard";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +31,11 @@ import { Pencil, Users, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings/resources")({
-  component: ResourcesPage,
+  component: () => (
+    <RoleGuard min="manager">
+      <ResourcesPage />
+    </RoleGuard>
+  ),
 });
 
 interface MemberRow {

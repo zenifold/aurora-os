@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,11 +48,15 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent: var(--sidebar-accent);
 
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
 
   --shadow-elegant: 0 1px 3px 0 oklch(0 0 0 / 0.05), 0 1px 2px -1px oklch(0 0 0 / 0.05);
   --shadow-pop: 0 10px 30px -10px oklch(0.45 0.2 290 / 0.25);
+  --shadow-lift:
+    0 18px 40px -22px color-mix(in oklab, var(--primary) 35%, transparent),
+    0 2px 6px -2px oklch(0 0 0 / 0.08);
 }
 
 :root {
@@ -64,7 +69,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 270);
 
-  --primary: oklch(0.55 0.22 295);
+  --primary: oklch(0.62 0.13 290);
   --primary-foreground: oklch(0.99 0 0);
 
   --secondary: oklch(0.97 0.01 270);
@@ -81,9 +86,9 @@
 
   --border: oklch(0.92 0.005 270);
   --input: oklch(0.92 0.005 270);
-  --ring: oklch(0.55 0.22 295);
+  --ring: oklch(0.62 0.13 290);
 
-  /* Aura rainbow */
+  /* Aurora rainbow */
   --aura-indigo: oklch(0.55 0.22 270);
   --aura-purple: oklch(0.6 0.25 310);
   --aura-pink: oklch(0.7 0.22 350);
@@ -125,7 +130,7 @@
   --popover: oklch(0.21 0.02 270);
   --popover-foreground: oklch(0.96 0.005 270);
 
-  --primary: oklch(0.7 0.2 295);
+  --primary: oklch(0.72 0.11 290);
   --primary-foreground: oklch(0.15 0.02 270);
 
   --secondary: oklch(0.25 0.02 270);
@@ -142,7 +147,7 @@
 
   --border: oklch(1 0 0 / 0.1);
   --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.7 0.2 295);
+  --ring: oklch(0.72 0.11 290);
 
   --aura-indigo: oklch(0.65 0.22 270);
   --aura-purple: oklch(0.7 0.25 310);
@@ -165,12 +170,100 @@
   * {
     border-color: var(--color-border);
   }
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+}
+
+/* ---------- User preference: accent color ---------- */
+/* Defaults inherit the workspace primary; presets override the violet/aurora axis. */
+html[data-accent="indigo"] {
+  --primary: oklch(0.58 0.18 270);
+  --ring: oklch(0.58 0.18 270);
+  --aura-indigo: oklch(0.55 0.22 270);
+  --aura-purple: oklch(0.6 0.24 295);
+  --aura-pink: oklch(0.68 0.2 330);
+  --aura-orange: oklch(0.78 0.16 70);
+}
+html[data-accent="indigo"].dark {
+  --primary: oklch(0.72 0.16 270);
+  --ring: oklch(0.72 0.16 270);
+}
+html[data-accent="aurora"] {
+  --primary: oklch(0.62 0.13 290);
+  --ring: oklch(0.62 0.13 290);
+}
+html[data-accent="emerald"] {
+  --primary: oklch(0.6 0.16 160);
+  --ring: oklch(0.6 0.16 160);
+  --aura-indigo: oklch(0.55 0.16 200);
+  --aura-purple: oklch(0.6 0.18 175);
+  --aura-pink: oklch(0.7 0.18 150);
+  --aura-orange: oklch(0.78 0.16 95);
+}
+html[data-accent="emerald"].dark {
+  --primary: oklch(0.74 0.14 160);
+  --ring: oklch(0.74 0.14 160);
+}
+html[data-accent="sunset"] {
+  --primary: oklch(0.65 0.2 30);
+  --ring: oklch(0.65 0.2 30);
+  --aura-indigo: oklch(0.6 0.2 350);
+  --aura-purple: oklch(0.65 0.22 20);
+  --aura-pink: oklch(0.74 0.2 40);
+  --aura-orange: oklch(0.8 0.18 70);
+}
+html[data-accent="sunset"].dark {
+  --primary: oklch(0.74 0.18 35);
+  --ring: oklch(0.74 0.18 35);
+}
+html[data-accent="ocean"] {
+  --primary: oklch(0.58 0.15 230);
+  --ring: oklch(0.58 0.15 230);
+  --aura-indigo: oklch(0.55 0.18 240);
+  --aura-purple: oklch(0.6 0.18 215);
+  --aura-pink: oklch(0.7 0.16 195);
+  --aura-orange: oklch(0.8 0.14 175);
+}
+html[data-accent="ocean"].dark {
+  --primary: oklch(0.74 0.14 230);
+  --ring: oklch(0.74 0.14 230);
+}
+html[data-accent="rose"] {
+  --primary: oklch(0.62 0.2 5);
+  --ring: oklch(0.62 0.2 5);
+  --aura-indigo: oklch(0.55 0.22 340);
+  --aura-purple: oklch(0.6 0.24 0);
+  --aura-pink: oklch(0.7 0.22 15);
+  --aura-orange: oklch(0.8 0.16 50);
+}
+html[data-accent="rose"].dark {
+  --primary: oklch(0.76 0.16 5);
+  --ring: oklch(0.76 0.16 5);
+}
+html[data-accent="mono"] {
+  --primary: oklch(0.28 0.01 270);
+  --ring: oklch(0.28 0.01 270);
+  --aura-indigo: oklch(0.4 0.01 270);
+  --aura-purple: oklch(0.5 0.01 270);
+  --aura-pink: oklch(0.65 0.01 270);
+  --aura-orange: oklch(0.78 0.01 270);
+}
+html[data-accent="mono"].dark {
+  --primary: oklch(0.92 0.005 270);
+  --ring: oklch(0.92 0.005 270);
 }
 
 /* ---------- User preference: font size ---------- */
@@ -297,5 +390,214 @@ html[data-high-contrast="true"] * {
   .stagger-children > *:nth-child(6) { animation-delay: 220ms; }
   .stagger-children > *:nth-child(7) { animation-delay: 260ms; }
   .stagger-children > *:nth-child(8) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(9) { animation-delay: 340ms; }
+  .stagger-children > *:nth-child(10) { animation-delay: 380ms; }
+  .stagger-children > *:nth-child(11) { animation-delay: 420ms; }
+  .stagger-children > *:nth-child(12) { animation-delay: 460ms; }
+
+  /* ---------- Hover lift (opt-in for clickable cards/rows) ---------- */
+  .hover-lift {
+    transition:
+      transform 200ms cubic-bezier(0.32, 0.72, 0, 1),
+      box-shadow 200ms cubic-bezier(0.32, 0.72, 0, 1),
+      border-color 200ms ease-out;
+    will-change: transform;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -10px color-mix(in oklab, var(--foreground) 18%, transparent);
+  }
+  .hover-lift:active {
+    transform: translateY(0);
+    transition-duration: 80ms;
+  }
+
+  /* ---------- Tap press (opt-in for tappable rows/list items) ---------- */
+  .press {
+    transition: transform 120ms ease-out, background-color 150ms ease-out;
+  }
+  .press:active {
+    transform: scale(0.985);
+  }
+
+  /* ---------- Shake (used for WIP-limit nudge) ---------- */
+  .animate-shake {
+    animation: aura-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  @keyframes aura-shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+
+  /* ---------- Surface card: subtle gradient border + lift on hover ---------- */
+  .surface-card {
+    position: relative;
+    background:
+      linear-gradient(180deg,
+        color-mix(in oklab, var(--card) 100%, transparent),
+        color-mix(in oklab, var(--card) 96%, transparent)
+      );
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition:
+      transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 240ms ease;
+  }
+  .surface-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 40%,
+      color-mix(in oklab, var(--aura-pink) 14%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 240ms ease;
+    pointer-events: none;
+  }
+  .surface-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lift);
+    border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  }
+  .surface-card:hover::before { opacity: 1; }
+
+  /* ---------- Hover lift utility (lighter than surface-card) ---------- */
+  .hover-lift {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -16px color-mix(in oklab, var(--primary) 40%, transparent);
+  }
+
+  /* ---------- Press feedback ---------- */
+  .press {
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .press:active { transform: scale(0.97); }
+
+  /* ---------- Soft pulse (for unread dots, live indicators) ---------- */
+  .pulse-soft {
+    animation: aura-pulse-soft 2.4s ease-in-out infinite;
+  }
+  @keyframes aura-pulse-soft {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.6; transform: scale(1.15); }
+  }
+
+  /* ---------- Live ring (for presence avatars / live data) ---------- */
+  .live-ring {
+    position: relative;
+  }
+  .live-ring::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 1.5px solid color-mix(in oklab, var(--primary) 55%, transparent);
+    animation: aura-live 2s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes aura-live {
+    0%   { opacity: 0.8; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.25); }
+  }
+
+  /* ---------- Animated gradient text (greeting, KPIs) ---------- */
+  .text-aura-gradient-anim {
+    background: linear-gradient(
+      110deg,
+      var(--aura-indigo),
+      var(--aura-purple),
+      var(--aura-pink),
+      var(--aura-orange),
+      var(--aura-indigo)
+    );
+    background-size: 280% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aura-grad-shift 14s linear infinite;
+  }
+  @keyframes aura-grad-shift {
+    to { background-position: -280% 0; }
+  }
+
+  /* ---------- Count-up nudge for numeric values ---------- */
+  .animate-count-in {
+    animation: aura-count 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes aura-count {
+    from { opacity: 0; transform: translateY(4px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ---------- Icon tile — used in headers / quick actions ---------- */
+  .icon-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.625rem;
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--primary);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 22%, transparent);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), background 220ms ease;
+  }
+  .icon-tile:hover { transform: rotate(-3deg) scale(1.04); background: color-mix(in oklab, var(--primary) 18%, transparent); }
+
+  /* ---------- Focus ring (richer than browser default) ---------- */
+  .focus-aura:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+
+  /* ---------- Section divider with gradient seam ---------- */
+  .seam {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--primary) 35%, transparent),
+      transparent
+    );
+  }
 }
 
+
+/* ---------- Print: only show elements within [data-print="true"] ---------- */
+@media print {
+  body { background: white !important; color: black !important; }
+  /* Hide everything by default */
+  body * { visibility: hidden; }
+  /* Show the printable region and its children */
+  [data-print="true"], [data-print="true"] * { visibility: visible; }
+  [data-print="true"] {
+    position: absolute; left: 0; top: 0; width: 100%;
+    padding: 24px; background: white !important; color: black !important;
+  }
+  /* Hide nav/buttons inside the printable area */
+  [data-print="true"] [data-print-hide="true"] { display: none !important; }
+  /* Force light card backgrounds for legibility */
+  [data-print="true"] .bg-card, [data-print="true"] .bg-card\/40, [data-print="true"] .bg-card\/30 {
+    background: white !important; border: 1px solid #e5e7eb !important;
+  }
+  a { color: black !important; text-decoration: none !important; }
+}

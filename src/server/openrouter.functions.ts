@@ -16,7 +16,7 @@ export const listOpenRouterModels = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ models: OpenRouterModel[]; error: string | null }> => {
     try {
       const res = await fetch("https://openrouter.ai/api/v1/models", {
-        headers: { "HTTP-Referer": "https://lovable.dev", "X-Title": "Aura" },
+        headers: { "HTTP-Referer": "https://github.com/zenifold/aurora-os", "X-Title": "Aurora" },
       });
       if (!res.ok) {
         return { models: [], error: `OpenRouter ${res.status}` };

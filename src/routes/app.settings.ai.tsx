@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { RoleGuard } from "@/components/app/RoleGuard";
+import { confirmDialog } from "@/lib/dialogs";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -42,7 +44,11 @@ import { Sparkles, Plus, Trash2, KeyRound, ExternalLink, Bot, Check, ChevronsUpD
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings/ai")({
-  component: AiSettingsPage,
+  component: () => (
+    <RoleGuard min="manager">
+      <AiSettingsPage />
+    </RoleGuard>
+  ),
 });
 
 function AiSettingsPage() {
@@ -104,7 +110,13 @@ function AiSettingsPage() {
                 variant="ghost"
                 size="sm"
                 onClick={async () => {
-                  if (!confirm("Remove the OpenRouter key for this workspace?")) return;
+                  const ok = await confirmDialog({
+                    title: "Remove OpenRouter key?",
+                    description: "Agents in this workspace won't be able to run until a new key is added.",
+                    confirmLabel: "Remove",
+                    tone: "destructive",
+                  });
+                  if (!ok) return;
                   await setKey.mutateAsync(null);
                   toast.success("Key removed");
                 }}
@@ -169,8 +181,14 @@ function AiSettingsPage() {
                 variant="ghost"
                 size="icon"
                 className="text-destructive"
-                onClick={() => {
-                  if (confirm(`Delete agent "${a.name}"?`)) remove.mutate(a.id);
+                onClick={async () => {
+                  const ok = await confirmDialog({
+                    title: "Delete agent?",
+                    description: `"${a.name}" will no longer be assignable to tasks.`,
+                    confirmLabel: "Delete",
+                    tone: "destructive",
+                  });
+                  if (ok) remove.mutate(a.id);
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -199,6 +217,8 @@ function AiSettingsPage() {
           setEditing(null);
         }}
       />
+
+      <AuraMemoryCard />
     </div>
   );
 }
@@ -590,5 +610,233 @@ function ModelPicker({ value, onChange }: { value: string; onChange: (v: string)
         </Command>
       </PopoverContent>
     </Popover>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Workspace memory — pinned facts Aura always applies
+// ─────────────────────────────────────────────────────────────────────
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  listAuraMemory,
+  upsertAuraMemory,
+  deleteAuraMemory,
+} from "@/lib/aura-memory.functions";
+import { Pin, BookMarked } from "lucide-react";
+
+const MEM_KINDS = [
+  { value: "fact", label: "Fact", hint: "Concrete info Aura should know (clients, contracts, prices)" },
+  { value: "preference", label: "Preference", hint: "How you want things done" },
+  { value: "style", label: "Style/voice", hint: "Tone, brand voice, formatting" },
+  { value: "other", label: "Other", hint: "" },
+] as const;
+
+function AuraMemoryCard() {
+  const ws = useWorkspaceStore((s) => s.current);
+  const qc = useQueryClient();
+  const list = useServerFn(listAuraMemory);
+  const upsert = useServerFn(upsertAuraMemory);
+  const remove = useServerFn(deleteAuraMemory);
+
+  const { data } = useQuery({
+    queryKey: ["aura-memory", ws?.id],
+    queryFn: () => list({ data: { workspace_id: ws!.id } }),
+    enabled: !!ws?.id,
+  });
+  const rows = data?.ok ? data.memory : [];
+
+  const [draft, setDraft] = useState("");
+  const [kind, setKind] = useState<typeof MEM_KINDS[number]["value"]>("fact");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
+
+  const save = useMutation({
+    mutationFn: async (vars: { id?: string; content: string; kind: typeof MEM_KINDS[number]["value"]; pinned?: boolean }) =>
+      upsert({ data: { workspace_id: ws!.id, ...vars } }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["aura-memory", ws?.id] });
+      toast.success("Memory saved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const del = useMutation({
+    mutationFn: async (id: string) => remove({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["aura-memory", ws?.id] }),
+  });
+
+  const togglePin = (id: string, pinned: boolean, content: string, kind: typeof MEM_KINDS[number]["value"]) =>
+    save.mutate({ id, content, kind, pinned: !pinned });
+
+  return (
+    <div className="mt-8 rounded-xl border border-border bg-card p-5">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <BookMarked className="h-4 w-4" />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-base font-semibold">Workspace memory</h2>
+          <p className="text-xs text-muted-foreground">
+            Pinned facts Aura includes in every answer — clients you serve, brand voice,
+            contract rules, conventions. Keep entries short and specific.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <div className="rounded-lg border bg-background/60 p-3">
+          <div className="mb-2 flex flex-wrap gap-1">
+            {MEM_KINDS.map((k) => (
+              <button
+                key={k.value}
+                onClick={() => setKind(k.value)}
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-[11px] transition",
+                  kind === k.value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "bg-background hover:bg-accent",
+                )}
+                title={k.hint}
+              >
+                {k.label}
+              </button>
+            ))}
+          </div>
+          <Textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="e.g. We work primarily with B2B SaaS clients in EMEA. Always use British English in client-facing copy."
+            rows={2}
+            className="resize-none text-sm"
+          />
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground">{draft.length}/2000</span>
+            <Button
+              size="sm"
+              disabled={!draft.trim() || save.isPending}
+              onClick={() => {
+                save.mutate(
+                  { content: draft.trim(), kind, pinned: true },
+                  { onSuccess: () => setDraft("") },
+                );
+              }}
+            >
+              <Plus className="mr-1 h-3 w-3" /> Add to memory
+            </Button>
+          </div>
+        </div>
+
+        {rows.length === 0 ? (
+          <p className="rounded-md border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
+            No memory pinned yet. Add facts above to teach Aura about your workspace.
+          </p>
+        ) : (
+          <ul className="space-y-1.5">
+            {rows.map((m) => {
+              const isEditing = editingId === m.id;
+              return (
+                <li
+                  key={m.id}
+                  className={cn(
+                    "flex items-start gap-2 rounded-md border bg-background/60 px-3 py-2 text-sm",
+                    !m.pinned && "opacity-60",
+                  )}
+                >
+                  <button
+                    onClick={() => togglePin(m.id, m.pinned, m.content, m.kind as typeof MEM_KINDS[number]["value"])}
+                    className={cn(
+                      "mt-0.5 shrink-0 rounded p-0.5 transition",
+                      m.pinned ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                    )}
+                    title={m.pinned ? "Pinned — click to unpin" : "Unpinned — click to pin"}
+                  >
+                    <Pin className={cn("h-3.5 w-3.5", m.pinned && "fill-current")} />
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-0.5 flex items-center gap-1.5">
+                      <Badge variant="outline" className="h-4 px-1 text-[9px] font-normal capitalize">
+                        {m.kind}
+                      </Badge>
+                    </div>
+                    {isEditing ? (
+                      <Textarea
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        rows={2}
+                        className="resize-none text-sm"
+                        autoFocus
+                      />
+                    ) : (
+                      <p className="break-words text-sm">{m.content}</p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    {isEditing ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => {
+                            save.mutate(
+                              {
+                                id: m.id,
+                                content: editingText.trim() || m.content,
+                                kind: m.kind as typeof MEM_KINDS[number]["value"],
+                                pinned: m.pinned,
+                              },
+                              { onSuccess: () => setEditingId(null) },
+                            );
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => {
+                            setEditingId(m.id);
+                            setEditingText(m.content);
+                          }}
+                          title="Edit"
+                        >
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={() => {
+                            void confirmDialog({
+                              title: "Remove memory?",
+                              description: "Aura will stop using this in answers.",
+                              confirmLabel: "Remove", tone: "destructive",
+                            }).then((ok) => ok && del.mutate(m.id));
+                          }}
+                          title="Delete"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }

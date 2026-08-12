@@ -123,3 +123,46 @@ export function useEscalationRules() {
     },
   });
 }
+
+export function useUpsertEscalationRule() {
+  const ws = useWorkspaceStore((s) => s.current);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: Partial<EscalationRule> & { name: string; tier: number }) => {
+      if (!ws) throw new Error("No workspace");
+      const payload = { workspace_id: ws.id, ...input } as never;
+      if (input.id) {
+        const { error } = await supabase
+          .from("escalation_rules" as never)
+          .update(payload)
+          .eq("id", input.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("escalation_rules" as never)
+          .insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["escalation_rules"] });
+      toast.success("Rule saved");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteEscalationRule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("escalation_rules" as never).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["escalation_rules"] });
+      toast.success("Rule deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}

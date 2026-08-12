@@ -11,6 +11,7 @@ import {
 import {
   MILESTONE_STATUS_META,
   MILESTONE_TYPE_META,
+  SIGNOFF_STATUS_META,
   type Milestone,
   type MilestoneStatus,
   type MilestoneType,
@@ -55,6 +56,7 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Pencil,
+  FileSignature,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -263,6 +265,12 @@ function Timeline({
                         ${m.payment_amount.toLocaleString()} {m.is_paid ? "· paid" : "· due"}
                       </Badge>
                     )}
+                    {m.signoff_status && m.signoff_status !== "not_required" && m.signoff_status !== "pending" && (
+                      <Badge variant="secondary" className={cn("text-[10px]", SIGNOFF_STATUS_META[m.signoff_status].tone)}>
+                        {SIGNOFF_STATUS_META[m.signoff_status].label}
+                        {m.signoff_status === "approved" && m.signoff_signed_name && ` · ${m.signoff_signed_name}`}
+                      </Badge>
+                    )}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     {format(target, "EEE, MMM d, yyyy")} ·{" "}
@@ -293,6 +301,22 @@ function Timeline({
                       }
                     >
                       <CheckCircle2 className="mr-1.5 h-4 w-4" /> Complete
+                    </Button>
+                  )}
+                  {(!m.signoff_status || m.signoff_status === "not_required" || m.signoff_status === "pending" || m.signoff_status === "rejected") && m.status !== "completed" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        update.mutate({
+                          id: m.id,
+                          requires_signoff: true,
+                          signoff_status: "requested",
+                          signoff_requested_at: new Date().toISOString(),
+                        })
+                      }
+                    >
+                      <FileSignature className="mr-1.5 h-4 w-4" /> Request sign-off
                     </Button>
                   )}
                   <Button variant="ghost" size="icon" onClick={() => onEdit(m)} aria-label="Edit">

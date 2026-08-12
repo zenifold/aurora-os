@@ -1,46 +1,88 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useCustomFields, useCreateCustomField, useDeleteCustomField } from "@/hooks/use-custom-fields";
+import { RoleGuard } from "@/components/app/RoleGuard";
+import { useState, useEffect, useMemo } from "react";
+import { z } from "zod";
+import {
+  useObjectTypes,
+  useObjectFields,
+  useCreateObjectField,
+  useDeleteObjectField,
+} from "@/hooks/use-object-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import type { FieldType } from "@/lib/types";
-import { Trash2, Plus } from "lucide-react";
+import {
+  FIELD_TYPE_GROUPS,
+  fieldTypeLabel,
+  fieldTypeNeedsOptions,
+  type ExtendedFieldType,
+} from "@/lib/object-types";
+import { Trash2, Plus, Sliders } from "lucide-react";
+import type { SelectOption } from "@/lib/types";
 
-export const Route = createFileRoute("/app/settings/fields")({
-  component: FieldsPage,
+const searchSchema = z.object({
+  object_type: z.string().optional(),
 });
 
-const FIELD_TYPES: { value: FieldType; label: string; hint?: string }[] = [
-  { value: "text", label: "Text" },
-  { value: "number", label: "Number" },
-  { value: "date", label: "Date" },
-  { value: "select", label: "Select" },
-  { value: "multi_select", label: "Multi-select" },
-  { value: "checkbox", label: "Checkbox" },
-  { value: "url", label: "URL" },
-  { value: "email", label: "Email" },
-  { value: "effort", label: "Level of Effort", hint: "Hours / days / points — drives Timeline scenarios" },
-];
+export const Route = createFileRoute("/app/settings/fields")({
+  validateSearch: searchSchema,
+  component: () => (
+    <RoleGuard min="manager">
+      <FieldsPage />
+    </RoleGuard>
+  ),
+});
 
 function FieldsPage() {
-  const { data: fields = [] } = useCustomFields();
-  const create = useCreateCustomField();
-  const remove = useDeleteCustomField();
+  const { object_type } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { data: types = [] } = useObjectTypes();
+  const [activeTypeId, setActiveTypeId] = useState<string | null>(object_type ?? null);
+
+  // Default to first type when types load
+  useEffect(() => {
+    if (!activeTypeId && types.length > 0) {
+      setActiveTypeId(object_type ?? types[0].id);
+    }
+  }, [types, activeTypeId, object_type]);
+
+  // Keep URL in sync
+  useEffect(() => {
+    if (activeTypeId && activeTypeId !== object_type) {
+      navigate({ search: { object_type: activeTypeId }, replace: true });
+    }
+  }, [activeTypeId, object_type, navigate]);
+
+  const activeType = useMemo(
+    () => types.find((t) => t.id === activeTypeId) ?? null,
+    [types, activeTypeId],
+  );
+  const { data: fields = [], isLoading } = useObjectFields(activeTypeId);
+  const create = useCreateObjectField();
+  const remove = useDeleteObjectField();
+
   const [name, setName] = useState("");
-  const [type, setType] = useState<FieldType>("text");
+  const [type, setType] = useState<ExtendedFieldType>("text");
+  const [helpText, setHelpText] = useState("");
+  const [required, setRequired] = useState(false);
+  const [visibleInTable, setVisibleInTable] = useState(true);
+  const [formulaExpr, setFormulaExpr] = useState("");
 
   const submit = async () => {
-    if (!name.trim()) return;
-    let opts;
+    if (!name.trim() || !activeTypeId) return;
+    let opts: SelectOption[] | undefined;
     if (type === "select" || type === "multi_select") {
       opts = [
         { id: "opt1", label: "Option 1", color: "#8b5cf6" },
@@ -53,54 +95,175 @@ function FieldsPage() {
         { id: "points", label: "Story points", color: "#a855f7" },
       ];
     }
-    await create.mutateAsync({ name: name.trim(), field_type: type, options: opts });
+    await create.mutateAsync({
+      object_type_id: activeTypeId,
+      name: name.trim(),
+      field_type: type,
+      options: opts,
+      help_text: helpText.trim() || undefined,
+      is_required: required,
+      is_visible_in_table: visibleInTable,
+      formula_expr: type === "formula" ? formulaExpr.trim() || undefined : undefined,
+    });
     setName("");
+    setHelpText("");
+    setRequired(false);
+    setVisibleInTable(true);
+    setFormulaExpr("");
     setType("text");
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">Custom fields</h1>
-      <p className="text-sm text-muted-foreground">Add typed metadata that appears as columns in every project.</p>
-
-      <div className="mt-6 flex items-end gap-3 rounded-xl border border-border bg-card p-4">
-        <div className="flex-1">
-          <Label htmlFor="fname">Name</Label>
-          <Input id="fname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Estimate (hours)" className="mt-1.5" />
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Custom fields</h2>
+          <p className="text-sm text-muted-foreground">
+            Add fields to any object type. Records inherit these fields automatically.
+          </p>
         </div>
-        <div className="w-44">
-          <Label>Type</Label>
-          <Select value={type} onValueChange={(v) => setType(v as FieldType)}>
-            <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+        <div className="flex items-center gap-2">
+          <Select value={activeTypeId ?? ""} onValueChange={setActiveTypeId}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Choose object type" />
+            </SelectTrigger>
             <SelectContent>
-              {FIELD_TYPES.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  <div className="flex flex-col">
-                    <span>{t.label}</span>
-                    {t.hint && <span className="text-[11px] text-muted-foreground">{t.hint}</span>}
-                  </div>
+              {types.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.label} {t.is_system && <span className="opacity-50 ml-1">(built-in)</span>}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={submit} disabled={!name.trim()} className="bg-aura-gradient text-primary-foreground hover:opacity-90">
-          <Plus className="mr-1.5 h-4 w-4" /> Add field
-        </Button>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-card">
-        {fields.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">No custom fields yet.</div>
+      {activeType && (
+        <div className="rounded-xl border bg-card p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <Sliders className="h-4 w-4 text-muted-foreground" />
+            <div className="text-sm font-medium">Add a field to {activeType.label}</div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Name</Label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Severity"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Type</Label>
+              <Select value={type} onValueChange={(v) => setType(v as ExtendedFieldType)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FIELD_TYPE_GROUPS.map((g) => (
+                    <SelectGroup key={g.group}>
+                      <SelectLabel>{g.group}</SelectLabel>
+                      {g.types.map((ft) => (
+                        <SelectItem key={ft.value} value={ft.value}>
+                          {ft.label}
+                          {ft.hint && (
+                            <span className="ml-2 text-xs text-muted-foreground">— {ft.hint}</span>
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label>Help text</Label>
+              <Input
+                value={helpText}
+                onChange={(e) => setHelpText(e.target.value)}
+                placeholder="Shown beneath the field in forms"
+              />
+            </div>
+            {type === "formula" && (
+              <div className="space-y-1.5 md:col-span-2">
+                <Label>Formula</Label>
+                <Textarea
+                  value={formulaExpr}
+                  onChange={(e) => setFormulaExpr(e.target.value)}
+                  placeholder="e.g. impact * likelihood"
+                  rows={2}
+                  className="font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Formula evaluation runs client-side when records are viewed.
+                </p>
+              </div>
+            )}
+            <div className="flex items-center gap-3">
+              <Switch checked={required} onCheckedChange={setRequired} id="req" />
+              <Label htmlFor="req" className="!mb-0 text-sm font-normal">
+                Required
+              </Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={visibleInTable}
+                onCheckedChange={setVisibleInTable}
+                id="vis"
+              />
+              <Label htmlFor="vis" className="!mb-0 text-sm font-normal">
+                Visible in table views by default
+              </Label>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={submit} disabled={!name.trim() || create.isPending}>
+              <Plus className="mr-2 h-4 w-4" /> Add field
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="rounded-xl border bg-card">
+        {isLoading ? (
+          <div className="p-4 text-sm text-muted-foreground">Loading…</div>
+        ) : fields.length === 0 ? (
+          <div className="p-8 text-center text-sm text-muted-foreground">
+            No custom fields yet for this object type.
+          </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y">
             {fields.map((f) => (
-              <li key={f.id} className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <p className="font-medium">{f.name}</p>
-                  <Badge variant="secondary">{f.field_type}</Badge>
+              <li key={f.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-medium">{f.name}</div>
+                    <Badge variant="outline">
+                      {fieldTypeLabel(f.field_type as ExtendedFieldType)}
+                    </Badge>
+                    {f.is_required && <Badge variant="secondary">Required</Badge>}
+                    {!f.is_visible_in_table && (
+                      <Badge variant="outline" className="opacity-60">
+                        Hidden in tables
+                      </Badge>
+                    )}
+                    {fieldTypeNeedsOptions(f.field_type as ExtendedFieldType) && f.options && (
+                      <span className="text-xs text-muted-foreground">
+                        {f.options.length} options
+                      </span>
+                    )}
+                  </div>
+                  {f.help_text && (
+                    <div className="text-xs text-muted-foreground">{f.help_text}</div>
+                  )}
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => remove.mutate(f.id)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (confirm(`Remove "${f.name}"?`)) remove.mutate(f.id);
+                  }}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </li>

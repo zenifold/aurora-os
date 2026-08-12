@@ -4,11 +4,11 @@ import { MarketingHeader, MarketingFooter } from "@/components/marketing/Marketi
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy — Aura" },
+      { title: "Privacy — Aurora" },
       {
         name: "description",
         content:
-          "How Aura handles your data. Self-host for total control, or use our hosted version with strict data minimization.",
+          "How Aurora handles your data. Self-host for total control, or use our hosted version with strict data minimization.",
       },
     ],
   }),
@@ -29,7 +29,7 @@ function PrivacyPage() {
         <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert">
           <h2>The short version</h2>
           <p>
-            Aura is open source. If you self-host, we never see any of your data — full stop. If
+            Aurora is open source. If you self-host, we never see any of your data — full stop. If
             you use the hosted version, we only collect what's strictly necessary to run the
             service and never sell or share your data with third parties.
           </p>

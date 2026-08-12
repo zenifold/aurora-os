@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { NavAccessGuard } from "@/components/app/NavAccessGuard";
 import { useMemo, useState } from "react";
 import {
   useResources,
@@ -38,11 +39,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, Trash2, User, Bot, Building2, Sparkles, Search } from "lucide-react";
+import { Loader2, Plus, Trash2, User, Users, Bot, Building2, Sparkles, Search } from "lucide-react";
+import { EmptyState } from "@/components/app/EmptyState";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 
 export const Route = createFileRoute("/app/resources/")({
-  component: ResourcesPage,
+  component: () => <NavAccessGuard navKey="resources"><ResourcesPage /></NavAccessGuard>,
 });
 
 interface Profile {
@@ -206,9 +208,13 @@ function ResourcesPage() {
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
         {filtered.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-            No matching team or resources. Add contractors, AI agents, or vendors to start planning capacity.
-          </div>
+          <EmptyState
+            icon={Users}
+            title="No resources yet"
+            description="Track team members, contractors, AI agents, and vendors so you can plan capacity and allocate them to projects."
+            primaryAction={{ label: "Add your first resource", onClick: () => setCreating(true) }}
+            secondaryAction={{ label: "Invite teammates", to: "/app/settings/members" }}
+          />
         ) : (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((e) => {

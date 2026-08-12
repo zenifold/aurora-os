@@ -4,6 +4,10 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { useAuth } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
 import { useProjects } from "@/hooks/use-projects";
+
+import { getSectionIcon } from "@/lib/section-icons";
+import { isNavHiddenByMode } from "@/lib/workspace-mode-nav";
+import { useClientContainers } from "@/hooks/use-containers";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -22,9 +26,18 @@ import {
   Plus,
   Settings,
   CalendarDays,
-  Star,
+  Bell,
   Sparkles,
   StickyNote,
+  Mic,
+  Search,
+  FileText,
+  Briefcase,
+  Users,
+  UsersRound,
+  CalendarRange,
+  LineChart,
+  AlertTriangle,
 } from "lucide-react";
 
 export function MobileDrawer() {
@@ -36,7 +49,16 @@ export function MobileDrawer() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const { data: projects = [] } = useProjects();
+  const divisions: Array<{ id: string; name: string; slug: string; icon?: string | null; color?: string }> = [];
   const navigate = useNavigate();
+  const clientContainers = useClientContainers();
+  const hasAnyClient = clientContainers.length > 0;
+  const mode = ws?.workspace_mode;
+  const showCrm = (ws?.kind === "sales" || ws?.kind === "hybrid") && !isNavHiddenByMode("crm", mode, hasAnyClient);
+  const showResources = !isNavHiddenByMode("resources", mode, hasAnyClient);
+  const showCapacity = !isNavHiddenByMode("capacity", mode, hasAnyClient);
+  const showExecutive = !isNavHiddenByMode("executive", mode, hasAnyClient);
+  const showEscalations = !isNavHiddenByMode("escalations", mode, hasAnyClient);
 
   const close = () => setOpen(false);
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "You";
@@ -88,42 +110,86 @@ export function MobileDrawer() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Smart lists */}
-        <nav className="space-y-0.5 px-2 py-3">
-          <DrawerNav onNavigate={close} to="/app" icon={CalendarDays} label="Today" />
-          <DrawerNav onNavigate={close} to="/app/my-tasks" icon={Inbox} label="My tasks" />
-          <DrawerNav onNavigate={close} to="/app/notes" icon={StickyNote} label="Notes" />
-          <DrawerNav onNavigate={close} to="/app/notifications" icon={Star} label="Notifications" />
-        </nav>
-
-        {/* Projects */}
-        <div className="flex items-center justify-between px-3 pb-1 pt-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Projects
-          </span>
+        {/* Quick actions */}
+        <div className="grid grid-cols-2 gap-2 border-b border-border px-3 py-3">
+          <button
+            onClick={() => {
+              close();
+              useUIStore.getState().setQuickCaptureOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-lg bg-aura-gradient px-3 py-2.5 text-sm font-medium text-primary-foreground shadow-pop active:scale-[0.98]"
+          >
+            <Sparkles className="h-4 w-4" /> Capture
+          </button>
+          <button
+            onClick={() => {
+              close();
+              useUIStore.getState().setCommandOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm font-medium active:scale-[0.98]"
+          >
+            <Search className="h-4 w-4" /> Search
+          </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
-          {projects.length === 0 && (
-            <p className="px-2 py-2 text-xs text-muted-foreground">No projects yet</p>
-          )}
-          <ul className="space-y-0.5">
-            {projects.map((p) => (
-              <li key={p.id}>
-                <Link
-                  to="/app/p/$projectId"
-                  params={{ projectId: p.id }}
-                  onClick={close}
-                  className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent/50"
-                >
-                  <span
-                    className="h-3 w-3 shrink-0 rounded-sm"
-                    style={{ backgroundColor: p.color }}
-                  />
-                  <span className="truncate">{p.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {/* Smart lists */}
+          {/* Zone 1: Personal */}
+          <nav className="space-y-0.5 px-2 py-3">
+            <DrawerNav onNavigate={close} to="/app" icon={CalendarDays} label="Home" />
+            <DrawerNav onNavigate={close} to="/app/my-tasks" icon={Inbox} label="My Work" />
+            <DrawerNav onNavigate={close} to="/app/inbox" icon={Bell} label="Notifications" />
+          </nav>
+
+          {/* Divisions removed */}
+          {false && divisions.length > 0 && null}
+
+          {/* Zone 2: Work */}
+          <div className="px-3 pb-1 pt-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Work
+            </span>
+          </div>
+          <nav className="space-y-0.5 px-2">
+            {showCrm && (
+              <DrawerNavGeneric onNavigate={close} to="/app/clients" icon={Briefcase} label="Clients" />
+            )}
+            {showResources && <DrawerNavGeneric onNavigate={close} to="/app/resources" icon={UsersRound} label="Resources" />}
+            {showCapacity && <DrawerNavGeneric onNavigate={close} to="/app/resources/capacity" icon={CalendarRange} label="Capacity" />}
+            {showExecutive && <DrawerNavGeneric onNavigate={close} to="/app/executive" icon={LineChart} label="Executive" />}
+            {showEscalations && <DrawerNavGeneric onNavigate={close} to="/app/escalations" icon={AlertTriangle} label="Escalations" />}
+            <DrawerNavGeneric onNavigate={close} to="/app/settings" icon={Settings} label="Settings" />
+          </nav>
+
+          {/* Projects */}
+          <div className="flex items-center justify-between px-3 pb-1 pt-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Projects
+            </span>
+          </div>
+          <div className="px-2 pb-3">
+            {projects.length === 0 && (
+              <p className="px-2 py-2 text-xs text-muted-foreground">No projects yet</p>
+            )}
+            <ul className="space-y-0.5">
+              {projects.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    to="/app/p/$projectId"
+                    params={{ projectId: p.id }}
+                    onClick={close}
+                    className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-accent/50 active:bg-accent"
+                  >
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: p.color }}
+                    />
+                    <span className="truncate">{p.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* Footer */}
@@ -171,19 +237,24 @@ function DrawerNav({
   label,
   onNavigate,
 }: {
-  to: "/app" | "/app/my-tasks" | "/app/notifications" | "/app/notes";
+  to: string;
   icon: typeof Folder;
   label: string;
   onNavigate: () => void;
 }) {
+  const isNotes = to === "/app/notes";
   return (
     <Link
-      to={to}
+      to={to as never}
+      search={isNotes ? ({ archived: false, project: undefined } as never) : undefined}
       onClick={onNavigate}
-      className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+      className="flex min-h-[44px] items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground active:bg-accent"
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-[18px] w-[18px]" />
       {label}
     </Link>
   );
 }
+
+const DrawerNavGeneric = DrawerNav;
+

@@ -32,6 +32,9 @@ export interface ClientPortalAccess {
   can_see_financials: boolean;
   can_see_team_names: boolean;
   can_see_timeline: boolean;
+  can_see_invoices: boolean;
+  can_see_documents: boolean;
+
   custom_brand_color: string | null;
   is_active: boolean;
   last_login_at: string | null;

@@ -209,3 +209,44 @@ export function useRemoveParticipant() {
     onSuccess: (i) => qc.invalidateQueries({ queryKey: ["meeting-participants", i.meeting_id] }),
   });
 }
+
+export interface ProjectDecision {
+  meetingId: string;
+  meetingTitle: string;
+  at: string;
+  text: string;
+}
+
+export function useProjectDecisions(projectId: string | undefined) {
+  const ws = useWorkspaceStore((s) => s.current);
+  return useQuery({
+    queryKey: ["project-decisions", projectId, ws?.id],
+    enabled: !!ws && !!projectId,
+    queryFn: async (): Promise<ProjectDecision[]> => {
+      const { data } = await supabase
+        .from("meetings")
+        .select("id, title, summary, updated_at, ai_status")
+        .eq("workspace_id", ws!.id)
+        .eq("project_id", projectId!)
+        .eq("ai_status", "completed")
+        .order("updated_at", { ascending: false })
+        .limit(20);
+      const rows = (data ?? []) as Array<{
+        id: string;
+        title: string;
+        summary: { decisions?: string[] } | null;
+        updated_at: string;
+      }>;
+      const out: ProjectDecision[] = [];
+      for (const m of rows) {
+        const decs = m.summary?.decisions ?? [];
+        for (const d of decs) {
+          if (typeof d === "string" && d.trim().length > 0) {
+            out.push({ meetingId: m.id, meetingTitle: m.title, at: m.updated_at, text: d });
+          }
+        }
+      }
+      return out;
+    },
+  });
+}

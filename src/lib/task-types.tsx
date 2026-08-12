@@ -1,27 +1,22 @@
-import { Target, Zap, Square, ChevronRight } from "lucide-react";
+import { Target, Zap, Square, ChevronRight, Flag } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type TaskType = "initiative" | "epic" | "task" | "subtask";
+export type TaskType = "initiative" | "epic" | "task" | "subtask" | "milestone";
 
-export const TASK_TYPES: TaskType[] = ["initiative", "epic", "task", "subtask"];
+export const TASK_TYPES: TaskType[] = ["initiative", "epic", "milestone", "task", "subtask"];
 
 export interface TaskTypeMeta {
   type: TaskType;
   label: string;
   icon: LucideIcon;
-  /** oklch color used for borders/icons/fills */
   color: string;
-  /** soft tint for backgrounds (oklab mix) */
   tint: string;
-  /** indent in pixels per level in tree views */
   indent: number;
-  /** table row height in px */
   rowHeight: number;
-  /** canvas node size */
   canvasW: number;
   canvasH: number;
-  /** timeline bar height */
   barHeight: number;
+  description?: string;
 }
 
 export const TASK_TYPE_META: Record<TaskType, TaskTypeMeta> = {
@@ -29,57 +24,75 @@ export const TASK_TYPE_META: Record<TaskType, TaskTypeMeta> = {
     type: "initiative",
     label: "Initiative",
     icon: Target,
-    color: "oklch(0.55 0.18 274)", // indigo-600
+    color: "oklch(0.55 0.18 274)",
     tint: "color-mix(in oklab, oklch(0.55 0.18 274) 14%, transparent)",
     indent: 0,
     rowHeight: 56,
     canvasW: 320,
     canvasH: 180,
     barHeight: 32,
+    description: "A multi-quarter goal. Top of the tree.",
   },
   epic: {
     type: "epic",
     label: "Epic",
     icon: Zap,
-    color: "oklch(0.6 0.2 296)", // violet-500
+    color: "oklch(0.6 0.2 296)",
     tint: "color-mix(in oklab, oklch(0.6 0.2 296) 14%, transparent)",
     indent: 24,
     rowHeight: 48,
     canvasW: 280,
     canvasH: 140,
     barHeight: 26,
+    description: "A meaningful chunk of work inside an initiative.",
+  },
+  milestone: {
+    type: "milestone",
+    label: "Milestone",
+    icon: Flag,
+    color: "oklch(0.68 0.17 55)",
+    tint: "color-mix(in oklab, oklch(0.68 0.17 55) 16%, transparent)",
+    indent: 24,
+    rowHeight: 44,
+    canvasW: 260,
+    canvasH: 110,
+    barHeight: 24,
+    description: "A checkpoint. Nest tasks (or other milestones) underneath to track % done.",
   },
   task: {
     type: "task",
     label: "Task",
     icon: Square,
-    color: "oklch(0.55 0.04 250)", // slate-500
+    color: "oklch(0.55 0.04 250)",
     tint: "color-mix(in oklab, oklch(0.55 0.04 250) 14%, transparent)",
     indent: 48,
     rowHeight: 44,
     canvasW: 240,
     canvasH: 120,
     barHeight: 22,
+    description: "A unit of work somebody can finish.",
   },
   subtask: {
     type: "subtask",
     label: "Subtask",
     icon: ChevronRight,
-    color: "oklch(0.65 0.02 250)", // gray-400
+    color: "oklch(0.65 0.02 250)",
     tint: "color-mix(in oklab, oklch(0.65 0.02 250) 12%, transparent)",
     indent: 72,
     rowHeight: 36,
     canvasW: 200,
     canvasH: 56,
     barHeight: 16,
+    description: "A step inside a task.",
   },
 };
 
-/** Allowed parent type for a given child type. null = top-level only. */
+/** Allowed parent type for a given child type. null = may live at the top level. */
 export const PARENT_OF: Record<TaskType, TaskType | null> = {
   initiative: null,
   epic: "initiative",
-  task: "epic",
+  milestone: null,
+  task: null,
   subtask: "task",
 };
 

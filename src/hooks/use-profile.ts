@@ -3,12 +3,16 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 
+import type { PrimaryRole } from "@/lib/role-nav";
+
 export interface ProfileRow {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
   timezone: string | null;
   theme_preference: "light" | "dark" | "system";
+  primary_role: PrimaryRole | null;
+  default_landing: string | null;
   created_at: string;
   updated_at: string;
 }
