@@ -15,6 +15,14 @@ additional_redirect_urls = [
 # CLI defaults and pushes that to the remote, so leaving these out silently
 # turned email confirmation OFF on a live domain. Values below match what the
 # hosted project shipped with — change them on purpose, not by omission.
+[auth.external.google]
+enabled = true
+# env() indirection is deliberate: this file is committed to a public repo, so
+# the literal secret must never appear here. Export both before running
+# `supabase config push`, or the push will clear the provider's credentials.
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_SECRET)"
+
 [auth.email]
 enable_signup = true
 enable_confirmations = true
