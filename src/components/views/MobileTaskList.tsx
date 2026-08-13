@@ -76,7 +76,9 @@ export function MobileTaskList({ projectId, tasks, onTaskClick }: Props) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
         <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-aura-gradient-subtle">
-          <Inbox className="h-6 w-6 text-aura-gradient" />
+          {/* Not .text-aura-gradient: that is background-clip:text with
+              color:transparent, which makes an SVG invisible. */}
+          <Inbox className="h-6 w-6 text-primary" />
         </div>
         <p className="text-sm font-medium">All caught up</p>
         <p className="mt-1 text-xs text-muted-foreground">No tasks here yet.</p>

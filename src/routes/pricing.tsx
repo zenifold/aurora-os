@@ -141,7 +141,10 @@ function PricingPage() {
                 )}
                 <div className="flex items-center gap-2">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-aura-gradient-subtle">
-                    <t.icon className="h-4 w-4 text-aura-gradient" />
+                    {/* text-primary, not .text-aura-gradient: the latter is
+                        background-clip:text + color:transparent, which renders
+                        an SVG invisible. */}
+                    <t.icon className="h-4 w-4 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold">{t.name}</h3>
                 </div>
@@ -153,7 +156,7 @@ function PricingPage() {
                 <ul className="mt-6 flex-1 space-y-2">
                   {t.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-aura-gradient" /> {f}
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
                     </li>
                   ))}
                 </ul>

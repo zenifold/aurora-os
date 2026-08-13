@@ -323,10 +323,44 @@ function Onboarding() {
     : 100;
 
 
-  const THEMES: { key: ThemeKey; label: string; description: string; icon: typeof Sun }[] = [
-    { key: "light", label: "Light", description: "Bright and clean.", icon: Sun },
-    { key: "dark", label: "Dark", description: "Easy on the eyes.", icon: Moon },
-    { key: "system", label: "System", description: "Match your device.", icon: Monitor },
+  // `swatch`/`iconClass` make each tile actually preview its theme. They also
+  // avoid .text-aura-gradient on the icon: that utility is background-clip:text
+  // with color:transparent, which renders an SVG invisible — all three tiles
+  // previously looked like the same empty dark square.
+  const THEMES: {
+    key: ThemeKey;
+    label: string;
+    description: string;
+    icon: typeof Sun;
+    swatch: string;
+    iconClass: string;
+  }[] = [
+    {
+      key: "light",
+      label: "Light",
+      description: "Bright and clean.",
+      icon: Sun,
+      swatch: "bg-white border border-black/10",
+      iconClass: "text-neutral-700",
+    },
+    {
+      key: "dark",
+      label: "Dark",
+      description: "Easy on the eyes.",
+      icon: Moon,
+      swatch: "bg-neutral-900 border border-white/15",
+      iconClass: "text-neutral-100",
+    },
+    {
+      key: "system",
+      label: "System",
+      description: "Match your device.",
+      icon: Monitor,
+      // Split tile: light on one side, dark on the other.
+      swatch:
+        "border border-white/15 bg-[linear-gradient(135deg,white_0%,white_50%,#171717_50%,#171717_100%)]",
+      iconClass: "text-neutral-500",
+    },
   ];
 
   return (
@@ -651,8 +685,10 @@ function Onboarding() {
                         : "border-border hover:border-primary/40"
                     }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-aura-gradient-subtle">
-                      <Icon className="h-5 w-5 text-aura-gradient" />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg ${t.swatch}`}
+                    >
+                      <Icon className={`h-5 w-5 ${t.iconClass}`} />
                     </div>
                     <h3 className="mt-3 text-sm font-semibold">{t.label}</h3>
                     <p className="mt-0.5 text-xs text-muted-foreground">{t.description}</p>

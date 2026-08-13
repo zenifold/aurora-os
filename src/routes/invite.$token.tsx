@@ -155,7 +155,7 @@ function AcceptInvite() {
           ) : invite ? (
             <>
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-aura-gradient-subtle">
-                <CheckCircle2 className="h-6 w-6 text-aura-gradient" />
+                <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
               <h1 className="mt-4 text-center text-xl font-semibold">
                 You're invited to <span className="text-aura-gradient">{invite.workspace?.name}</span>
